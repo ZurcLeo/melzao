@@ -1,0 +1,46 @@
+🎯 SHOW DO MELZÃO MVP - SETUP COMPLETO
+========================================
+
+✅ Configuração inicial finalizada em $(date)
+
+📂 ESTRUTURA CRIADA:
+├── 📄 package.json (root)
+├── 📂 server/
+│   ├── 📄 package.json
+│   ├── 📄 app.js (Express + Socket.io)
+│   ├── 📄 gameController.js (Lógica + 10 perguntas)
+│   └── 📄 gameSocket.js (WebSocket events)
+├── 📂 client/
+│   ├── 📄 package.json (React + TypeScript)
+│   ├── 📂 src/
+│   │   ├── 📄 App.tsx (Socket.io client)
+│   │   ├── 📄 HostDashboard.tsx (Interface)
+│   │   └── 📄 index.css (Tailwind CSS)
+│   └── 📄 tailwind.config.js
+└── 📄 README.md (Documentação completa)
+
+🔧 DEPENDÊNCIAS INSTALADAS:
+- Backend: express, socket.io, cors, nodemon
+- Frontend: react, typescript, socket.io-client, react-toastify, tailwindcss
+
+🚀 PRÓXIMOS PASSOS:
+1. cd /Users/leocruz/Documents/Projects/melzao
+2. npm run dev (para desenvolvimento)
+3. Acessar http://localhost:3000
+
+📋 FUNCIONALIDADES PRONTAS:
+✅ 10 perguntas LGBT+ hardcoded
+✅ Sistema de participantes
+✅ Timer de 15 segundos
+✅ Lógica de pontuação com honey
+✅ Dashboard do host responsivo
+✅ WebSocket em tempo real
+✅ Pronto para deploy
+
+🎮 COMO TESTAR:
+1. Adicionar participante
+2. Iniciar jogo
+3. Responder perguntas
+4. Ver ranking em tempo real
+
+Total: ~39.510 honey possível! 🏆

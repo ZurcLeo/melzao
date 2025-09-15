@@ -1,0 +1,23 @@
+{
+  "name": "show-melzao-mvp",
+  "version": "1.0.0",
+  "description": "Show do Melzão MVP - Quiz LGBT+ interativo",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start"
+  },
+  "keywords": ["quiz", "lgbt", "websocket", "react", "express"],
+  "author": "Leo Cruz",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
