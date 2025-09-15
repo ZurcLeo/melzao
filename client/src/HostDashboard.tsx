@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import HistoryDashboard from './components/HistoryDashboard';
 
 interface HostDashboardProps {
@@ -7,12 +7,15 @@ interface HostDashboardProps {
 }
 
 type DashboardView = 'live' | 'history';
+type AnswerState = 'idle' | 'processing' | 'revealing';
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
   const [participantName, setParticipantName] = useState('');
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentView, setCurrentView] = useState<DashboardView>('live');
+  const [answerState, setAnswerState] = useState<AnswerState>('idle');
+  const [lastAnswerResult, setLastAnswerResult] = useState<{correct: boolean, correctAnswer?: string} | null>(null);
 
   // Timer para resposta
   useEffect(() => {
@@ -32,6 +35,26 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
     }
   }, [gameState?.currentQuestion, gameState?.status]);
 
+  // Hook para futuros sons (preparação)
+  const useSounds = useCallback(() => {
+    const playSound = (soundName: string) => {
+      // TODO: Implementar reprodução de sons
+      console.log(`🔊 [FUTURO] Reproduzindo som: ${soundName}`);
+    };
+
+    return { playSound };
+  }, []);
+
+  const { playSound } = useSounds();
+
+  // Reset answerState quando nova pergunta começar
+  useEffect(() => {
+    if (gameState?.currentQuestion) {
+      setAnswerState('idle');
+      setLastAnswerResult(null);
+    }
+  }, [gameState?.currentQuestion]);
+
   const addParticipant = () => {
     if (participantName.trim()) {
       socket.emit('add-participant', participantName.trim());
@@ -44,14 +67,45 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
   };
 
   const submitAnswer = () => {
-    if (selectedAnswer && gameState.currentParticipant) {
+    if (selectedAnswer && gameState.currentParticipant && answerState === 'idle') {
+      // Fase 1: Processing (criar tensão)
+      setAnswerState('processing');
+      playSound('processing'); // Som de tensão
+
+      // Enviar resposta para o servidor
       socket.emit('submit-answer', {
         participantId: gameState.currentParticipant.id,
         answer: selectedAnswer
       });
-      setSelectedAnswer('');
+
+      // Não limpar selectedAnswer ainda - será usado para animação
     }
   };
+
+  // Listener para resultado da resposta
+  useEffect(() => {
+    const handleAnswerResult = (result: any) => {
+      if (answerState === 'processing') {
+        // Fase 2: Revealing (mostrar resultado)
+        setLastAnswerResult({
+          correct: result.correct,
+          correctAnswer: result.correctAnswer
+        });
+        setAnswerState('revealing');
+        playSound(result.correct ? 'correct' : 'incorrect');
+
+        setTimeout(() => {
+          // Fase 3: Reset para próxima pergunta
+          setAnswerState('idle');
+          setLastAnswerResult(null);
+          setSelectedAnswer('');
+        }, 2000); // Tempo para mostrar o resultado
+      }
+    };
+
+    socket.on('answer-result', handleAnswerResult);
+    return () => socket.off('answer-result', handleAnswerResult);
+  }, [answerState, socket, playSound]);
 
   const quitGame = () => {
     if (gameState.currentParticipant && window.confirm('Tem certeza que quer desistir?')) {
@@ -181,51 +235,105 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
       {gameState.status === 'active' && gameState.currentQuestion && (
         <div className="card mb-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-white">
+            <h2 className={`text-lg font-bold transition-all duration-300 ${
+              answerState === 'processing'
+                ? 'text-orange-400 animate-pulse'
+                : 'text-white'
+            }`}>
               🎯 Pergunta {gameState.currentQuestion.level}/10
+              {answerState === 'processing' && ' - Processando...'}
             </h2>
-            <div className={`px-3 py-1 rounded text-white font-bold ${
-              timeLeft > 10 ? 'bg-green-500' :
-              timeLeft > 5 ? 'bg-yellow-700' : 'bg-red-500'
+            <div className={`px-3 py-1 rounded text-white font-bold transition-all duration-300 ${
+              answerState === 'processing'
+                ? 'bg-orange-600 animate-pulse'
+                : timeLeft > 10 ? 'bg-green-500' :
+                timeLeft > 5 ? 'bg-yellow-700' : 'bg-red-500'
             }`}>
               ⏰ {timeLeft}s
             </div>
           </div>
+
+          {/* Resultado da Resposta */}
+          {answerState === 'revealing' && lastAnswerResult && (
+            <div className={`text-center mb-4 p-4 rounded-lg border-2 transition-all duration-300 ${
+              lastAnswerResult.correct
+                ? 'bg-green-900 border-green-400 text-green-100 animate-bounce'
+                : 'bg-red-900 border-red-400 text-red-100 animate-bounce'
+            }`}>
+              <div className="text-3xl font-bold mb-2">
+                {lastAnswerResult.correct ? '✅ CORRETO!' : '❌ INCORRETO!'}
+              </div>
+              {!lastAnswerResult.correct && lastAnswerResult.correctAnswer && (
+                <div className="text-xl">
+                  Resposta correta: <strong>{lastAnswerResult.correctAnswer}</strong>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="text-white mb-4 text-lg">
             {gameState.currentQuestion.question}
           </div>
 
           <div className="space-y-2 mb-4">
-            {gameState.currentQuestion.options.map((option: string) => (
-              <button
-                key={option}
-                onClick={() => setSelectedAnswer(option)}
-                className={`btn w-full text-left p-3 ${
-                  selectedAnswer === option
-                    ? 'btn-primary'
-                    : 'bg-gray-700 text-gray-300'
-                }`}
-                style={{display: 'block'}}
-              >
-                {option}
-              </button>
-            ))}
+            {gameState.currentQuestion.options.map((option: string) => {
+              const isSelected = selectedAnswer === option;
+              const isCorrectAnswer = answerState === 'revealing' &&
+                lastAnswerResult && option === lastAnswerResult.correctAnswer;
+              const isWrongSelected = answerState === 'revealing' &&
+                lastAnswerResult && !lastAnswerResult.correct && isSelected;
+
+              return (
+                <button
+                  key={option}
+                  onClick={() => answerState === 'idle' && setSelectedAnswer(option)}
+                  disabled={answerState !== 'idle'}
+                  className={`btn w-full text-left p-3 transition-all duration-300 ${
+                    isCorrectAnswer
+                      ? 'bg-green-600 text-white border-2 border-green-400 animate-pulse shadow-lg shadow-green-400/50 scale-105'
+                      : isWrongSelected
+                      ? 'bg-red-600 text-white border-2 border-red-400 animate-pulse shadow-lg shadow-red-400/50'
+                      : isSelected && answerState === 'processing'
+                      ? 'bg-orange-600 text-white animate-pulse'
+                      : isSelected
+                      ? 'btn-primary'
+                      : answerState !== 'idle'
+                      ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  style={{display: 'block'}}
+                >
+                  {option}
+                </button>
+              );
+            })}
           </div>
 
           <div className="flex gap-2 mb-4">
             <button
               onClick={submitAnswer}
-              disabled={!selectedAnswer}
-              className={`btn flex-1 py-2 font-bold ${
-                selectedAnswer ? 'btn-success' : 'disabled'
+              disabled={!selectedAnswer || answerState !== 'idle'}
+              className={`btn flex-1 py-2 font-bold transition-all duration-300 ${
+                answerState === 'processing'
+                  ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
+                  : answerState === 'revealing'
+                  ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                  : selectedAnswer
+                  ? 'btn-success hover:bg-green-700'
+                  : 'disabled'
               }`}
             >
-              ✅ Confirmar Resposta
+              {answerState === 'processing'
+                ? '⏳ Processando...'
+                : answerState === 'revealing'
+                ? '📊 Resultado'
+                : '✅ Confirmar Resposta'
+              }
             </button>
             <button
               onClick={quitGame}
-              className="btn btn-warning px-4 py-2"
+              disabled={answerState !== 'idle'}
+              className="btn btn-warning px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               🚪 Desistir
             </button>

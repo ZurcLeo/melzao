@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Trophy, Clock, Users, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 
 interface Response {
@@ -21,12 +21,15 @@ interface Participant {
 }
 
 type GameState = 'registration' | 'playing' | 'finished';
+type AnswerState = 'idle' | 'processing' | 'revealing';
 
 const ShowDoMelzao = () => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
   const [gameState, setGameState] = useState<GameState>('registration');
   const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [answerState, setAnswerState] = useState<AnswerState>('idle');
+  const [lastAnswerResult, setLastAnswerResult] = useState<boolean | null>(null);
 
   // Valores das perguntas por nível
   const questionValues: Record<number, number> = {
@@ -84,8 +87,43 @@ const ShowDoMelzao = () => {
     setParticipants(participants.filter(p => p.id !== id));
   };
 
-  // Responder pergunta
+  // Hook para futuros sons (preparação)
+  const useSounds = useCallback(() => {
+    const playSound = (soundName: string) => {
+      // TODO: Implementar reprodução de sons
+      console.log(`🔊 [FUTURO] Reproduzindo som: ${soundName}`);
+    };
+
+    return { playSound };
+  }, []);
+
+  const { playSound } = useSounds();
+
+  // Responder pergunta com tensão e delay
   const answerQuestion = (isCorrect: boolean, questionCode = '') => {
+    if (!currentParticipant || answerState !== 'idle') return;
+
+    // Fase 1: Processing (criar tensão)
+    setAnswerState('processing');
+    setLastAnswerResult(isCorrect);
+    playSound('processing'); // Som de tensão
+
+    setTimeout(() => {
+      // Fase 2: Revealing (mostrar resultado)
+      setAnswerState('revealing');
+      playSound(isCorrect ? 'correct' : 'incorrect');
+
+      setTimeout(() => {
+        // Fase 3: Processar lógica do jogo
+        processAnswer(isCorrect, questionCode);
+        setAnswerState('idle');
+        setLastAnswerResult(null);
+      }, 1500); // Tempo para mostrar o resultado
+    }, 2000); // Delay inicial para criar tensão
+  };
+
+  // Lógica separada para processar a resposta
+  const processAnswer = (isCorrect: boolean, questionCode = '') => {
     if (!currentParticipant) return;
 
     const updatedParticipant = { ...currentParticipant };
@@ -302,9 +340,23 @@ const ShowDoMelzao = () => {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
                   Pergunta {currentQuestion}/10
                 </h2>
-                <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getDifficultyColor(currentQuestion)}`}>
-                  {getDifficulty(currentQuestion)} - {questionValues[currentQuestion]} honey
+                <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  answerState === 'processing'
+                    ? 'bg-orange-100 text-orange-800 animate-pulse'
+                    : getDifficultyColor(currentQuestion)
+                }`}>
+                  {answerState === 'processing'
+                    ? '⏳ Processando...'
+                    : `${getDifficulty(currentQuestion)} - ${questionValues[currentQuestion]} honey`
+                  }
                 </div>
+                {answerState === 'revealing' && (
+                  <div className={`mt-3 text-2xl font-bold animate-bounce ${
+                    lastAnswerResult ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {lastAnswerResult ? '✅ CORRETO!' : '❌ INCORRETO!'}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -326,27 +378,41 @@ const ShowDoMelzao = () => {
                       const code = (document.getElementById('questionCode') as HTMLInputElement)?.value || '';
                       answerQuestion(true, code);
                     }}
-                    className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium flex items-center justify-center gap-2"
+                    disabled={answerState !== 'idle'}
+                    className={`flex-1 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
+                      answerState === 'revealing' && lastAnswerResult === true
+                        ? 'bg-green-400 text-white animate-pulse shadow-lg shadow-green-400/50 scale-105'
+                        : answerState !== 'idle'
+                        ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    }`}
                   >
                     <CheckCircle size={20} />
-                    Resposta Correta
+                    {answerState === 'processing' ? 'Processando...' : 'Resposta Correta'}
                   </button>
                   <button
                     onClick={() => {
                       const code = (document.getElementById('questionCode') as HTMLInputElement)?.value || '';
                       answerQuestion(false, code);
                     }}
-                    className="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-medium flex items-center justify-center gap-2"
+                    disabled={answerState !== 'idle'}
+                    className={`flex-1 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
+                      answerState === 'revealing' && lastAnswerResult === false
+                        ? 'bg-red-400 text-white animate-pulse shadow-lg shadow-red-400/50 scale-105'
+                        : answerState !== 'idle'
+                        ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                        : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
                   >
                     <XCircle size={20} />
-                    Resposta Errada
+                    {answerState === 'processing' ? 'Processando...' : 'Resposta Errada'}
                   </button>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={skipQuestion}
-                    disabled={currentParticipant.skipsUsed >= 1}
+                    disabled={currentParticipant.skipsUsed >= 1 || answerState !== 'idle'}
                     className="flex-1 bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                   >
                     <Clock size={16} />
@@ -354,7 +420,7 @@ const ShowDoMelzao = () => {
                   </button>
                   <button
                     onClick={useAudienceHelp}
-                    disabled={currentParticipant.helpUsed}
+                    disabled={currentParticipant.helpUsed || answerState !== 'idle'}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                   >
                     <Users size={16} />
@@ -362,7 +428,8 @@ const ShowDoMelzao = () => {
                   </button>
                   <button
                     onClick={giveUp}
-                    className="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 text-sm"
+                    disabled={answerState !== 'idle'}
+                    className="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                   >
                     Desistir
                   </button>

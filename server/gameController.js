@@ -219,11 +219,22 @@ class GameController {
   }
 
   static getGameState() {
-    return {
-      ...gameState,
+    // Criar uma versão limpa do gameState sem referências circulares
+    const cleanGameState = {
+      participants: gameState.participants,
+      currentParticipant: gameState.currentParticipant,
+      currentQuestion: gameState.currentQuestion,
+      questionIndex: gameState.questionIndex,
+      status: gameState.status,
+      // Excluir timer (causa referência circular)
+      hasActiveTimer: gameState.timer !== null,
+      usedQuestionIds: gameState.usedQuestionIds,
+      sessionId: gameState.sessionId,
       totalParticipants: gameState.participants.length,
       rankings: this.getRankings()
     };
+
+    return cleanGameState;
   }
 
   static getRankings() {
