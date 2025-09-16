@@ -129,7 +129,7 @@ class GameController {
 
     if (isCorrect) {
       participant.currentLevel++;
-      participant.totalEarned += question.honeyValue;
+      participant.totalEarned = question.honeyValue; // Não acumula, apenas o valor da pergunta atual
 
       // Verificar se completou todos os 10 níveis
       if (participant.currentLevel >= 10) {
@@ -169,8 +169,8 @@ class GameController {
         currentEarnings: participant.totalEarned
       };
     } else {
-      // Errou - fica com 50%
-      const finalEarnings = Math.floor(participant.totalEarned * 0.5);
+      // Errou - ganha 50% do valor da pergunta atual
+      const finalEarnings = Math.floor(question.honeyValue * 0.5);
       participant.totalEarned = finalEarnings;
       participant.status = 'eliminated';
       gameState.status = 'waiting';

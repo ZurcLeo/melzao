@@ -31,11 +31,10 @@ const ShowDoMelzao = () => {
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [lastAnswerResult, setLastAnswerResult] = useState<boolean | null>(null);
 
-  // Valores das perguntas por nível
+  // Valores das perguntas por nível (progressão dobrando a partir de 5)
   const questionValues: Record<number, number> = {
-    1: 50, 2: 100, 3: 200,           // Fáceis
-    4: 400, 5: 800, 6: 1600, 7: 3200, // Moderadas
-    8: 6400, 9: 12800, 10: 20000     // Difíceis
+    1: 5, 2: 10, 3: 20, 4: 40, 5: 80,
+    6: 160, 7: 320, 8: 640, 9: 1280, 10: 2560
   };
 
   const getDifficulty = (questionNum: number) => {
@@ -163,13 +162,13 @@ const ShowDoMelzao = () => {
 
     const updatedParticipant = { ...currentParticipant };
     updatedParticipant.skipsUsed += 1;
-    updatedParticipant.totalEarned = Math.max(0, updatedParticipant.totalEarned - 100);
+    updatedParticipant.totalEarned = Math.max(0, updatedParticipant.totalEarned - 10);
 
     const response: Response = {
       questionNumber: currentQuestion,
       questionCode: 'SKIP',
       isCorrect: null,
-      value: -100,
+      value: -10,
       timestamp: new Date().toLocaleTimeString()
     };
 
@@ -307,15 +306,15 @@ const ShowDoMelzao = () => {
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <ul className="space-y-2">
                 <li>• 10 perguntas por participante</li>
-                <li>• Fáceis (1-3): 50, 100, 200 honey</li>
-                <li>• Moderadas (4-7): 400, 800, 1600, 3200 honey</li>
-                <li>• Difíceis (8-10): 6400, 12800, 20000 honey</li>
+                <li>• Fáceis (1-3): 5, 10, 20 honey</li>
+                <li>• Moderadas (4-7): 40, 80, 160, 320 honey</li>
+                <li>• Difíceis (8-10): 640, 1280, 2560 honey</li>
               </ul>
               <ul className="space-y-2">
-                <li>• 1 pulo por participante (custa 100 honey)</li>
+                <li>• 1 pulo por participante (custa 10 honey)</li>
                 <li>• 1 ajuda da plateia por participante</li>
                 <li>• Erro = metade do valor da pergunta</li>
-                <li>• Desistir = leva o valor acumulado</li>
+                <li>• Desistir = leva o valor atual da pergunta</li>
               </ul>
             </div>
           </div>
@@ -416,7 +415,7 @@ const ShowDoMelzao = () => {
                     className="flex-1 bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                   >
                     <Clock size={16} />
-                    Pular (-100 🍯)
+                    Pular (-10 🍯)
                   </button>
                   <button
                     onClick={useAudienceHelp}
