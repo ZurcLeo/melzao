@@ -10,6 +10,7 @@ const socket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:5001');
 function App() {
   const [gameState, setGameState] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [offlineMode, setOfflineMode] = useState(false);
 
   useEffect(() => {
     // Connection events
@@ -65,31 +66,54 @@ function App() {
 
   return (
     <div className="min-h-screen">
+      {/* Controles de modo */}
+      <div className="fixed top-4 left-4 z-50 flex gap-2">
+        <button
+          onClick={() => setOfflineMode(!offlineMode)}
+          className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
+            offlineMode
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
+              : 'bg-gray-600 text-white hover:bg-gray-700'
+          }`}
+          title={offlineMode ? 'Modo Offline Ativo' : 'Ativar Modo Offline'}
+        >
+          {offlineMode ? '🎵 Offline' : '🌐 Online'}
+        </button>
+      </div>
+
       {/* Status de conexão */}
       <div className={`fixed top-4 right-4 px-3 py-1 rounded text-sm z-50 ${
-        isConnected
+        offlineMode
+          ? 'bg-purple-500 text-white'
+          : isConnected
           ? 'bg-green-500 text-white'
           : 'bg-red-500 text-white animate-pulse'
       }`}>
-        {isConnected ? '🟢 Online' : '🔴 Offline'}
+        {offlineMode ? '🎵 Offline' : isConnected ? '🟢 Online' : '🔴 Offline'}
       </div>
 
       {/* App principal */}
-      <HostDashboard socket={socket} gameState={gameState} />
+      <HostDashboard
+        socket={offlineMode ? null : socket}
+        gameState={offlineMode ? null : gameState}
+        offlineMode={offlineMode}
+      />
 
       {/* Notificações */}
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss={false}
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+      {!offlineMode && (
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+      )}
     </div>
   );
 }

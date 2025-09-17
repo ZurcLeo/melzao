@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Trophy, Clock, Users, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { useSounds } from './hooks/useSounds';
 
 interface Response {
   questionNumber: number;
@@ -77,6 +78,7 @@ const ShowDoMelzao = () => {
     if (participants.length === 0) return;
     setGameState('playing');
     setCurrentParticipant(participants[0]);
+    playSound('gameStart'); // Som de início do jogo
   };
 
   // Atualizar nome do participante
@@ -91,68 +93,8 @@ const ShowDoMelzao = () => {
     setParticipants(participants.filter(p => p.id !== id));
   };
 
-  // Função para tocar sons
-  const playSound = useCallback(async (soundName: string) => {
-    console.log(`🔊 Tentando tocar som: ${soundName}`);
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      console.log(`🎵 AudioContext state: ${audioContext.state}`);
-
-      // Ativar contexto de áudio se necessário (requisito do navegador)
-      if (audioContext.state === 'suspended') {
-        console.log('🔓 Resumindo AudioContext...');
-        await audioContext.resume();
-      }
-
-      // Criar múltiplos osciladores para melodias
-      const createTone = (frequency: number, startTime: number, duration: number, volume = 0.1) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.frequency.setValueAtTime(frequency, startTime);
-        gainNode.gain.setValueAtTime(volume, startTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
-
-        return { oscillator, gainNode };
-      };
-
-      const now = audioContext.currentTime;
-
-      switch(soundName) {
-        case 'processing':
-          // Som de tensão - pulsação repetitiva
-          for(let i = 0; i < 4; i++) {
-            const tone = createTone(220 - (i * 10), now + (i * 0.5), 0.3, 0.08);
-            tone.oscillator.type = 'sawtooth';
-          }
-          break;
-
-        case 'correct':
-          // Melodia ascendente alegre - Dó, Mi, Sol, Dó
-          createTone(523, now, 0.2, 0.15); // Dó
-          createTone(659, now + 0.15, 0.2, 0.15); // Mi
-          createTone(784, now + 0.3, 0.2, 0.15); // Sol
-          createTone(1047, now + 0.45, 0.4, 0.2); // Dó oitava
-          break;
-
-        case 'incorrect':
-          // Som descendente triste
-          const incorrect1 = createTone(400, now, 0.3, 0.12);
-          incorrect1.oscillator.type = 'square';
-          const incorrect2 = createTone(300, now + 0.2, 0.4, 0.12);
-          incorrect2.oscillator.type = 'square';
-          break;
-      }
-    } catch (error) {
-      console.log(`🔊 Som ${soundName} (Web Audio API não suportada)`, error);
-    }
-  }, []);
+  // Sistema de sons integrado
+  const { playSound } = useSounds();
 
   // Responder pergunta com tensão e delay
   const answerQuestion = (isCorrect: boolean, questionCode = '') => {
@@ -209,11 +151,15 @@ const ShowDoMelzao = () => {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         updatedParticipant.status = 'finished';
+        // Som especial para completar todas as perguntas
+        setTimeout(() => playSound('victory'), 500);
         nextParticipant();
       }
     } else {
       updatedParticipant.totalEarned += Math.floor(questionValue / 2);
       updatedParticipant.status = 'eliminated';
+      // Som dramático para eliminação
+      setTimeout(() => playSound('elimination'), 500);
       nextParticipant();
     }
 

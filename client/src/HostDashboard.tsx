@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import HistoryDashboard from './components/HistoryDashboard';
+import { useSounds } from './hooks/useSounds';
 
 interface HostDashboardProps {
   socket: any;
@@ -17,12 +18,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [lastAnswerResult, setLastAnswerResult] = useState<{correct: boolean, correctAnswer?: string} | null>(null);
 
-  // Timer para resposta
+  // Timer para resposta com som de alerta
   useEffect(() => {
     if (gameState?.status === 'active' && gameState.currentQuestion) {
       setTimeLeft(30);
       const timer = setInterval(() => {
         setTimeLeft(prev => {
+          if (prev === 6) {
+            playSound('timeWarning'); // Som de alerta aos 5 segundos
+          }
           if (prev <= 1) {
             clearInterval(timer);
             return 0;
@@ -33,18 +37,9 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
 
       return () => clearInterval(timer);
     }
-  }, [gameState?.currentQuestion, gameState?.status]);
+  }, [gameState?.currentQuestion, gameState?.status, playSound]);
 
-  // Hook para futuros sons (preparação)
-  const useSounds = useCallback(() => {
-    const playSound = (soundName: string) => {
-      // TODO: Implementar reprodução de sons
-      console.log(`🔊 [FUTURO] Reproduzindo som: ${soundName}`);
-    };
-
-    return { playSound };
-  }, []);
-
+  // Sistema de sons integrado
   const { playSound } = useSounds();
 
   // Reset answerState quando nova pergunta começar
@@ -64,6 +59,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
 
   const startGame = (participantId: string) => {
     socket.emit('start-game', participantId);
+    playSound('gameStart'); // Som de início do jogo
   };
 
   const submitAnswer = () => {
@@ -82,7 +78,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
     }
   };
 
-  // Listener para resultado da resposta
+  // Listener para resultado da resposta com sons
   useEffect(() => {
     const handleAnswerResult = (result: any) => {
       if (answerState === 'processing') {
@@ -92,7 +88,21 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
           correctAnswer: result.correctAnswer
         });
         setAnswerState('revealing');
-        playSound(result.correct ? 'correct' : 'incorrect');
+
+        // Sons baseados no resultado
+        if (result.correct) {
+          if (result.completed) {
+            playSound('victory'); // Som especial para vitória completa
+          } else {
+            playSound('correct'); // Som normal de acerto
+          }
+        } else {
+          if (result.eliminated) {
+            playSound('elimination'); // Som dramático de eliminação
+          } else {
+            playSound('incorrect'); // Som normal de erro
+          }
+        }
 
         setTimeout(() => {
           // Fase 3: Reset para próxima pergunta
