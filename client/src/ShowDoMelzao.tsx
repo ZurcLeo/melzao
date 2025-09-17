@@ -31,6 +31,11 @@ const ShowDoMelzao = () => {
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [lastAnswerResult, setLastAnswerResult] = useState<boolean | null>(null);
 
+  // Debug: monitorar mudanças de estado
+  React.useEffect(() => {
+    console.log('🎮 Estado mudou:', { answerState, lastAnswerResult });
+  }, [answerState, lastAnswerResult]);
+
   // Valores das perguntas por nível (progressão dobrando a partir de 5)
   const questionValues: Record<number, number> = {
     1: 5, 2: 10, 3: 20, 4: 40, 5: 80,
@@ -86,34 +91,93 @@ const ShowDoMelzao = () => {
     setParticipants(participants.filter(p => p.id !== id));
   };
 
-  // Hook para futuros sons (preparação)
-  const useSounds = useCallback(() => {
-    const playSound = (soundName: string) => {
-      // TODO: Implementar reprodução de sons
-      console.log(`🔊 [FUTURO] Reproduzindo som: ${soundName}`);
-    };
+  // Função para tocar sons
+  const playSound = useCallback(async (soundName: string) => {
+    console.log(`🔊 Tentando tocar som: ${soundName}`);
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      console.log(`🎵 AudioContext state: ${audioContext.state}`);
 
-    return { playSound };
+      // Ativar contexto de áudio se necessário (requisito do navegador)
+      if (audioContext.state === 'suspended') {
+        console.log('🔓 Resumindo AudioContext...');
+        await audioContext.resume();
+      }
+
+      // Criar múltiplos osciladores para melodias
+      const createTone = (frequency: number, startTime: number, duration: number, volume = 0.1) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+
+        return { oscillator, gainNode };
+      };
+
+      const now = audioContext.currentTime;
+
+      switch(soundName) {
+        case 'processing':
+          // Som de tensão - pulsação repetitiva
+          for(let i = 0; i < 4; i++) {
+            const tone = createTone(220 - (i * 10), now + (i * 0.5), 0.3, 0.08);
+            tone.oscillator.type = 'sawtooth';
+          }
+          break;
+
+        case 'correct':
+          // Melodia ascendente alegre - Dó, Mi, Sol, Dó
+          createTone(523, now, 0.2, 0.15); // Dó
+          createTone(659, now + 0.15, 0.2, 0.15); // Mi
+          createTone(784, now + 0.3, 0.2, 0.15); // Sol
+          createTone(1047, now + 0.45, 0.4, 0.2); // Dó oitava
+          break;
+
+        case 'incorrect':
+          // Som descendente triste
+          const incorrect1 = createTone(400, now, 0.3, 0.12);
+          incorrect1.oscillator.type = 'square';
+          const incorrect2 = createTone(300, now + 0.2, 0.4, 0.12);
+          incorrect2.oscillator.type = 'square';
+          break;
+      }
+    } catch (error) {
+      console.log(`🔊 Som ${soundName} (Web Audio API não suportada)`, error);
+    }
   }, []);
-
-  const { playSound } = useSounds();
 
   // Responder pergunta com tensão e delay
   const answerQuestion = (isCorrect: boolean, questionCode = '') => {
-    if (!currentParticipant || answerState !== 'idle') return;
+    console.log('🎯 answerQuestion chamada:', { isCorrect, questionCode, answerState });
+
+    if (!currentParticipant || answerState !== 'idle') {
+      console.log('❌ Bloqueado:', { currentParticipant: !!currentParticipant, answerState });
+      return;
+    }
 
     // Fase 1: Processing (criar tensão)
+    console.log('⏳ Iniciando processing...');
     setAnswerState('processing');
     setLastAnswerResult(isCorrect);
     playSound('processing'); // Som de tensão
 
     setTimeout(() => {
       // Fase 2: Revealing (mostrar resultado)
+      console.log('🎉 Iniciando revealing...', { isCorrect });
       setAnswerState('revealing');
       playSound(isCorrect ? 'correct' : 'incorrect');
 
       setTimeout(() => {
         // Fase 3: Processar lógica do jogo
+        console.log('🔄 Processando resposta...');
         processAnswer(isCorrect, questionCode);
         setAnswerState('idle');
         setLastAnswerResult(null);
@@ -325,7 +389,13 @@ const ShowDoMelzao = () => {
 
   if (gameState === 'playing' && currentParticipant) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-600 p-6">
+      <div className={`min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-600 p-6 transition-all duration-500 ${
+        answerState === 'revealing'
+          ? lastAnswerResult
+            ? 'bg-gradient-to-br from-green-400 via-green-500 to-green-600 animate-pulse'
+            : 'bg-gradient-to-br from-red-400 via-red-500 to-red-600 animate-pulse'
+          : ''
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold text-white mb-2">🍯 Show do Melzão 🍯</h1>
@@ -341,7 +411,7 @@ const ShowDoMelzao = () => {
                 </h2>
                 <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   answerState === 'processing'
-                    ? 'bg-orange-100 text-orange-800 animate-pulse'
+                    ? 'bg-orange-100 text-orange-800 animate-pulse shadow-lg shadow-orange-400/50 scale-110'
                     : getDifficultyColor(currentQuestion)
                 }`}>
                   {answerState === 'processing'
@@ -350,10 +420,12 @@ const ShowDoMelzao = () => {
                   }
                 </div>
                 {answerState === 'revealing' && (
-                  <div className={`mt-3 text-2xl font-bold animate-bounce ${
-                    lastAnswerResult ? 'text-green-600' : 'text-red-600'
+                  <div className={`mt-3 text-4xl font-bold transition-all duration-500 ${
+                    lastAnswerResult
+                      ? 'text-green-600 animate-bounce shadow-lg shadow-green-400/50 scale-125'
+                      : 'text-red-600 animate-pulse shadow-lg shadow-red-400/50 scale-125'
                   }`}>
-                    {lastAnswerResult ? '✅ CORRETO!' : '❌ INCORRETO!'}
+                    {lastAnswerResult ? '✅ CORRETO! 🎉' : '❌ INCORRETO! 💔'}
                   </div>
                 )}
               </div>
@@ -380,7 +452,7 @@ const ShowDoMelzao = () => {
                     disabled={answerState !== 'idle'}
                     className={`flex-1 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
                       answerState === 'revealing' && lastAnswerResult === true
-                        ? 'bg-green-400 text-white animate-pulse shadow-lg shadow-green-400/50 scale-105'
+                        ? 'bg-green-400 text-white animate-bounce shadow-2xl shadow-green-400/80 scale-110 ring-4 ring-green-300'
                         : answerState !== 'idle'
                         ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                         : 'bg-green-600 text-white hover:bg-green-700'
@@ -397,7 +469,7 @@ const ShowDoMelzao = () => {
                     disabled={answerState !== 'idle'}
                     className={`flex-1 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 ${
                       answerState === 'revealing' && lastAnswerResult === false
-                        ? 'bg-red-400 text-white animate-pulse shadow-lg shadow-red-400/50 scale-105'
+                        ? 'bg-red-400 text-white animate-pulse shadow-2xl shadow-red-400/80 scale-110 ring-4 ring-red-300'
                         : answerState !== 'idle'
                         ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                         : 'bg-red-600 text-white hover:bg-red-700'
