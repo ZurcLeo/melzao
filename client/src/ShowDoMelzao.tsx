@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Trophy, Clock, Users, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { useSounds } from './hooks/useSounds';
 

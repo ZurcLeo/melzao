@@ -1,22 +1,27 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import HistoryDashboard from './components/HistoryDashboard';
 import { useSounds } from './hooks/useSounds';
 
 interface HostDashboardProps {
   socket: any;
   gameState: any;
+  offlineMode?: boolean;
 }
 
 type DashboardView = 'live' | 'history';
 type AnswerState = 'idle' | 'processing' | 'revealing';
 
-const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
+const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlineMode = false }) => {
   const [participantName, setParticipantName] = useState('');
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentView, setCurrentView] = useState<DashboardView>('live');
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [lastAnswerResult, setLastAnswerResult] = useState<{correct: boolean, correctAnswer?: string} | null>(null);
+
+
+  // Sistema de sons integrado
+  const { playSound } = useSounds();
 
   // Timer para resposta com som de alerta
   useEffect(() => {
@@ -38,9 +43,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
       return () => clearInterval(timer);
     }
   }, [gameState?.currentQuestion, gameState?.status, playSound]);
-
-  // Sistema de sons integrado
-  const { playSound } = useSounds();
 
   // Reset answerState quando nova pergunta começar
   useEffect(() => {
@@ -134,6 +136,12 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState }) => {
       socket.emit('reset-history');
     }
   };
+
+  // Modo Offline - importar ShowDoMelzao dinamicamente
+  if (offlineMode) {
+    const ShowDoMelzao = require('./ShowDoMelzao').default;
+    return <ShowDoMelzao />;
+  }
 
   if (!gameState) {
     return (
