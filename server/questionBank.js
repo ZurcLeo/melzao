@@ -191,6 +191,108 @@ const QUESTION_BANK = {
       question: 'Qual é o significado da letra "Q" em LGBTQ+?',
       options: ['Questionando', 'Queer', 'Qualidade', 'Quieto'],
       correctAnswer: 'Queer', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_5', level: 3, category: 'lgbtq',
+      question: 'O que é PrEP (Profilaxia Pré-Exposição)?',
+      options: ['Medicamento para tratar HIV', 'Medicamento para prevenir HIV', 'Exame para detectar HIV', 'Vacina contra HIV'],
+      correctAnswer: 'Medicamento para prevenir HIV', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_6', level: 3, category: 'lgbtq',
+      question: 'Qual medicamento é usado na PrEP no Brasil?',
+      options: ['Efavirenz', 'Tenofovir + Entricitabina', 'Zidovudina', 'Ritonavir'],
+      correctAnswer: 'Tenofovir + Entricitabina', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_7', level: 3, category: 'lgbtq',
+      question: 'O que significa PeP (Profilaxia Pós-Exposição)?',
+      options: ['Prevenção após exposição ao HIV', 'Prevenção antes da exposição ao HIV', 'Tratamento do HIV', 'Cura do HIV'],
+      correctAnswer: 'Prevenção após exposição ao HIV', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_8', level: 3, category: 'lgbtq',
+      question: 'Quanto tempo após a exposição de risco a PeP deve ser iniciada?',
+      options: ['Até 24 horas', 'Até 72 horas', 'Até 7 dias', 'Até 30 dias'],
+      correctAnswer: 'Até 72 horas', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_9', level: 3, category: 'lgbtq',
+      question: 'Por quanto tempo deve ser tomada a PeP?',
+      options: ['15 dias', '28 dias', '45 dias', '60 dias'],
+      correctAnswer: '28 dias', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_10', level: 3, category: 'lgbtq',
+      question: 'Qual a eficácia da PrEP quando usada corretamente?',
+      options: ['Até 70%', 'Até 85%', 'Até 99%', '100%'],
+      correctAnswer: 'Até 99%', honeyValue: 20
+    },
+    {
+      id: 'atual_3_10', level: 3, category: 'atual',
+      question: 'Em 2025, Trump impôs uma tarifa de quanto por cento sobre produtos brasileiros?',
+      options: ['25%', '40%', '50%', '75%'],
+      correctAnswer: '50%', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_11', level: 3, category: 'lgbtq',
+      question: 'A PrEP está disponível gratuitamente no SUS?',
+      options: ['Sim, para todos', 'Não, apenas em clínicas privadas', 'Sim, para grupos prioritários', 'Apenas com prescrição especial'],
+      correctAnswer: 'Sim, para grupos prioritários', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_12', level: 3, category: 'lgbtq',
+      question: 'Quais grupos são prioritários para PrEP no Brasil?',
+      options: ['Apenas profissionais de saúde', 'HSH, pessoas trans, trabalhadores do sexo', 'Apenas casais sorodiscordantes', 'Todos os adultos'],
+      correctAnswer: 'HSH, pessoas trans, trabalhadores do sexo', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_13', level: 3, category: 'lgbtq',
+      question: 'A PrEP protege contra outras ISTs além do HIV?',
+      options: ['Sim, contra todas as ISTs', 'Não, apenas contra HIV', 'Sim, contra sífilis e gonorreia', 'Sim, mas apenas contra hepatite B'],
+      correctAnswer: 'Não, apenas contra HIV', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_14', level: 3, category: 'lgbtq',
+      question: 'Qual exame é obrigatório antes de iniciar a PrEP?',
+      options: ['Teste de HIV', 'Hemograma completo', 'Função renal', 'Todos os anteriores'],
+      correctAnswer: 'Todos os anteriores', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_15', level: 3, category: 'lgbtq',
+      question: 'Com que frequência deve-se fazer acompanhamento médico durante o uso da PrEP?',
+      options: ['Mensalmente', 'A cada 3 meses', 'A cada 6 meses', 'Anualmente'],
+      correctAnswer: 'A cada 3 meses', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_16', level: 3, category: 'lgbtq',
+      question: 'A PeP pode ser usada repetidas vezes?',
+      options: ['Não, apenas uma vez na vida', 'Sim, quando houver nova exposição de risco', 'Apenas duas vezes por ano', 'Apenas com autorização especial'],
+      correctAnswer: 'Sim, quando houver nova exposição de risco', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_17', level: 3, category: 'lgbtq',
+      question: 'Em que ano a PrEP foi incorporada ao SUS no Brasil?',
+      options: ['2015', '2017', '2019', '2020'],
+      correctAnswer: '2017', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_18', level: 3, category: 'lgbtq',
+      question: 'Qual a principal diferença entre PrEP e PeP?',
+      options: ['PrEP é mais cara que PeP', 'PrEP é preventiva, PeP é emergencial', 'PeP é mais eficaz que PrEP', 'Não há diferença significativa'],
+      correctAnswer: 'PrEP é preventiva, PeP é emergencial', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_19', level: 3, category: 'lgbtq',
+      question: 'A PrEP pode ser interrompida e retomada?',
+      options: ['Não, deve ser contínua', 'Sim, conforme necessidade e orientação médica', 'Apenas uma vez', 'Apenas durante feriados'],
+      correctAnswer: 'Sim, conforme necessidade e orientação médica', honeyValue: 20
+    },
+    {
+      id: 'lgbtq_3_20', level: 3, category: 'lgbtq',
+      question: 'A PrEP (Profilaxia Pré-Exposição) previne qual infecção?',
+      options: ['Sífilis', 'HIV', 'Gonorreia', 'Hepatite B'],
+      correctAnswer: 'HIV', honeyValue: 20
     }
   ],
 
@@ -233,11 +335,12 @@ const QUESTION_BANK = {
       correctAnswer: 'Titanic', honeyValue: 40
     },
     {
-      id: 'lgbtq_4_3', level: 4, category: 'lgbtq',
-      question: 'Qual é o nome do movimento pelos direitos LGBT no Brasil dos anos 80?',
-      options: ['Movimento Homossexual Brasileiro', 'Grupo Gay da Bahia', 'Lambda', 'Triângulo Rosa'],
-      correctAnswer: 'Movimento Homossexual Brasileiro', honeyValue: 40
-    },
+    id: 'lgbtq_4_3', level: 4, category: 'lgbtq',
+    question: 'Qual foi o primeiro grupo LGBT organizado no Brasil?',
+    options: ['Grupo Gay da Bahia', 'Somos - Grupo de Afirmação Homossexual', 'Triângulo Rosa', 'Lambda'],
+    correctAnswer: 'Somos - Grupo de Afirmação Homossexual', 
+    honeyValue: 40
+  },
     {
       id: 'brasil_4_3', level: 4, category: 'brasil',
       question: 'Qual foi o primeiro jornal do Brasil?',
@@ -246,7 +349,7 @@ const QUESTION_BANK = {
     },
     {
       id: 'atual_4_3', level: 4, category: 'atual',
-      question: 'Qual é a criptomoeda criada por Elon Musk como meme?',
+      question: 'Qual é a criptomoeda promovida por Elon Musk como meme?',
       options: ['Bitcoin', 'Ethereum', 'Dogecoin', 'Shiba Inu'],
       correctAnswer: 'Dogecoin', honeyValue: 40
     },
@@ -255,6 +358,18 @@ const QUESTION_BANK = {
       question: 'Qual presidente brasileiro sancionou a lei de criminalização da homofobia?',
       options: ['Lula', 'Dilma', 'Temer', 'STF decidiu'],
       correctAnswer: 'STF decidiu', honeyValue: 40
+    },
+    {
+      id: 'lgbtq_4_5', level: 4, category: 'lgbtq',
+      question: 'Complete o nome do filme: "_____, A Rainha do ____"',
+      options: ['Priscilla, Deserto', 'Gloria, Palco', 'Pabllo, Noite', 'Roberta, Cidade'],
+      correctAnswer: 'Priscilla, Deserto', honeyValue: 40
+    },
+    {
+      id: 'lgbtq_4_6', level: 4, category: 'lgbtq',
+      question: 'O que significa a sigla HSH, grupo prioritário para PrEP no Brasil?',
+      options: ['Homens Solteiros Homossexuais', 'Homens que fazem Sexo com Homens', 'Homens Sarados e Hiperssexualizados', 'Homens com Síndrome Hemofílica'],
+      correctAnswer: 'Homens que fazem Sexo com Homens', honeyValue: 40
     }
   ],
 
@@ -262,7 +377,7 @@ const QUESTION_BANK = {
   level5: [
     {
       id: 'lgbtq_5_1', level: 5, category: 'lgbtq',
-      question: 'Que cor representa pessoas não-binárias na bandeira do orgulho?',
+      question: 'Na bandeira não-binária, qual cor representa pessoas fora do sistema binário de gênero?',
       options: ['Amarelo', 'Roxo', 'Verde', 'Laranja'],
       correctAnswer: 'Amarelo', honeyValue: 80
     },
@@ -319,6 +434,12 @@ const QUESTION_BANK = {
       question: 'Qual é o nome do primeiro jornal LGBT do Brasil?',
       options: ['Lampião da Esquina', 'O Snob', 'ChanacomChana', 'Nós Por Exemplo'],
       correctAnswer: 'Lampião da Esquina', honeyValue: 80
+    },
+    {
+      id: 'lgbtq_5_5', level: 5, category: 'lgbtq',
+      question: 'Harvey Milk, retratado no filme "Milk", foi o primeiro parlamentar americano declaradamente gay eleito para qual cargo?',
+      options: ['Prefeito', 'Vereador', 'Deputado', 'Senador'],
+      correctAnswer: 'Vereador', honeyValue: 80
     }
   ],
 
@@ -344,9 +465,10 @@ const QUESTION_BANK = {
     },
     {
       id: 'lgbtq_6_2', level: 6, category: 'lgbtq',
-      question: 'Qual ativista brasileira foi a primeira travesti a obter PhD?',
-      options: ['Indianara Siqueira', 'Luma Andrade', 'Megg Rayara', 'Duda Salabert'],
-      correctAnswer: 'Megg Rayara', honeyValue: 160
+      question: 'Quem é a primeira mulher trans na ativa das Forças Armadas brasileiras?',
+      options: ['Indianara Siqueira', 'Bruna Benevides', 'Duda Salabert', 'Erika Hilton'],
+      correctAnswer: 'Bruna Benevides', 
+      honeyValue: 160
     },
     {
       id: 'brasil_6_2', level: 6, category: 'brasil',
@@ -358,7 +480,7 @@ const QUESTION_BANK = {
       id: 'atual_6_2', level: 6, category: 'atual',
       question: 'Qual empresa criou o primeiro carro elétrico de massa?',
       options: ['Tesla', 'BMW', 'General Motors', 'Nissan'],
-      correctAnswer: 'General Motors', honeyValue: 160
+      correctAnswer: 'Tesla', honeyValue: 160
     },
     {
       id: 'lgbtq_6_3', level: 6, category: 'lgbtq',
@@ -383,6 +505,12 @@ const QUESTION_BANK = {
       question: 'Qual país tem a maior Parada do Orgulho do mundo?',
       options: ['Brasil', 'Estados Unidos', 'Alemanha', 'Reino Unido'],
       correctAnswer: 'Brasil', honeyValue: 160
+    },
+    {
+      id: 'brasil_6_5', level: 6, category: 'brasil',
+      question: 'O Brasil possui a segunda maior reserva mundial de que tipo de mineral estratégico?',
+      options: ['Terras raras', 'Petróleo', 'Ouro', 'Diamantes'],
+      correctAnswer: 'Terras raras', honeyValue: 160
     }
   ],
 
@@ -408,8 +536,8 @@ const QUESTION_BANK = {
     },
     {
       id: 'lgbtq_7_2', level: 7, category: 'lgbtq',
-      question: 'Qual foi o primeiro filme brasileiro com temática LGBT?',
-      options: ['O Menino e o Vento', 'Vera', 'A Hora da Estrela', 'Dona Flor e Seus Dois Maridos'],
+      question: 'Qual filme de 1967 foi o primeiro brasileiro a tratar a homossexualidade de forma séria?',
+      options: ['O Menino e o Vento', 'Vera', 'A Hora da Estrela', 'Torre de Babel'],
       correctAnswer: 'O Menino e o Vento', honeyValue: 320
     },
     {
@@ -420,9 +548,9 @@ const QUESTION_BANK = {
     },
     {
       id: 'atual_7_2', level: 7, category: 'atual',
-      question: 'Qual é o nome do primeiro robô humanoide da Boston Dynamics?',
-      options: ['Atlas', 'Spot', 'BigDog', 'Petman'],
-      correctAnswer: 'Petman', honeyValue: 320
+      question: 'Qual foi o primeiro robô humanoide da Boston Dynamics?',
+      options: ['Atlas', 'BigDog', 'PETMAN', 'Spot'],
+      correctAnswer: 'PETMAN', honeyValue: 320
     },
     {
       id: 'lgbtq_7_3', level: 7, category: 'lgbtq',
@@ -447,6 +575,12 @@ const QUESTION_BANK = {
       question: 'Qual é o nome da primeira deputada federal trans eleita no Brasil?',
       options: ['Erika Hilton', 'Duda Salabert', 'Indianara Siqueira', 'Robeyoncé Lima'],
       correctAnswer: 'Erika Hilton', honeyValue: 320
+    },
+    {
+      id: 'brasil_7_5', level: 7, category: 'brasil',
+      question: 'Qual percentual das reservas globais de terras raras o Brasil possui?',
+      options: ['15%', '18%', '23%', '28%'],
+      correctAnswer: '23%', honeyValue: 320
     }
   ],
 
@@ -472,9 +606,9 @@ const QUESTION_BANK = {
     },
     {
       id: 'lgbtq_8_2', level: 8, category: 'lgbtq',
-      question: 'Em que ano foi realizada a primeira cirurgia de redesignação sexual?',
-      options: ['1930', '1952', '1966', '1972'],
-      correctAnswer: '1952', honeyValue: 640
+      question: 'Qual foi a primeira pessoa conhecida a fazer cirurgia de redesignação sexual?',
+      options: ['Christine Jorgensen (1952)', 'Lili Elbe (1930)', 'Dora Richter (1921)', 'Karl M. Baer (1906)'],
+      correctAnswer: 'Lili Elbe (1930)', honeyValue: 640
     },
     {
       id: 'brasil_8_2', level: 8, category: 'brasil',
@@ -502,9 +636,9 @@ const QUESTION_BANK = {
     },
     {
       id: 'atual_8_3', level: 8, category: 'atual',
-      question: 'Qual foi o primeiro país a banir TikTok completamente?',
-      options: ['Índia', 'China', 'Estados Unidos', 'Afeganistão'],
-      correctAnswer: 'Afeganistão', honeyValue: 640
+      question: 'Qual foi o primeiro país a banir completamente o TikTok?',
+      options: ['China', 'Estados Unidos', 'Índia', 'Afeganistão'],
+      correctAnswer: 'Índia', honeyValue: 640
     },
     {
       id: 'lgbtq_8_4', level: 8, category: 'lgbtq',
@@ -575,6 +709,12 @@ const QUESTION_BANK = {
       question: 'Qual é o nome da primeira pessoa trans a ser nomeada ministra no mundo?',
       options: ['Georgina Beyer', 'Amanda Simpson', 'Rachel Levine', 'Não se sabe'],
       correctAnswer: 'Não se sabe', honeyValue: 1280
+    },
+    {
+      id: 'atual_9_4', level: 9, category: 'atual',
+      question: 'A China controla aproximadamente quanto por cento da cadeia produtiva mundial de terras raras?',
+      options: ['85%', '90%', '95%', '98%'],
+      correctAnswer: '95%', honeyValue: 160
     }
   ],
 

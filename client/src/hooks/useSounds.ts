@@ -13,7 +13,7 @@ export const useSounds = () => {
         await audioContext.resume();
       }
 
-      // Criar múltiplos osciladores para melodias
+      // Criar múltiplos osciladores para melodias com efeitos
       const createTone = (frequency: number, startTime: number, duration: number, volume = 0.1) => {
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
@@ -31,31 +31,158 @@ export const useSounds = () => {
         return { oscillator, gainNode };
       };
 
+      // Criar tom com filtro passa-baixa
+      const createFilteredTone = (frequency: number, startTime: number, duration: number, volume = 0.1, cutoff = 800) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(cutoff, startTime);
+        filter.Q.setValueAtTime(1, startTime);
+
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+
+        return { oscillator, gainNode, filter };
+      };
+
+      // Criar tom com reverb simulado (delay)
+      const createReverbTone = (frequency: number, startTime: number, duration: number, volume = 0.1) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const delay = audioContext.createDelay(0.3);
+        const delayGain = audioContext.createGain();
+
+        delay.delayTime.setValueAtTime(0.1, startTime);
+        delayGain.gain.setValueAtTime(0.3, startTime);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        gainNode.connect(delay);
+        delay.connect(delayGain);
+        delayGain.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+
+        return { oscillator, gainNode, delay, delayGain };
+      };
+
+      // Criar tom com distorção sutil usando waveshaper
+      const createDistortedTone = (frequency: number, startTime: number, duration: number, volume = 0.1) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const waveshaper = audioContext.createWaveShaper();
+
+        // Curva de distorção sutil
+        const samples = 44100;
+        const curve = new Float32Array(samples);
+        for (let i = 0; i < samples; i++) {
+          const x = (i - samples / 2) / (samples / 2);
+          curve[i] = Math.tanh(x * 2) * 0.7; // Distorção suave
+        }
+        waveshaper.curve = curve;
+
+        oscillator.connect(waveshaper);
+        waveshaper.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(frequency, startTime);
+        gainNode.gain.setValueAtTime(volume, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+
+        return { oscillator, gainNode, waveshaper };
+      };
+
       const now = audioContext.currentTime;
 
       switch(soundName) {
         case 'processing':
-          // Som de tensão - pulsação repetitiva
-          for(let i = 0; i < 4; i++) {
-            const tone = createTone(220 - (i * 10), now + (i * 0.5), 0.3, 0.08);
-            tone.oscillator.type = 'sawtooth';
-          }
+          // Suspense com progressão menor e filtro passa-baixa
+          // Progressão: Am - F - C - G (em tonalidades menores)
+          const chordTimes = [0, 0.6, 1.2, 1.8];
+          const minorChords = [
+            [220, 261, 330], // A menor
+            [175, 208, 261], // F menor
+            [196, 233, 294], // G menor
+            [165, 196, 247]  // D menor
+          ];
+
+          minorChords.forEach((chord, chordIndex) => {
+            chord.forEach((freq, noteIndex) => {
+              const tone = createFilteredTone(
+                freq,
+                now + chordTimes[chordIndex] + (noteIndex * 0.05),
+                0.8,
+                0.06,
+                400 - (chordIndex * 50) // Filtro diminuindo gradualmente
+              );
+              tone.oscillator.type = 'sawtooth';
+            });
+          });
           break;
 
         case 'correct':
-          // Melodia ascendente alegre - Dó, Mi, Sol, Dó
-          createTone(523, now, 0.2, 0.15); // Dó
-          createTone(659, now + 0.15, 0.2, 0.15); // Mi
-          createTone(784, now + 0.3, 0.2, 0.15); // Sol
-          createTone(1047, now + 0.45, 0.4, 0.2); // Dó oitava
+          // Arpejo maior (Dó-Mi-Sol) com reverb
+          const arpeggioNotes = [523, 659, 784, 1047]; // Dó, Mi, Sol, Dó oitava
+          const arpeggioTimes = [0, 0.12, 0.24, 0.36];
+
+          arpeggioNotes.forEach((freq, index) => {
+            const tone = createReverbTone(
+              freq,
+              now + arpeggioTimes[index],
+              0.6,
+              0.12
+            );
+            tone.oscillator.type = 'triangle'; // Tom mais suave e musical
+          });
           break;
 
         case 'incorrect':
-          // Som descendente triste
-          const incorrect1 = createTone(400, now, 0.3, 0.12);
-          incorrect1.oscillator.type = 'square';
-          const incorrect2 = createTone(300, now + 0.2, 0.4, 0.12);
-          incorrect2.oscillator.type = 'square';
+          // Dissonância (trítono) com distorção sutil
+          console.log('🔊 Tocando som de erro...');
+
+          try {
+            // Trítono: Fá# e Dó (intervalo mais dissonante)
+            const tritoneNotes = [370, 523]; // Fá# e Dó
+
+            tritoneNotes.forEach((freq, index) => {
+              const tone = createDistortedTone(
+                freq,
+                now + (index * 0.1),
+                0.8,
+                0.1
+              );
+              tone.oscillator.type = 'sawtooth';
+            });
+
+            // Nota descendente final para reforçar erro
+            const finalError = createDistortedTone(277, now + 0.5, 0.6, 0.08);
+            finalError.oscillator.type = 'square';
+          } catch (errorSound) {
+            console.log('🔊 Erro no som distorcido, usando fallback...');
+            // Fallback para som simples se a distorção falhar
+            const simple1 = createTone(400, now, 0.3, 0.12);
+            simple1.oscillator.type = 'square';
+            const simple2 = createTone(300, now + 0.2, 0.4, 0.12);
+            simple2.oscillator.type = 'square';
+          }
           break;
 
         case 'gameStart':
@@ -83,12 +210,32 @@ export const useSounds = () => {
           break;
 
         case 'victory':
-          // Melodia de vitória épica
-          createTone(523, now, 0.2, 0.15); // Dó
-          createTone(659, now + 0.15, 0.2, 0.15); // Mi
-          createTone(784, now + 0.3, 0.2, 0.15); // Sol
-          createTone(1047, now + 0.45, 0.2, 0.15); // Dó
-          createTone(1319, now + 0.6, 0.4, 0.2); // Mi oitava
+          // Fanfarra em Dó Maior com brilho (oitavas altas)
+          const fanfareNotes = [
+            [523, 659, 784], // Acorde Dó Maior
+            [587, 740, 880], // Acorde Ré Maior
+            [659, 831, 988], // Acorde Mi Maior
+            [784, 988, 1175, 1568] // Acorde Sol Maior com oitava alta
+          ];
+          const fanfareTimes = [0, 0.25, 0.5, 0.75];
+
+          fanfareNotes.forEach((chord, chordIndex) => {
+            chord.forEach((freq, noteIndex) => {
+              const tone = createReverbTone(
+                freq,
+                now + fanfareTimes[chordIndex] + (noteIndex * 0.02),
+                0.8,
+                0.15
+              );
+              tone.oscillator.type = 'sawtooth'; // Mais brilhante
+            });
+          });
+
+          // Nota final triunfante em oitava alta
+          setTimeout(() => {
+            const finalTone = createReverbTone(1047, now + 1.2, 1.5, 0.2);
+            finalTone.oscillator.type = 'triangle';
+          }, 50);
           break;
       }
     } catch (error) {

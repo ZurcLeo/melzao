@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trophy, Clock, Users, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { useSounds } from './hooks/useSounds';
 
@@ -15,7 +15,7 @@ interface Participant {
   name: string;
   currentQuestion: number;
   totalEarned: number;
-  status: 'waiting' | 'playing' | 'finished' | 'eliminated';
+  status: 'waiting' | 'playing' | 'finished' | 'eliminated' | 'awaiting_host_decision';
   skipsUsed: number;
   helpUsed: boolean;
   responses: Response[];
@@ -115,7 +115,9 @@ const ShowDoMelzao = () => {
       // Fase 2: Revealing (mostrar resultado)
       console.log('🎉 Iniciando revealing...', { isCorrect });
       setAnswerState('revealing');
-      playSound(isCorrect ? 'correct' : 'incorrect');
+      const soundToPlay = isCorrect ? 'correct' : 'incorrect';
+      console.log(`🎵 Reproduzindo som: ${soundToPlay} (isCorrect: ${isCorrect})`);
+      playSound(soundToPlay);
 
       setTimeout(() => {
         // Fase 3: Processar lógica do jogo
@@ -147,8 +149,9 @@ const ShowDoMelzao = () => {
     if (isCorrect) {
       updatedParticipant.totalEarned += questionValue;
       if (currentQuestion < 10) {
-        updatedParticipant.currentQuestion = currentQuestion + 1;
-        setCurrentQuestion(currentQuestion + 1);
+        // PAUSAR AQUI - aguardar decisão do host para continuar
+        updatedParticipant.status = 'awaiting_host_decision';
+        console.log('✅ Resposta correta! Aguardando decisão do host...');
       } else {
         updatedParticipant.status = 'finished';
         // Som especial para completar todas as perguntas
@@ -205,8 +208,40 @@ const ShowDoMelzao = () => {
     updateCurrentParticipant(updatedParticipant);
   };
 
+  // Atualizar participante atual
+  const updateCurrentParticipant = useCallback((updatedParticipant: Participant) => {
+    setParticipants(participants.map(p =>
+      p.id === updatedParticipant.id ? updatedParticipant : p
+    ));
+    setCurrentParticipant(updatedParticipant);
+  }, [participants]);
+
+  // Próximo participante
+  const nextParticipant = useCallback(() => {
+    const nextIndex = participants.findIndex(p => p.status === 'waiting');
+    if (nextIndex !== -1) {
+      setCurrentParticipant(participants[nextIndex]);
+      setCurrentQuestion(1);
+    } else {
+      setGameState('finished');
+    }
+  }, [participants]);
+
+  // Função para o host continuar o jogo após acerto
+  const continueToNextQuestion = useCallback(() => {
+    if (!currentParticipant || currentParticipant.status !== 'awaiting_host_decision') return;
+
+    const updatedParticipant = { ...currentParticipant };
+    updatedParticipant.status = 'playing';
+    updatedParticipant.currentQuestion = currentQuestion + 1;
+    setCurrentQuestion(currentQuestion + 1);
+
+    updateCurrentParticipant(updatedParticipant);
+    console.log('➡️ Host decidiu continuar para próxima pergunta');
+  }, [currentParticipant, currentQuestion, updateCurrentParticipant]);
+
   // Desistir (leva o valor acumulado)
-  const giveUp = () => {
+  const giveUp = useCallback(() => {
     if (!currentParticipant) return;
 
     const updatedParticipant = { ...currentParticipant };
@@ -223,26 +258,7 @@ const ShowDoMelzao = () => {
     updatedParticipant.responses.push(response);
     updateCurrentParticipant(updatedParticipant);
     nextParticipant();
-  };
-
-  // Próximo participante
-  const nextParticipant = () => {
-    const nextIndex = participants.findIndex(p => p.status === 'waiting');
-    if (nextIndex !== -1) {
-      setCurrentParticipant(participants[nextIndex]);
-      setCurrentQuestion(1);
-    } else {
-      setGameState('finished');
-    }
-  };
-
-  // Atualizar participante atual
-  const updateCurrentParticipant = (updatedParticipant: Participant) => {
-    setParticipants(participants.map(p =>
-      p.id === updatedParticipant.id ? updatedParticipant : p
-    ));
-    setCurrentParticipant(updatedParticipant);
-  };
+  }, [currentParticipant, currentQuestion, updateCurrentParticipant, nextParticipant]);
 
   // Reiniciar jogo
   const resetGame = () => {
@@ -252,13 +268,29 @@ const ShowDoMelzao = () => {
     setCurrentQuestion(1);
   };
 
+  // Event listener para ações do host
+  useEffect(() => {
+    const handleHostAction = (event: CustomEvent) => {
+      const { action } = event.detail;
+
+      if (action === 'continue_to_next_question') {
+        continueToNextQuestion();
+      } else if (action === 'force_quit_participant') {
+        giveUp();
+      }
+    };
+
+    window.addEventListener('host-action', handleHostAction as EventListener);
+    return () => window.removeEventListener('host-action', handleHostAction as EventListener);
+  }, [currentParticipant, continueToNextQuestion, giveUp]);
+
   if (gameState === 'registration') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
-              🍯 Show do Melzão 🍯
+              🍯 Show do Melzão
             </h1>
             <p className="text-xl text-white/90">
               Quiz show com até 5 participantes - Ganhe honey respondendo perguntas!

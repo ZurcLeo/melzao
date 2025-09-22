@@ -91,20 +91,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
         });
         setAnswerState('revealing');
 
-        // Sons baseados no resultado
-        if (result.correct) {
-          if (result.completed) {
-            playSound('victory'); // Som especial para vitória completa
-          } else {
-            playSound('correct'); // Som normal de acerto
-          }
-        } else {
-          if (result.eliminated) {
-            playSound('elimination'); // Som dramático de eliminação
-          } else {
-            playSound('incorrect'); // Som normal de erro
-          }
-        }
+        // Sons são tocados pelo ShowDoMelzao.tsx para evitar duplicação
+        // A lógica de sons foi movida para lá para melhor controle
 
         setTimeout(() => {
           // Fase 3: Reset para próxima pergunta
@@ -328,38 +316,70 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
           </div>
 
           <div className="flex gap-2 mb-4">
-            <button
-              onClick={submitAnswer}
-              disabled={!selectedAnswer || answerState !== 'idle'}
-              className={`btn flex-1 py-2 font-bold transition-all duration-300 ${
-                answerState === 'processing'
-                  ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
-                  : answerState === 'revealing'
-                  ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                  : selectedAnswer
-                  ? 'btn-success hover:bg-green-700'
-                  : 'disabled'
-              }`}
-            >
-              {answerState === 'processing'
-                ? '⏳ Processando...'
-                : answerState === 'revealing'
-                ? '📊 Resultado'
-                : '✅ Confirmar Resposta'
-              }
-            </button>
-            <button
-              onClick={quitGame}
-              disabled={answerState !== 'idle'}
-              className="btn btn-warning px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              🚪 Desistir
-            </button>
+            {/* Botões para quando o participante está aguardando decisão do host */}
+            {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
+              <>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'continue_to_next_question' } }))}
+                  className="btn btn-success flex-1 py-2 font-bold text-lg"
+                >
+                  ➡️ Próxima Pergunta
+                </button>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'force_quit_participant' } }))}
+                  className="btn btn-warning px-4 py-2 font-bold"
+                >
+                  💰 Parar e Levar
+                </button>
+              </>
+            ) : (
+              /* Botões normais do jogo */
+              <>
+                <button
+                  onClick={submitAnswer}
+                  disabled={!selectedAnswer || answerState !== 'idle'}
+                  className={`btn flex-1 py-2 font-bold transition-all duration-300 ${
+                    answerState === 'processing'
+                      ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
+                      : answerState === 'revealing'
+                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                      : selectedAnswer
+                      ? 'btn-success hover:bg-green-700'
+                      : 'disabled'
+                  }`}
+                >
+                  {answerState === 'processing'
+                    ? '⏳ Processando...'
+                    : answerState === 'revealing'
+                    ? '📊 Resultado'
+                    : '✅ Confirmar Resposta'
+                  }
+                </button>
+                <button
+                  onClick={quitGame}
+                  disabled={answerState !== 'idle'}
+                  className="btn btn-warning px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🚪 Desistir
+                </button>
+              </>
+            )}
           </div>
 
-          <div className="text-center text-yellow-400 font-bold">
-            💰 Prêmio: {gameState.currentQuestion.honeyValue} Honey
-          </div>
+          {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
+            <div className="text-center">
+              <div className="bg-green-600 text-white p-3 rounded-lg mb-2 font-bold">
+                ✅ RESPOSTA CORRETA!
+              </div>
+              <div className="text-yellow-400 font-bold">
+                🤝 Aguardando decisão do host: continuar ou parar?
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-yellow-400 font-bold">
+              💰 Prêmio: {gameState.currentQuestion.honeyValue} Honey
+            </div>
+          )}
         </div>
       )}
 
