@@ -165,8 +165,8 @@ const QUESTION_BANK = {
     {
       id: 'atual_3_2', level: 3, category: 'atual',
       question: 'Qual é o nome da inteligência artificial do Google?',
-      options: ['Alexa', 'Siri', 'Bard', 'Cortana'],
-      correctAnswer: 'Bard', honeyValue: 20
+      options: ['Alexa', 'Siri', 'Gemini', 'Cortana'],
+      correctAnswer: 'Gemini', honeyValue: 20
     },
     {
       id: 'lgbtq_3_3', level: 3, category: 'lgbtq',
@@ -437,7 +437,7 @@ const QUESTION_BANK = {
     },
     {
       id: 'lgbtq_5_5', level: 5, category: 'lgbtq',
-      question: 'Harvey Milk, retratado no filme "Milk", foi o primeiro parlamentar americano declaradamente gay eleito para qual cargo?',
+      question: 'Harvey Milk, retratado no filme "Milk: A Voz da Igualdade", foi o primeiro parlamentar americano declaradamente gay eleito para qual cargo?',
       options: ['Prefeito', 'Vereador', 'Deputado', 'Senador'],
       correctAnswer: 'Vereador', honeyValue: 80
     }

@@ -7,7 +7,7 @@
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",
-    "build": "cd client && npm run build",
+    "build": "cd server && npm install && npm run build",
     "start": "cd server && npm start"
   },
   "keywords": ["quiz", "lgbt", "websocket", "react", "express"],

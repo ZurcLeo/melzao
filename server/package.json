@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "echo \"No tests yet\" && exit 0",
+    "build": "npm rebuild sqlite3",
+    "postinstall": "npm rebuild sqlite3"
   },
   "dependencies": {
     "cors": "^2.8.5",
