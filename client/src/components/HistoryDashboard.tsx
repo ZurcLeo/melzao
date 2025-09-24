@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { apiService, GameStats, TopScore, GameSession, SessionReport, QuestionStats } from '../services/api';
 import SimpleCharts from './SimpleCharts';
 
@@ -55,7 +55,7 @@ const HistoryDashboard: React.FC = () => {
     }
   };
 
-  const filterSessions = () => {
+  const filterSessions = useCallback(() => {
     let filtered = sessions;
 
     if (statusFilter !== 'all') {
@@ -71,11 +71,11 @@ const HistoryDashboard: React.FC = () => {
     }
 
     setFilteredSessions(filtered);
-  };
+  }, [sessions, searchTerm, statusFilter]);
 
   useEffect(() => {
     filterSessions();
-  }, [sessions, searchTerm, statusFilter]);
+  }, [filterSessions]);
 
   const loadSessionDetail = async (sessionId: string) => {
     try {
