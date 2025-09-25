@@ -5,7 +5,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com' || 'http://localhost:5001');
+const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com', {
+  transports: ['polling', 'websocket'],
+  upgrade: true,
+  rememberUpgrade: false
+});
 
 function App() {
   const [gameState, setGameState] = useState<any>(null);

@@ -8,9 +8,12 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["https://zurcleo.github.io", "http://localhost:3001"],
-    methods: ["GET", "POST"]
-  }
+    origin: ["https://zurcleo.github.io", "https://zurcleo.github.io/melzao", "http://localhost:3001"],
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 app.use(cors());
