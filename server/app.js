@@ -8,7 +8,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["https://zurcleo.github.io", "https://zurcleo.github.io/melzao", "http://localhost:3001"],
+    origin: [
+      "https://zurcleo.github.io",
+      "https://zurcleo.github.io/",
+      "https://zurcleo.github.io/melzao",
+      "https://zurcleo.github.io/melzao/",
+      "http://localhost:3001"
+    ],
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -16,7 +22,17 @@ const io = socketIo(server, {
   allowEIO3: true
 });
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://zurcleo.github.io",
+    "https://zurcleo.github.io/",
+    "https://zurcleo.github.io/melzao",
+    "https://zurcleo.github.io/melzao/",
+    "http://localhost:3001"
+  ],
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Trust proxy for accurate IP addresses (important for rate limiting)
