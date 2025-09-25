@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import HostDashboard from './HostDashboard';
+import AuthModal from './components/AuthModal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -15,12 +16,37 @@ function App() {
   const [gameState, setGameState] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for saved auth on app start
+    const savedToken = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('authUser');
+
+    if (savedToken && savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        setAuthToken(savedToken);
+        setCurrentUser(user);
+      } catch (e) {
+        // Invalid saved data, clear it
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+      }
+    }
+
     // Connection events
     socket.on('connect', () => {
       setIsConnected(true);
       toast.success('🔌 Conectado ao servidor!');
+
+      // Send auth token if available
+      if (savedToken || authToken) {
+        socket.auth = { token: savedToken || authToken };
+      }
+
       socket.emit('join-game');
     });
 
@@ -66,7 +92,27 @@ function App() {
       socket.off('time-up');
       socket.off('error');
     };
-  }, []);
+  }, [authToken]);
+
+  const handleAuthSuccess = (user: any, token: string) => {
+    setCurrentUser(user);
+    setAuthToken(token);
+    socket.auth = { token };
+    socket.disconnect();
+    socket.connect(); // Reconnect with auth
+    toast.success(`🎉 Bem-vindo, ${user.name}!`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setAuthToken(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+    socket.auth = {};
+    socket.disconnect();
+    socket.connect(); // Reconnect as anonymous
+    toast.info('👋 Logout realizado');
+  };
 
   return (
     <div className="min-h-screen">
@@ -83,6 +129,17 @@ function App() {
         >
           {offlineMode ? '🎵 Offline' : '🌐 Online'}
         </button>
+
+        {/* Auth button */}
+        {!offlineMode && (
+          <button
+            onClick={() => currentUser ? handleLogout() : setShowAuthModal(true)}
+            className="px-3 py-1 rounded text-sm font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700"
+            title={currentUser ? 'Logout' : 'Login / Registrar'}
+          >
+            {currentUser ? `👤 ${currentUser.name}` : '🔑 Entrar'}
+          </button>
+        )}
       </div>
 
       {/* Status de conexão */}
@@ -93,7 +150,12 @@ function App() {
           ? 'bg-green-500 text-white'
           : 'bg-red-500 text-white animate-pulse'
       }`}>
-        {offlineMode ? '🎵 Offline' : isConnected ? '🟢 Online' : '🔴 Offline'}
+        {offlineMode
+          ? '🎵 Offline'
+          : isConnected
+          ? (currentUser ? `🟢 ${currentUser.role}` : '🟢 Anônimo')
+          : '🔴 Offline'
+        }
       </div>
 
       {/* App principal */}
@@ -101,6 +163,13 @@ function App() {
         socket={offlineMode ? null : socket}
         gameState={offlineMode ? null : gameState}
         offlineMode={offlineMode}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
 
       {/* Notificações */}
