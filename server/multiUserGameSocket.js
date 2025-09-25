@@ -408,6 +408,21 @@ module.exports = function(io) {
       }
     });
 
+    // Handle join-game event (for backwards compatibility)
+    socket.on('join-game', () => {
+      // Send basic game state for anonymous users
+      const gameState = {
+        status: 'waiting',
+        participants: [],
+        currentQuestion: null,
+        currentParticipant: null,
+        session: null
+      };
+
+      socket.emit('game-state', gameState);
+      console.log(`🎮 Estado do jogo enviado para ${userName}`);
+    });
+
     // Initial connection event
     socket.emit('connected', {
       userId,
@@ -415,6 +430,17 @@ module.exports = function(io) {
       userRole: socket.userRole,
       message: 'Conectado com sucesso ao Show do Melzão Multi-User!'
     });
+
+    // Also emit initial game state
+    const initialGameState = {
+      status: 'waiting',
+      participants: [],
+      currentQuestion: null,
+      currentParticipant: null,
+      session: null
+    };
+
+    socket.emit('game-state', initialGameState);
   });
 
   // ========== HELPER FUNCTIONS ==========
