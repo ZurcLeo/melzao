@@ -7,26 +7,44 @@ const multiUserGameController = require('./multiUserGameController');
  */
 module.exports = function(io) {
 
-  // Middleware for socket authentication
+  // Middleware for socket authentication (optional)
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
 
       if (!token) {
-        return next(new Error('Authentication token required'));
+        // Allow anonymous connections for public game access
+        socket.userId = null;
+        socket.userEmail = 'anonymous';
+        socket.userName = 'Jogador Anônimo';
+        socket.userRole = 'guest';
+        console.log(`👤 Conexão anônima aceita`);
+        return next();
       }
 
-      // Verify token
+      // Verify token if provided
       const user = await authService.verifyToken(token);
 
       if (!user) {
-        return next(new Error('Invalid token'));
+        // If token is invalid, still allow as anonymous
+        socket.userId = null;
+        socket.userEmail = 'anonymous';
+        socket.userName = 'Jogador Anônimo';
+        socket.userRole = 'guest';
+        console.log(`👤 Token inválido, conexão anônima aceita`);
+        return next();
       }
 
       // Check if user is active
       const userDetails = await authService.getUserById(user.userId);
       if (!userDetails || userDetails.status !== 'active') {
-        return next(new Error('User not active'));
+        // If user inactive, still allow as anonymous
+        socket.userId = null;
+        socket.userEmail = 'anonymous';
+        socket.userName = 'Jogador Anônimo';
+        socket.userRole = 'guest';
+        console.log(`👤 Usuário inativo, conexão anônima aceita`);
+        return next();
       }
 
       // Attach user info to socket
@@ -39,8 +57,13 @@ module.exports = function(io) {
       next();
 
     } catch (error) {
-      console.error('Erro na autenticação do socket:', error);
-      next(new Error('Authentication failed'));
+      console.error('Erro na autenticação do socket, permitindo acesso anônimo:', error);
+      // Allow anonymous access even if auth service fails
+      socket.userId = null;
+      socket.userEmail = 'anonymous';
+      socket.userName = 'Jogador Anônimo';
+      socket.userRole = 'guest';
+      next();
     }
   });
 
