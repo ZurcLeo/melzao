@@ -16,11 +16,28 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 
+// Trust proxy for accurate IP addresses (important for rate limiting)
+app.set('trust proxy', true);
+
 // Inicializar banco de dados
 database.initialize().catch(console.error);
 
-// Importar socket handler
-require('./gameSocket')(io);
+// Import API routes
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const questionRoutes = require('./routes/questions');
+const configRoutes = require('./routes/configs');
+const gameRoutes = require('./routes/game');
+
+// Use API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/questions', questionRoutes);
+app.use('/api/configs', configRoutes);
+app.use('/api/game', gameRoutes);
+
+// Import multi-user socket handler
+require('./multiUserGameSocket')(io);
 
 // Health check
 app.get('/health', (req, res) => {

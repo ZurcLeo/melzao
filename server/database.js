@@ -9,13 +9,27 @@ class Database {
   async initialize() {
     return new Promise((resolve, reject) => {
       const dbPath = path.join(__dirname, 'game.db');
-      this.db = new sqlite3.Database(dbPath, (err) => {
+      this.db = new sqlite3.Database(dbPath, async (err) => {
         if (err) {
           console.error('Erro ao abrir o banco de dados:', err);
           reject(err);
         } else {
           console.log('✅ Banco de dados conectado com sucesso');
-          this.createTables().then(resolve).catch(reject);
+
+          try {
+            // Criar tabelas básicas primeiro
+            await this.createTables();
+
+            // Executar migrations
+            const MigrationRunner = require('./migrationRunner');
+            const migrationRunner = new MigrationRunner(this);
+            await migrationRunner.initialize();
+            await migrationRunner.runMigrations();
+
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
         }
       });
     });
