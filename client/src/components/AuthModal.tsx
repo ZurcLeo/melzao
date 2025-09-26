@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
-import { Modal, ModalBody, ModalFooter } from './ui/Modal';
+import { Modal, ModalBody } from './ui/Modal';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card, CardContent } from './ui/Card';

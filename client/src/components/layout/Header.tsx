@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, LogOut, Wifi, WifiOff, Music, Users } from 'lucide-react';
+import { User, Wifi, WifiOff, Music, Users } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 
