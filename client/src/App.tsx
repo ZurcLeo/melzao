@@ -63,8 +63,8 @@ function App() {
     // Game events
     socket.on('game-state', setGameState);
 
-    socket.on('participant-added', (participant: any) => {
-      toast.success(`👥 ${participant.name} entrou no jogo!`);
+    socket.on('participant-added', (data: any) => {
+      toast.success(`👥 ${data.participant.name} entrou no jogo!`);
     });
 
     socket.on('game-started', (data: any) => {

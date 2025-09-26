@@ -61,7 +61,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   };
 
   const startGame = (participantId: string) => {
-    socket.emit('start-game', participantId);
+    socket.emit('start-game', { participantId });
     playSound('gameStart'); // Som de início do jogo
   };
 
