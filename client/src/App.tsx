@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import io from 'socket.io-client';
 import HostDashboard from './HostDashboard';
 import AuthModal from './components/AuthModal';
+import { Header, Container } from './components/layout';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
 
 const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com', {
   transports: ['polling', 'websocket'],
@@ -115,55 +116,30 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Controles de modo */}
-      <div className="fixed top-4 left-4 z-50 flex gap-2">
-        <button
-          onClick={() => setOfflineMode(!offlineMode)}
-          className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
-            offlineMode
-              ? 'bg-purple-600 text-white hover:bg-purple-700'
-              : 'bg-gray-600 text-white hover:bg-gray-700'
-          }`}
-          title={offlineMode ? 'Modo Offline Ativo' : 'Ativar Modo Offline'}
-        >
-          {offlineMode ? '🎵 Offline' : '🌐 Online'}
-        </button>
-
-        {/* Auth button */}
-        {!offlineMode && (
-          <button
-            onClick={() => currentUser ? handleLogout() : setShowAuthModal(true)}
-            className="px-3 py-1 rounded text-sm font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700"
-            title={currentUser ? 'Logout' : 'Login / Registrar'}
-          >
-            {currentUser ? `👤 ${currentUser.name}` : '🔑 Entrar'}
-          </button>
-        )}
-      </div>
-
-      {/* Status de conexão */}
-      <div className={`fixed top-4 right-4 px-3 py-1 rounded text-sm z-50 ${
-        offlineMode
-          ? 'bg-purple-500 text-white'
-          : isConnected
-          ? 'bg-green-500 text-white'
-          : 'bg-red-500 text-white animate-pulse'
-      }`}>
-        {offlineMode
-          ? '🎵 Offline'
-          : isConnected
-          ? (currentUser ? `🟢 ${currentUser.role}` : '🟢 Anônimo')
-          : '🔴 Offline'
-        }
-      </div>
-
-      {/* App principal */}
-      <HostDashboard
-        socket={offlineMode ? null : socket}
-        gameState={offlineMode ? null : gameState}
+    <motion.div
+      className="min-h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Header moderno */}
+      <Header
+        currentUser={currentUser}
+        isConnected={isConnected}
         offlineMode={offlineMode}
+        onToggleOffline={() => setOfflineMode(!offlineMode)}
+        onLogin={() => setShowAuthModal(true)}
+        onLogout={handleLogout}
       />
+
+      {/* Conteúdo principal com espaçamento para o header */}
+      <Container size="full" padding="none" className="pt-20">
+        <HostDashboard
+          socket={offlineMode ? null : socket}
+          gameState={offlineMode ? null : gameState}
+          offlineMode={offlineMode}
+        />
+      </Container>
 
       {/* Authentication Modal */}
       <AuthModal
@@ -172,11 +148,11 @@ function App() {
         onAuthSuccess={handleAuthSuccess}
       />
 
-      {/* Notificações */}
+      {/* Notificações modernas */}
       {!offlineMode && (
         <ToastContainer
           position="top-center"
-          autoClose={3000}
+          autoClose={4000}
           hideProgressBar={false}
           newestOnTop
           closeOnClick
@@ -185,9 +161,10 @@ function App() {
           draggable
           pauseOnHover
           theme="dark"
+          toastClassName="glass-card border-0"
         />
       )}
-    </div>
+    </motion.div>
   );
 }
 

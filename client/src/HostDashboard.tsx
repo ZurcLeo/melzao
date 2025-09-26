@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Users, Clock, Trophy, History, Plus, Send } from 'lucide-react';
 import HistoryDashboard from './components/HistoryDashboard';
 import { useSounds } from './hooks/useSounds';
+import { Button } from './components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/Card';
+import { Input } from './components/ui/Input';
+import { Container } from './components/layout';
 
 interface HostDashboardProps {
   socket: any;
