@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Wifi, WifiOff, Music, Users } from 'lucide-react';
+import { User, Wifi, WifiOff, Music, Users, Settings, LogOut } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Modal, ModalBody } from '../ui/Modal';
+import UserProfile from '../UserProfile';
 import { cn } from '../../utils/cn';
 
 interface HeaderProps {
@@ -23,6 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   className,
 }) => {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const getConnectionStatus = () => {
     if (offlineMode) return { text: 'Offline', icon: Music, color: 'text-purple-400' };
     if (isConnected) {
@@ -85,19 +89,63 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Auth Button */}
             {!offlineMode && (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={currentUser ? <User size={16} /> : <User size={16} />}
-                onClick={currentUser ? onLogout : onLogin}
-              >
-                <span className="hidden sm:inline">
-                  {currentUser ? currentUser.name : 'Entrar'}
-                </span>
-                <span className="sm:hidden">
-                  {currentUser ? currentUser.name.charAt(0) : '🔑'}
-                </span>
-              </Button>
+              <>
+                {currentUser ? (
+                  <div className="relative">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<User size={16} />}
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                    >
+                      <span className="hidden sm:inline">
+                        {currentUser.name}
+                      </span>
+                      <span className="sm:hidden">
+                        {currentUser.name.charAt(0)}
+                      </span>
+                    </Button>
+
+                    {/* User Menu Dropdown */}
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-black/90 backdrop-blur-md rounded-xl border border-white/20 shadow-xl z-50">
+                        <div className="p-2">
+                          <button
+                            onClick={() => {
+                              setShowProfile(true);
+                              setShowUserMenu(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg transition-colors"
+                          >
+                            <Settings size={16} />
+                            Meu Perfil
+                          </button>
+                          <button
+                            onClick={() => {
+                              onLogout();
+                              setShowUserMenu(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<User size={16} />}
+                    onClick={onLogin}
+                  >
+                    <span className="hidden sm:inline">Entrar</span>
+                    <span className="sm:hidden">🔑</span>
+                  </Button>
+                )}
+              </>
             )}
 
             {/* Connection Status */}
@@ -119,6 +167,30 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* User Profile Modal */}
+      <Modal
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+        title=""
+        size="xl"
+      >
+        <ModalBody>
+          <UserProfile
+            currentUser={currentUser}
+            authToken={(window as any).authToken || localStorage.getItem('authToken') || ''}
+            onClose={() => setShowProfile(false)}
+          />
+        </ModalBody>
+      </Modal>
+
+      {/* Click outside to close menu */}
+      {showUserMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
     </motion.header>
   );
 };
