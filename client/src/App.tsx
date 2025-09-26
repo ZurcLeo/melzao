@@ -31,6 +31,10 @@ function App() {
         const user = JSON.parse(savedUser);
         setAuthToken(savedToken);
         setCurrentUser(user);
+
+        // Make user and token globally available for HostDashboard
+        (window as any).currentUser = user;
+        (window as any).authToken = savedToken;
       } catch (e) {
         // Invalid saved data, clear it
         localStorage.removeItem('authToken');
@@ -98,6 +102,11 @@ function App() {
   const handleAuthSuccess = (user: any, token: string) => {
     setCurrentUser(user);
     setAuthToken(token);
+
+    // Make user and token globally available for HostDashboard
+    (window as any).currentUser = user;
+    (window as any).authToken = token;
+
     socket.auth = { token };
     socket.disconnect();
     socket.connect(); // Reconnect with auth
@@ -107,6 +116,11 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     setAuthToken(null);
+
+    // Clear global variables
+    (window as any).currentUser = null;
+    (window as any).authToken = null;
+
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
     socket.auth = {};

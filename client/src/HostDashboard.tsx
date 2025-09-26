@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HistoryDashboard from './components/HistoryDashboard';
+import AdminPanel from './components/AdminPanel';
 import { useSounds } from './hooks/useSounds';
 
 interface HostDashboardProps {
@@ -8,7 +9,7 @@ interface HostDashboardProps {
   offlineMode?: boolean;
 }
 
-type DashboardView = 'live' | 'history';
+type DashboardView = 'live' | 'history' | 'admin';
 type AnswerState = 'idle' | 'processing' | 'revealing';
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlineMode = false }) => {
@@ -170,18 +171,36 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   >
     📊 Dados Históricos
   </button>
+  {window.currentUser && window.currentUser.role === 'admin' && (
+    <button
+      onClick={() => setCurrentView('admin')}
+      className={`btn px-4 py-2 ${currentView === 'admin' ? 'btn-primary' : 'bg-gray-600'}`}
+    >
+      👑 Admin
+    </button>
+  )}
 </div>
       </div>
 
       {/* Conteúdo baseado na visualização atual */}
       {currentView === 'history' ? (
         <HistoryDashboard />
+      ) : currentView === 'admin' ? (
+        <AdminPanel
+          currentUser={window.currentUser}
+          authToken={window.authToken || localStorage.getItem('authToken')}
+        />
       ) : (
         <>
-      {/* Adicionar Participante */}
-      {gameState.status === 'waiting' && (
+      {/* Adicionar Participante - Admin sempre pode, outros apenas quando waiting */}
+      {(gameState.status === 'waiting' || (window.currentUser && window.currentUser.role === 'admin')) && (
         <div className="card mb-4">
-          <h2 className="text-lg font-bold text-white mb-4">👥 Adicionar Participante</h2>
+          <h2 className="text-lg font-bold text-white mb-4">
+            👥 Adicionar Participante
+            {window.currentUser && window.currentUser.role === 'admin' && gameState.status !== 'waiting' && (
+              <span className="text-sm text-yellow-400 ml-2">(Admin Override)</span>
+            )}
+          </h2>
           <div className="flex gap-2">
             <input
               type="text"
