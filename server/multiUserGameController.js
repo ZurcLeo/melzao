@@ -40,7 +40,9 @@ class MultiUserGameController {
         `, [userId]);
 
         if (!config) {
-          throw new Error('Configuração padrão não encontrada para o usuário');
+          // Create default configuration for user
+          console.log(`🔧 Criando configuração padrão para usuário ${userId}`);
+          config = await this.createDefaultUserConfig(userId);
         }
       }
 
@@ -721,6 +723,68 @@ class MultiUserGameController {
     });
 
     return inactiveUsers.length;
+  }
+
+  /**
+   * Create default configuration for a new user
+   */
+  async createDefaultUserConfig(userId) {
+    const Database = require('./database');
+
+    try {
+      // Insert default configuration
+      const result = await Database.run(`
+        INSERT INTO user_game_configs (
+          user_id,
+          config_name,
+          honey_multiplier,
+          time_limit,
+          custom_questions_only,
+          allow_lifelines,
+          max_participants,
+          auto_advance,
+          theme_color,
+          is_default
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        userId,
+        'Configuração Padrão',
+        1.0,                    // honey_multiplier
+        30,                     // time_limit
+        0,                      // custom_questions_only (false)
+        1,                      // allow_lifelines (true)
+        100,                    // max_participants
+        0,                      // auto_advance (false)
+        '#FF6B35',              // theme_color
+        1                       // is_default (true)
+      ]);
+
+      // Get the created configuration
+      const config = await Database.get(`
+        SELECT * FROM user_game_configs WHERE id = ?
+      `, [result.lastID]);
+
+      console.log(`✅ Configuração padrão criada para usuário ${userId} (ID: ${result.lastID})`);
+      return config;
+
+    } catch (error) {
+      console.error('Erro ao criar configuração padrão:', error);
+
+      // Return a fallback configuration if database insert fails
+      return {
+        id: null,
+        user_id: userId,
+        config_name: 'Configuração Padrão',
+        honey_multiplier: 1.0,
+        time_limit: 30,
+        custom_questions_only: 0,
+        allow_lifelines: 1,
+        max_participants: 100,
+        auto_advance: 0,
+        theme_color: '#FF6B35',
+        is_default: 1
+      };
+    }
   }
 }
 

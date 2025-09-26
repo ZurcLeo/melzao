@@ -279,10 +279,30 @@ class AuthService {
     }
 
     // Criar configuração padrão para o usuário aprovado
-    await Database.run(`
-      INSERT INTO user_game_configs (user_id, config_name, is_default)
-      VALUES (?, 'Padrão', 1)
-    `, [userId]);
+    try {
+      await Database.run(`
+        INSERT INTO user_game_configs (
+          user_id, config_name, honey_multiplier, time_limit,
+          custom_questions_only, allow_lifelines, max_participants,
+          auto_advance, theme_color, is_default
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        userId,
+        'Configuração Padrão',
+        1.0,        // honey_multiplier
+        30,         // time_limit
+        0,          // custom_questions_only
+        1,          // allow_lifelines
+        100,        // max_participants
+        0,          // auto_advance
+        '#FF6B35',  // theme_color
+        1           // is_default
+      ]);
+      console.log(`✅ Configuração padrão criada para usuário aprovado ${userId}`);
+    } catch (configError) {
+      console.warn(`⚠️ Erro ao criar configuração padrão para usuário ${userId}:`, configError.message);
+      // Don't fail the approval if config creation fails
+    }
 
     const user = await this.getUserById(userId);
     console.log(`✅ Usuário aprovado: ${user.email}`);
