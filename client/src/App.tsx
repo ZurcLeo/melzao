@@ -83,8 +83,9 @@ function App() {
       toast.warning('⏰ Tempo esgotado!');
     });
 
-    socket.on('error', (error: string) => {
-      toast.error(`❌ Erro: ${error}`);
+    socket.on('error', (error: any) => {
+      const errorMessage = typeof error === 'object' ? error.message || JSON.stringify(error) : error;
+      toast.error(`❌ Erro: ${errorMessage}`);
     });
 
     return () => {

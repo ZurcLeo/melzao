@@ -196,10 +196,31 @@ module.exports = function(io) {
           return;
         }
 
+        // For anonymous users, we can't add participants to a session
+        if (!userId) {
+          socket.emit('error', {
+            message: 'Você precisa fazer login para adicionar participantes',
+            code: 'LOGIN_REQUIRED'
+          });
+          return;
+        }
+
+        // Ensure user has a session
+        let session = multiUserGameController.getUserSession(userId);
+        if (!session) {
+          console.log(`🎯 Criando sessão automática para adicionar participante - usuário ${userName}`);
+          session = await multiUserGameController.createSession(userId, 1); // Default config ID = 1
+        }
+
         const participant = await multiUserGameController.addParticipant(userId, name.trim());
 
         socket.emit('participant-added', { participant });
         broadcastToUser(userId, 'participant-added', { participant });
+
+        // Send updated game state
+        const gameState = multiUserGameController.getGameState(userId);
+        socket.emit('game-state', gameState);
+        broadcastToUser(userId, 'game-state', gameState);
 
       } catch (error) {
         console.error('Erro ao adicionar participante:', error);
@@ -409,18 +430,48 @@ module.exports = function(io) {
     });
 
     // Handle join-game event (for backwards compatibility)
-    socket.on('join-game', () => {
-      // Send basic game state for anonymous users
-      const gameState = {
-        status: 'waiting',
-        participants: [],
-        currentQuestion: null,
-        currentParticipant: null,
-        session: null
-      };
+    socket.on('join-game', async () => {
+      try {
+        // For authenticated users, ensure they have a session
+        if (userId) {
+          let session = multiUserGameController.getUserSession(userId);
 
-      socket.emit('game-state', gameState);
-      console.log(`🎮 Estado do jogo enviado para ${userName}`);
+          if (!session) {
+            // Create default session for authenticated users
+            console.log(`🎯 Criando sessão automática para usuário ${userName}`);
+            session = await multiUserGameController.createSession(userId, 1); // Default config ID = 1
+          }
+
+          // Send session-based game state
+          const gameState = multiUserGameController.getGameState(userId);
+          socket.emit('game-state', gameState);
+          console.log(`🎮 Estado da sessão enviado para ${userName}`);
+        } else {
+          // Send basic game state for anonymous users
+          const gameState = {
+            status: 'waiting',
+            participants: [],
+            currentQuestion: null,
+            currentParticipant: null,
+            session: null,
+            totalParticipants: 0
+          };
+          socket.emit('game-state', gameState);
+          console.log(`🎮 Estado básico enviado para usuário anônimo`);
+        }
+      } catch (error) {
+        console.error('Erro ao processar join-game:', error);
+        // Fallback to basic state
+        const gameState = {
+          status: 'waiting',
+          participants: [],
+          currentQuestion: null,
+          currentParticipant: null,
+          session: null,
+          totalParticipants: 0
+        };
+        socket.emit('game-state', gameState);
+      }
     });
 
     // Initial connection event

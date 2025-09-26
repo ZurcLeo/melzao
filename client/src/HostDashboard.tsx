@@ -55,7 +55,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
 
   const addParticipant = () => {
     if (participantName.trim()) {
-      socket.emit('add-participant', participantName.trim());
+      socket.emit('add-participant', { name: participantName.trim() });
       setParticipantName('');
     }
   };
