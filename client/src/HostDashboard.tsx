@@ -188,7 +188,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
       ) : currentView === 'admin' ? (
         <AdminPanel
           currentUser={window.currentUser}
-          authToken={window.authToken || localStorage.getItem('authToken')}
+          authToken={window.authToken || localStorage.getItem('authToken') || ''}
         />
       ) : (
         <>

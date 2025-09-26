@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, XCircle, UserX, RotateCcw, BarChart3, Activity } from 'lucide-react';
+import { Users, CheckCircle, UserX, RotateCcw, BarChart3, Activity } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent } from './ui/Card';
 import { Modal, ModalBody } from './ui/Modal';
@@ -33,21 +33,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
 
   const makeRequest = async (url: string, options: RequestInit = {}) => {
-    const response = await fetch(`${API_BASE}${url}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
-        ...options.headers,
-      },
-    });
+    try {
+      const response = await fetch(`${API_BASE}${url}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+          ...options.headers,
+        },
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erro na requisição' }));
-      throw new Error(errorData.error || `HTTP ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro na requisição' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Erro de conexão');
     }
-
-    return response.json();
   };
 
   const loadPendingUsers = async () => {
@@ -56,7 +63,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       const data = await makeRequest('/api/admin/users/pending');
       setPendingUsers(data.users || []);
     } catch (error) {
-      toast.error(`Erro ao carregar usuários pendentes: ${error.message}`);
+      toast.error(`Erro ao carregar usuários pendentes: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }
@@ -68,7 +75,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       const data = await makeRequest('/api/admin/users?limit=100');
       setAllUsers(data.users || []);
     } catch (error) {
-      toast.error(`Erro ao carregar usuários: ${error.message}`);
+      toast.error(`Erro ao carregar usuários: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }
@@ -80,7 +87,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       const data = await makeRequest('/api/admin/stats');
       setStats(data.stats);
     } catch (error) {
-      toast.error(`Erro ao carregar estatísticas: ${error.message}`);
+      toast.error(`Erro ao carregar estatísticas: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setLoading(false);
     }
@@ -93,7 +100,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       loadPendingUsers();
       loadAllUsers();
     } catch (error) {
-      toast.error(`Erro ao aprovar usuário: ${error.message}`);
+      toast.error(`Erro ao aprovar usuário: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -103,7 +110,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       toast.success('Usuário desativado com sucesso!');
       loadAllUsers();
     } catch (error) {
-      toast.error(`Erro ao desativar usuário: ${error.message}`);
+      toast.error(`Erro ao desativar usuário: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -113,7 +120,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       toast.success('Usuário reativado com sucesso!');
       loadAllUsers();
     } catch (error) {
-      toast.error(`Erro ao reativar usuário: ${error.message}`);
+      toast.error(`Erro ao reativar usuário: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -125,6 +132,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
     } else if (activeTab === 'stats') {
       loadStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const formatDate = (dateString: string) => {
@@ -339,7 +347,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
                     <div className="flex gap-2">
                       {user.status === 'active' && user.id !== currentUser?.userId && (
                         <Button
-                          variant="danger"
+                          variant="error"
                           size="sm"
                           onClick={() => deactivateUser(user.id)}
                           icon={<UserX size={16} />}
@@ -521,7 +529,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
 
                 {selectedUser.status === 'active' && selectedUser.id !== currentUser?.userId && (
                   <Button
-                    variant="danger"
+                    variant="error"
                     onClick={() => {
                       deactivateUser(selectedUser.id);
                       setShowUserModal(false);
