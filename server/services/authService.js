@@ -156,6 +156,60 @@ class AuthService {
   }
 
   /**
+   * Update user profile
+   */
+  async updateProfile(userId, profileData) {
+    const { name, email } = profileData;
+
+    // Validações
+    if (name && (typeof name !== 'string' || name.trim().length < 2)) {
+      throw new Error('Nome deve ter pelo menos 2 caracteres');
+    }
+
+    if (email && !this.isValidEmail(email)) {
+      throw new Error('Email inválido');
+    }
+
+    // Verificar se email já existe (se está sendo alterado)
+    if (email) {
+      const currentUser = await this.getUserById(userId);
+      if (currentUser.email !== email.toLowerCase().trim()) {
+        const existingUser = await this.getUserByEmail(email);
+        if (existingUser) {
+          throw new Error('Email já está em uso por outro usuário');
+        }
+      }
+    }
+
+    // Construir query dinamicamente
+    const updates = [];
+    const values = [];
+
+    if (name) {
+      updates.push('name = ?');
+      values.push(name.trim());
+    }
+
+    if (email) {
+      updates.push('email = ?');
+      values.push(email.toLowerCase().trim());
+    }
+
+    if (updates.length === 0) {
+      throw new Error('Nenhum campo para atualizar');
+    }
+
+    values.push(userId);
+
+    await Database.run(`
+      UPDATE users SET ${updates.join(', ')} WHERE id = ?
+    `, values);
+
+    console.log(`👤 Perfil atualizado para usuário ID: ${userId}`);
+    return { message: 'Perfil atualizado com sucesso' };
+  }
+
+  /**
    * Change user password
    */
   async changePassword(userId, currentPassword, newPassword) {

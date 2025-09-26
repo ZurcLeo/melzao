@@ -146,13 +146,28 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!profileForm.name.trim()) {
+      toast.error('Nome é obrigatório');
+      return;
+    }
+
     try {
       setProfileLoading(true);
 
-      // Note: This would need a corresponding backend endpoint
-      // For now, we'll just show what would happen
-      toast.info('Funcionalidade em desenvolvimento - apenas mudança de senha está disponível no momento');
+      const data = await makeRequest('/api/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: profileForm.name,
+          email: profileForm.email
+        })
+      });
 
+      toast.success('Perfil atualizado com sucesso!');
+      setUserData(data.user);
+      setProfileForm({
+        name: data.user.name,
+        email: data.user.email
+      });
       setEditingProfile(false);
     } catch (error) {
       toast.error(`Erro ao atualizar perfil: ${error instanceof Error ? error.message : String(error)}`);
@@ -306,7 +321,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
                   placeholder="seu@email.com"
                   required
                   variant="glass"
-                  disabled // Email change might require verification
                 />
 
                 <div className="flex gap-2 pt-4">

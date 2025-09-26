@@ -189,6 +189,62 @@ router.post('/change-password', authenticateToken, async (req, res) => {
 });
 
 /**
+ * @route PUT /auth/profile
+ * @desc Update user profile
+ * @access Private
+ */
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    if (!name && !email) {
+      return res.status(400).json({
+        error: 'Pelo menos um campo (nome ou email) deve ser fornecido',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    const result = await authService.updateProfile(req.user.userId, { name, email });
+
+    // Retornar dados atualizados do usuário
+    const updatedUser = await authService.getUserById(req.user.userId);
+
+    res.json({
+      success: true,
+      message: result.message,
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        status: updatedUser.status,
+        createdAt: updatedUser.created_at,
+        lastLogin: updatedUser.last_login
+      }
+    });
+
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+
+    let errorCode = 'PROFILE_UPDATE_FAILED';
+    let statusCode = 400;
+
+    if (error.message.includes('já está em uso')) {
+      errorCode = 'EMAIL_IN_USE';
+      statusCode = 409;
+    } else if (error.message.includes('inválido')) {
+      errorCode = 'INVALID_DATA';
+      statusCode = 400;
+    }
+
+    res.status(statusCode).json({
+      error: error.message,
+      code: errorCode
+    });
+  }
+});
+
+/**
  * @route POST /auth/forgot-password
  * @desc Generate password reset token
  * @access Public
