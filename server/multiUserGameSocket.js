@@ -209,7 +209,7 @@ module.exports = function(io) {
         let session = multiUserGameController.getUserSession(userId);
         if (!session) {
           console.log(`🎯 Criando sessão automática para adicionar participante - usuário ${userName}`);
-          session = await multiUserGameController.createSession(userId, 1); // Default config ID = 1
+          session = await multiUserGameController.createUserSession(userId);
         }
 
         const participant = await multiUserGameController.addParticipant(userId, name.trim());
@@ -218,7 +218,18 @@ module.exports = function(io) {
         broadcastToUser(userId, 'participant-added', { participant });
 
         // Send updated game state
-        const gameState = multiUserGameController.getGameState(userId);
+        const updatedSession = multiUserGameController.getUserSession(userId);
+        const gameState = {
+          status: updatedSession.gameStatus,
+          participants: updatedSession.participants,
+          currentQuestion: updatedSession.currentQuestion,
+          currentParticipant: updatedSession.currentParticipant,
+          session: {
+            id: updatedSession.sessionId,
+            config: updatedSession.config
+          },
+          totalParticipants: updatedSession.participants.length
+        };
         socket.emit('game-state', gameState);
         broadcastToUser(userId, 'game-state', gameState);
 
@@ -439,11 +450,21 @@ module.exports = function(io) {
           if (!session) {
             // Create default session for authenticated users
             console.log(`🎯 Criando sessão automática para usuário ${userName}`);
-            session = await multiUserGameController.createSession(userId, 1); // Default config ID = 1
+            session = await multiUserGameController.createUserSession(userId);
           }
 
           // Send session-based game state
-          const gameState = multiUserGameController.getGameState(userId);
+          const gameState = {
+            status: session.gameStatus,
+            participants: session.participants,
+            currentQuestion: session.currentQuestion,
+            currentParticipant: session.currentParticipant,
+            session: {
+              id: session.sessionId,
+              config: session.config
+            },
+            totalParticipants: session.participants.length
+          };
           socket.emit('game-state', gameState);
           console.log(`🎮 Estado da sessão enviado para ${userName}`);
         } else {
