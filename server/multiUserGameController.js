@@ -300,6 +300,11 @@ class MultiUserGameController {
     }
 
     try {
+      // Validate config object
+      if (!config) {
+        throw new Error('Configuração não fornecida para loadQuestionBank');
+      }
+
       // Load default questions from existing system
       const defaultQuestions = this.getDefaultQuestions();
 
@@ -759,6 +764,17 @@ class MultiUserGameController {
     const Database = require('./database');
 
     try {
+      // Check if user already has a default configuration
+      const existingConfig = await Database.get(`
+        SELECT * FROM user_game_configs
+        WHERE user_id = ? AND is_default = 1
+      `, [userId]);
+
+      if (existingConfig) {
+        console.log(`✅ Configuração padrão já existe para usuário ${userId} (ID: ${existingConfig.id})`);
+        return existingConfig;
+      }
+
       // Insert default configuration
       const result = await Database.run(`
         INSERT INTO user_game_configs (
@@ -785,6 +801,12 @@ class MultiUserGameController {
         '#FF6B35',              // theme_color
         1                       // is_default (true)
       ]);
+
+      // Check if insertion was successful
+      if (!result || !result.lastID) {
+        console.error('Erro: Falha ao inserir configuração, resultado:', result);
+        throw new Error('Falha ao criar configuração no banco de dados');
+      }
 
       // Get the created configuration
       const config = await Database.get(`
