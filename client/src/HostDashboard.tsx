@@ -19,6 +19,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   const [currentView, setCurrentView] = useState<DashboardView>('live');
   const [answerState, setAnswerState] = useState<AnswerState>('idle');
   const [lastAnswerResult, setLastAnswerResult] = useState<{correct: boolean, correctAnswer?: string} | null>(null);
+  const [gameStarting, setGameStarting] = useState<string | null>(null); // Track which participant is starting
 
 
   // Sistema de sons integrado
@@ -53,16 +54,61 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
     }
   }, [gameState?.currentQuestion]);
 
+  // Clear loading state when game actually starts or when status changes
+  useEffect(() => {
+    if (gameState?.status === 'active' && gameState?.currentQuestion) {
+      console.log('🎮 Jogo efetivamente iniciado, limpando estado de loading');
+      setGameStarting(null);
+    }
+  }, [gameState?.status, gameState?.currentQuestion]);
+
+  // Listen for game events to provide better feedback
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleGameStarted = (data: any) => {
+      console.log('📨 Recebido game-started:', data);
+      setGameStarting(null); // Clear loading state
+    };
+
+    const handleError = (error: any) => {
+      console.error('📨 Recebido erro:', error);
+      setGameStarting(null); // Clear loading state on error
+    };
+
+    socket.on('game-started', handleGameStarted);
+    socket.on('error', handleError);
+
+    return () => {
+      socket.off('game-started', handleGameStarted);
+      socket.off('error', handleError);
+    };
+  }, [socket]);
+
   const addParticipant = () => {
     if (participantName.trim()) {
+      console.log('🎭 Adicionando participante:', participantName.trim());
       socket.emit('add-participant', { name: participantName.trim() });
       setParticipantName('');
+    } else {
+      console.warn('⚠️ Nome do participante está vazio');
     }
   };
 
   const startGame = (participantId: string) => {
+    console.log('🎮 Iniciando jogo para participante:', participantId);
+    console.log('🎮 Estado atual do jogo:', gameState);
+
+    if (!socket) {
+      console.error('❌ Socket não disponível');
+      return;
+    }
+
+    setGameStarting(participantId); // Set loading state
     socket.emit('start-game', { participantId });
     playSound('gameStart'); // Som de início do jogo
+
+    console.log('📤 Evento start-game enviado para o servidor');
   };
 
   const submitAnswer = () => {
@@ -205,14 +251,24 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
             <input
               type="text"
               value={participantName}
-              onChange={(e) => setParticipantName(e.target.value)}
+              onChange={(e) => {
+                setParticipantName(e.target.value);
+                console.log('📝 Input alterado:', e.target.value);
+              }}
               placeholder="Nome do participante"
               className="input flex-1"
-              onKeyPress={(e) => e.key === 'Enter' && addParticipant()}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addParticipant();
+                }
+              }}
+              autoComplete="off"
             />
             <button
               onClick={addParticipant}
-              className="btn btn-primary px-4 py-2"
+              disabled={!participantName.trim()}
+              className="btn btn-primary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ➕
             </button>
@@ -245,9 +301,18 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
                 {gameState.status === 'waiting' && participant.status === 'waiting' && (
                   <button
                     onClick={() => startGame(participant.id)}
-                    className="btn btn-success text-sm"
+                    disabled={gameStarting === participant.id}
+                    className={`btn text-sm ${
+                      gameStarting === participant.id
+                        ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
+                        : 'btn-success'
+                    }`}
                   >
-                    ▶️ Iniciar
+                    {gameStarting === participant.id ? (
+                      <>⏳ Iniciando...</>
+                    ) : (
+                      <>▶️ Iniciar</>
+                    )}
                   </button>
                 )}
               </div>

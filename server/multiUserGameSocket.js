@@ -247,9 +247,11 @@ module.exports = function(io) {
      */
     socket.on('start-game', async (data) => {
       try {
+        console.log(`🎮 Recebido start-game de ${userName}:`, data);
         const { participantId } = data;
 
         if (!participantId) {
+          console.error('❌ ID do participante não fornecido');
           socket.emit('error', {
             message: 'ID do participante é obrigatório',
             code: 'MISSING_PARTICIPANT_ID'
@@ -257,13 +259,47 @@ module.exports = function(io) {
           return;
         }
 
+        console.log(`🎯 Iniciando jogo para participante ${participantId} do usuário ${userId}`);
         const gameStart = await multiUserGameController.startGame(userId, participantId);
+        console.log(`✅ Jogo iniciado com sucesso:`, gameStart);
 
         socket.emit('game-started', gameStart);
         broadcastToUser(userId, 'game-started', gameStart);
 
-        // Auto-start question timer if configured
+        // Send updated game state
         const session = multiUserGameController.getUserSession(userId);
+        if (!session) {
+          console.error('❌ Sessão não encontrada após iniciar jogo');
+          socket.emit('error', {
+            message: 'Erro interno: sessão perdida',
+            code: 'SESSION_LOST'
+          });
+          return;
+        }
+
+        const gameState = {
+          status: session.gameStatus,
+          participants: session.participants,
+          currentQuestion: session.currentQuestion,
+          currentParticipant: session.currentParticipant,
+          session: {
+            id: session.sessionId,
+            config: session.config
+          },
+          totalParticipants: session.participants.length
+        };
+
+        console.log(`📊 Enviando game-state atualizado:`, {
+          status: gameState.status,
+          hasCurrentQuestion: !!gameState.currentQuestion,
+          hasCurrentParticipant: !!gameState.currentParticipant,
+          totalParticipants: gameState.totalParticipants
+        });
+
+        socket.emit('game-state', gameState);
+        broadcastToUser(userId, 'game-state', gameState);
+
+        // Auto-start question timer if configured
         if (session && session.config.time_limit > 0) {
           startQuestionTimer(userId, session.config.time_limit);
         }

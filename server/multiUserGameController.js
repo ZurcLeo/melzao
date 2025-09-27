@@ -208,20 +208,30 @@ class MultiUserGameController {
    * Start game for a specific participant in user's session
    */
   async startGame(userId, participantId) {
-    const session = this.getUserSession(userId);
+    console.log(`🎯 startGame chamado para userId: ${userId}, participantId: ${participantId}`);
 
+    const session = this.getUserSession(userId);
     if (!session) {
+      console.error(`❌ Sessão não encontrada para userId: ${userId}`);
       throw new Error('Sessão não encontrada');
     }
 
+    console.log(`📋 Sessão encontrada: ${session.sessionId}, status: ${session.gameStatus}`);
+    console.log(`👥 Participantes na sessão: ${session.participants.length}`);
+
     const participant = session.participants.find(p => p.id === participantId);
     if (!participant) {
+      console.error(`❌ Participante ${participantId} não encontrado na sessão ${session.sessionId}`);
+      console.log(`📋 Participantes disponíveis:`, session.participants.map(p => ({ id: p.id, name: p.name })));
       throw new Error('Participante não encontrado');
     }
 
     if (session.gameStatus === 'active') {
+      console.warn(`⚠️ Jogo já ativo na sessão ${session.sessionId}`);
       throw new Error('Já existe um jogo ativo nesta sessão');
     }
+
+    console.log(`🔄 Inicializando estado do jogo para participante: ${participant.name}`);
 
     // Initialize game state
     session.currentParticipant = participant;
@@ -236,27 +246,44 @@ class MultiUserGameController {
 
     // Reset participant state
     participant.status = 'playing';
-    participant.currentLevel = 0;
+    participant.currentLevel = 1; // Começar no nível 1, não 0
     participant.totalEarned = 0;
     participant.answers = [];
 
-    // Get first question
-    const firstQuestion = await this.getNextQuestion(userId, 1);
-    session.currentQuestion = firstQuestion;
+    console.log(`📚 Buscando primeira questão (nível 1) para usuário ${userId}`);
 
-    console.log(`🎮 Jogo iniciado na sessão ${session.sessionId} para: ${participant.name}`);
+    try {
+      // Get first question
+      const firstQuestion = await this.getNextQuestion(userId, 1);
+      session.currentQuestion = firstQuestion;
 
-    return {
-      participant,
-      question: firstQuestion,
-      sessionInfo: {
-        sessionId: session.sessionId,
-        config: {
-          timeLimit: session.config.time_limit,
-          honeyMultiplier: session.config.honey_multiplier
+      console.log(`✅ Primeira questão carregada:`, {
+        questionText: firstQuestion.question?.substring(0, 50) + '...',
+        level: firstQuestion.level,
+        honeyValue: firstQuestion.honeyValue
+      });
+
+      console.log(`🎮 Jogo iniciado na sessão ${session.sessionId} para: ${participant.name}`);
+
+      return {
+        participant,
+        question: firstQuestion,
+        sessionInfo: {
+          sessionId: session.sessionId,
+          config: {
+            timeLimit: session.config.time_limit,
+            honeyMultiplier: session.config.honey_multiplier
+          }
         }
-      }
-    };
+      };
+    } catch (error) {
+      console.error(`❌ Erro ao buscar primeira questão:`, error);
+      // Reverter estado em caso de erro
+      session.gameStatus = 'waiting';
+      session.currentParticipant = null;
+      participant.status = 'waiting';
+      throw new Error(`Erro ao carregar primeira questão: ${error.message}`);
+    }
   }
 
   // ========== QUESTION MANAGEMENT ==========

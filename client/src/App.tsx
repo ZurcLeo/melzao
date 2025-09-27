@@ -61,13 +61,23 @@ function App() {
     });
 
     // Game events
-    socket.on('game-state', setGameState);
+    socket.on('game-state', (data: any) => {
+      console.log('📊 Novo game-state recebido:', {
+        status: data?.status,
+        hasCurrentQuestion: !!data?.currentQuestion,
+        hasCurrentParticipant: !!data?.currentParticipant,
+        totalParticipants: data?.totalParticipants
+      });
+      setGameState(data);
+    });
 
     socket.on('participant-added', (data: any) => {
+      console.log('👥 Participante adicionado:', data);
       toast.success(`👥 ${data.participant.name} entrou no jogo!`);
     });
 
     socket.on('game-started', (data: any) => {
+      console.log('🎮 Jogo iniciado:', data);
       toast.info(`🎮 Jogo iniciado para ${data.participant.name}!`);
     });
 
