@@ -258,31 +258,42 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex gap-2">
-            <Button
-              variant={activeTab === 'profile' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('profile')}
-              icon={<User size={16} />}
-            >
-              Perfil
-            </Button>
-            <Button
-              variant={activeTab === 'password' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('password')}
-              icon={<Lock size={16} />}
-            >
-              Senha
-            </Button>
-            <Button
-              variant={activeTab === 'security' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('security')}
-              icon={<Shield size={16} />}
-            >
-              Segurança
-            </Button>
+          <div className="border-b border-white/20 mb-6 bg-black/20 rounded-t-xl p-1">
+            <div className="flex flex-wrap gap-1">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[110px] justify-center ${
+                  activeTab === 'profile'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <User size={16} />
+                Perfil
+              </button>
+              <button
+                onClick={() => setActiveTab('password')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[110px] justify-center ${
+                  activeTab === 'password'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <Lock size={16} />
+                Senha
+              </button>
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[110px] justify-center ${
+                  activeTab === 'security'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <Shield size={16} />
+                Segurança
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>

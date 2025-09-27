@@ -174,6 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
         onClose={() => setShowProfile(false)}
         title=""
         size="xl"
+        className="max-w-4xl"
       >
         <ModalBody>
           <UserProfile
