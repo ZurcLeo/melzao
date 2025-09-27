@@ -132,54 +132,98 @@ const HistoryDashboard: React.FC = () => {
   };
 
   const renderStats = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {gameStats && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="card text-center">
-              <div className="text-2xl font-bold text-blue-400">{gameStats.totalSessions}</div>
-              <div className="text-sm text-gray-300">Sessões Totais</div>
-            </div>
-            <div className="card text-center">
-              <div className="text-2xl font-bold text-green-400">{gameStats.totalParticipants}</div>
-              <div className="text-sm text-gray-300">Participantes</div>
-            </div>
-            <div className="card text-center">
-              <div className="text-2xl font-bold text-yellow-400">{gameStats.totalWinners}</div>
-              <div className="text-sm text-gray-300">Vencedores</div>
-            </div>
-            <div className="card text-center">
-              <div className="text-2xl font-bold text-purple-400">{gameStats.accuracyRate}%</div>
-              <div className="text-sm text-gray-300">Taxa de Acerto</div>
-            </div>
+            <Card variant="glass" padding="md">
+              <CardContent>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="text-white" size={20} />
+                  </div>
+                  <div className="text-2xl font-bold text-blue-400">{gameStats.totalSessions}</div>
+                  <div className="text-sm text-gray-300">Sessões Totais</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card variant="glass" padding="md">
+              <CardContent>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Users className="text-white" size={20} />
+                  </div>
+                  <div className="text-2xl font-bold text-green-400">{gameStats.totalParticipants}</div>
+                  <div className="text-sm text-gray-300">Participantes</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card variant="glass" padding="md">
+              <CardContent>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <Trophy className="text-white" size={20} />
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-400">{gameStats.totalWinners}</div>
+                  <div className="text-sm text-gray-300">Vencedores</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card variant="glass" padding="md">
+              <CardContent>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <TrendingUp className="text-white" size={20} />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-400">{gameStats.accuracyRate}%</div>
+                  <div className="text-sm text-gray-300">Taxa de Acerto</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="card">
-              <h3 className="text-lg font-bold text-white mb-2">📊 Respostas</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Total de Respostas:</span>
-                  <span className="font-bold">{gameStats.totalAnswers}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+                    <BarChart3 className="text-white" size={18} />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Respostas</h3>
                 </div>
-                <div className="flex justify-between">
-                  <span>Respostas Corretas:</span>
-                  <span className="font-bold text-green-400">{gameStats.correctAnswers}</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                    <span className="text-gray-300">Total de Respostas:</span>
+                    <span className="font-bold text-white">{gameStats.totalAnswers}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                    <span className="text-gray-300">Respostas Corretas:</span>
+                    <span className="font-bold text-green-400">{gameStats.correctAnswers}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/10 rounded-lg">
+                    <span className="text-gray-300">Respostas Erradas:</span>
+                    <span className="font-bold text-red-400">{gameStats.totalAnswers - gameStats.correctAnswers}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Respostas Erradas:</span>
-                  <span className="font-bold text-red-400">{gameStats.totalAnswers - gameStats.correctAnswers}</span>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="card">
-              <h3 className="text-lg font-bold text-white mb-2">🍯 Honey Médio</h3>
-              <div className="text-3xl font-bold text-yellow-400 text-center">
-                {gameStats.averageHoneyEarned}
-              </div>
-              <div className="text-sm text-gray-300 text-center mt-1">Honey por jogador</div>
-            </div>
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white text-lg">🍯</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Honey Médio</h3>
+                </div>
+                <div className="text-center bg-gradient-to-r from-yellow-600/20 to-orange-600/20 p-6 rounded-xl border border-yellow-400/30">
+                  <div className="text-4xl font-bold text-yellow-400 mb-2">
+                    {gameStats.averageHoneyEarned}
+                  </div>
+                  <div className="text-sm text-gray-300">Honey por jogador</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </>
       )}
