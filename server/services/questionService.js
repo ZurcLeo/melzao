@@ -171,7 +171,7 @@ class QuestionService {
   /**
    * Get user's questions with filtering and pagination
    */
-  async getUserQuestions(userId, filters = {}) {
+  async getUserQuestions(userId, filters = {}, userRole = 'host') {
     const {
       page = 1,
       limit = 20,
@@ -185,12 +185,19 @@ class QuestionService {
       SELECT
         id, question_id, category, question_text, options, correct_answer,
         level, honey_value, is_active, usage_count, created_at, updated_at,
-        explanation
+        explanation, created_by
       FROM questions
-      WHERE created_by = ?
     `;
 
-    const params = [userId];
+    const params = [];
+
+    // Admins can see all questions, hosts only see their own
+    if (userRole === 'admin') {
+      query += ` WHERE 1=1`;
+    } else {
+      query += ` WHERE created_by = ?`;
+      params.push(userId);
+    }
 
     // Apply filters
     if (level) {
@@ -220,20 +227,46 @@ class QuestionService {
 
     const questions = await Database.all(query, params);
 
-    // Parse options JSON
-    const parsedQuestions = questions.map(q => ({
-      ...q,
-      options: JSON.parse(q.options),
-      isActive: Boolean(q.is_active)
+    // Parse options JSON and add creator info for admins
+    const parsedQuestions = await Promise.all(questions.map(async (q) => {
+      const baseQuestion = {
+        ...q,
+        options: JSON.parse(q.options),
+        isActive: Boolean(q.is_active)
+      };
+
+      // For admins, add creator information
+      if (userRole === 'admin' && q.created_by) {
+        const Database = require('../database');
+        const creator = await Database.get(`
+          SELECT name, email FROM users WHERE id = ?
+        `, [q.created_by]);
+
+        if (creator) {
+          baseQuestion.createdBy = {
+            name: creator.name,
+            email: creator.email
+          };
+        }
+      }
+
+      return baseQuestion;
     }));
 
     // Get total count for pagination
     let countQuery = `
       SELECT COUNT(*) as total
       FROM questions
-      WHERE created_by = ?
     `;
-    const countParams = [userId];
+    const countParams = [];
+
+    // Admins can see all questions, hosts only see their own
+    if (userRole === 'admin') {
+      countQuery += ` WHERE 1=1`;
+    } else {
+      countQuery += ` WHERE created_by = ?`;
+      countParams.push(userId);
+    }
 
     if (level) {
       countQuery += ` AND level = ?`;

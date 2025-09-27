@@ -17,6 +17,10 @@ interface Question {
   explanation?: string;
   usage_count: number;
   created_at: string;
+  createdBy?: {
+    name: string;
+    email: string;
+  };
 }
 
 interface QuestionManagerProps {
@@ -277,6 +281,11 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                       <span className="text-gray-400 text-sm">
                         Usado {question.usage_count}x
                       </span>
+                      {question.createdBy && (
+                        <span className="bg-gray-600 text-white px-2 py-1 rounded text-sm">
+                          👤 {question.createdBy.name}
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="text-white font-semibold mb-2">{question.question_text}</h3>

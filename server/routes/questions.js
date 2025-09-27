@@ -51,6 +51,7 @@ router.post('/', async (req, res) => {
 router.get('/my', async (req, res) => {
   try {
     const userId = req.user.userId;
+    const userRole = req.user.role;
     const filters = {
       page: req.query.page,
       limit: req.query.limit,
@@ -60,7 +61,7 @@ router.get('/my', async (req, res) => {
       search: req.query.search
     };
 
-    const result = await questionService.getUserQuestions(userId, filters);
+    const result = await questionService.getUserQuestions(userId, filters, userRole);
 
     res.json({
       success: true,
