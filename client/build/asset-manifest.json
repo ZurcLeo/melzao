@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/melzao/static/css/main.ee6fc3f6.css",
-    "main.js": "/melzao/static/js/main.44d157ce.js",
+    "main.css": "/melzao/static/css/main.830d23c1.css",
+    "main.js": "/melzao/static/js/main.5826675d.js",
     "static/js/453.a3c1d153.chunk.js": "/melzao/static/js/453.a3c1d153.chunk.js",
     "index.html": "/melzao/index.html",
-    "main.ee6fc3f6.css.map": "/melzao/static/css/main.ee6fc3f6.css.map",
-    "main.44d157ce.js.map": "/melzao/static/js/main.44d157ce.js.map",
+    "main.830d23c1.css.map": "/melzao/static/css/main.830d23c1.css.map",
+    "main.5826675d.js.map": "/melzao/static/js/main.5826675d.js.map",
     "453.a3c1d153.chunk.js.map": "/melzao/static/js/453.a3c1d153.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ee6fc3f6.css",
-    "static/js/main.44d157ce.js"
+    "static/css/main.830d23c1.css",
+    "static/js/main.5826675d.js"
   ]
 }

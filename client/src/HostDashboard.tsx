@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Play, Users, BarChart3, Settings, Crown, Timer, Trophy } from 'lucide-react';
 import HistoryDashboard from './components/HistoryDashboard';
 import AdminPanel from './components/AdminPanel';
+import { Card, CardContent } from './components/ui/Card';
+import { Button } from './components/ui/Button';
 import { useSounds } from './hooks/useSounds';
 
 interface HostDashboardProps {
@@ -203,40 +206,88 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   }
 
   return (
-    <div className="container">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="card header mb-4 p-4">
-        <h1 className="text-2xl font-bold mb-2">🍯 Show do Melzão</h1>
-        <p className="opacity-90 mb-2">Dashboard do Leo 🍀</p>
-        <div className="text-sm mb-4">
-  Status: <strong className="font-semibold">{gameState.status}</strong> |
-  Participantes: <strong className="font-semibold">{gameState.totalParticipants}</strong>
-</div>
+      <Card variant="glass" padding="lg">
+        <CardContent>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-600 rounded-full flex items-center justify-center">
+                <Trophy className="text-white" size={28} />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Show do Melzão</h1>
+                <p className="text-gray-300">Dashboard Interativo do Quiz LGBT+</p>
+              </div>
+            </div>
 
-{/* Navigation */}
-<div className="flex gap-2 mt-4">
-  <button
-    onClick={() => setCurrentView('live')}
-    className={`btn px-4 py-2 ${currentView === 'live' ? 'btn-primary' : 'bg-gray-600'}`}
-  >
-    🔴 Ao Vivo
-  </button>
-  <button
-    onClick={() => setCurrentView('history')}
-    className={`btn px-4 py-2 ${currentView === 'history' ? 'btn-primary' : 'bg-gray-600'}`}
-  >
-    📊 Dados Históricos
-  </button>
-  {window.currentUser && window.currentUser.role === 'admin' && (
-    <button
-      onClick={() => setCurrentView('admin')}
-      className={`btn px-4 py-2 ${currentView === 'admin' ? 'btn-primary' : 'bg-gray-600'}`}
-    >
-      👑 Admin
-    </button>
-  )}
-</div>
-      </div>
+            {/* Status Info */}
+            <div className="text-right">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    gameState?.status === 'active' ? 'bg-green-400 animate-pulse' :
+                    gameState?.status === 'waiting' ? 'bg-yellow-400' : 'bg-gray-400'
+                  }`}></div>
+                  <span className="text-gray-300">
+                    Status: <span className="text-white font-semibold">
+                      {gameState?.status === 'active' ? 'Ativo' :
+                       gameState?.status === 'waiting' ? 'Aguardando' : 'Inativo'}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users size={16} className="text-blue-400" />
+                  <span className="text-gray-300">
+                    Participantes: <span className="text-white font-semibold">{gameState?.totalParticipants || 0}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="border-b border-white/20 mb-6 bg-black/20 rounded-t-xl p-1">
+            <div className="flex flex-wrap gap-1">
+              <button
+                onClick={() => setCurrentView('live')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[140px] justify-center ${
+                  currentView === 'live'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <Play size={16} />
+                Ao Vivo
+              </button>
+              <button
+                onClick={() => setCurrentView('history')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[140px] justify-center ${
+                  currentView === 'history'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <BarChart3 size={16} />
+                Histórico
+              </button>
+              {window.currentUser && window.currentUser.role === 'admin' && (
+                <button
+                  onClick={() => setCurrentView('admin')}
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[140px] justify-center ${
+                    currentView === 'admin'
+                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                  }`}
+                >
+                  <Crown size={16} />
+                  Admin
+                </button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Conteúdo baseado na visualização atual */}
       {currentView === 'history' ? (
@@ -248,280 +299,397 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
         />
       ) : (
         <>
-      {/* Adicionar Participante - Admin sempre pode, outros apenas quando waiting */}
-      {(gameState.status === 'waiting' || (window.currentUser && window.currentUser.role === 'admin')) && (
-        <div className="card mb-4">
-          <h2 className="text-lg font-bold text-white mb-4">
-            👥 Adicionar Participante
-            {window.currentUser && window.currentUser.role === 'admin' && gameState.status !== 'waiting' && (
-              <span className="text-sm text-yellow-400 ml-2">(Admin Override)</span>
-            )}
-          </h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={participantName}
-              onChange={(e) => {
-                setParticipantName(e.target.value);
-                console.log('📝 Input alterado:', e.target.value);
-              }}
-              placeholder="Nome do participante"
-              className="input flex-1"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addParticipant();
-                }
-              }}
-              autoComplete="off"
-            />
-            <button
-              onClick={addParticipant}
-              disabled={!participantName.trim()}
-              className="btn btn-primary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ➕
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Lista de Participantes */}
-      {gameState.participants && gameState.participants.length > 0 && (
-        <div className="card mb-4">
-          <h2 className="text-lg font-bold text-white mb-4">📋 Participantes</h2>
-          <div className="space-y-2">
-            {gameState.participants.map((participant: any) => (
-              <div
-                key={participant.id}
-                className={`flex justify-between items-center p-3 rounded border-l-4 ${
-                  participant.status === 'playing' ? 'bg-blue-700 border-blue-400' :
-                  participant.status === 'winner' ? 'bg-green-700 border-green-400' :
-                  participant.status === 'eliminated' ? 'bg-red-700 border-red-400' :
-                  participant.status === 'quit' ? 'bg-yellow-700 border-yellow-400' :
-                  'bg-gray-700 border-gray-500'
-                }`}
-              >
-                <div>
-                  <div className="text-white font-semibold">{participant.name}</div>
-                  <div className="text-sm text-gray-300">
-                    Nível {participant.currentLevel} | {participant.totalEarned} 🍯
+          {/* Adicionar Participante */}
+          {(gameState.status === 'waiting' || (window.currentUser && window.currentUser.role === 'admin')) && (
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <Users className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">
+                      Adicionar Participante
+                    </h2>
+                    {window.currentUser && window.currentUser.role === 'admin' && gameState.status !== 'waiting' && (
+                      <p className="text-yellow-400 text-sm">(Admin Override Ativo)</p>
+                    )}
                   </div>
                 </div>
-                {gameState.status === 'waiting' && participant.status === 'waiting' && (
-                  <button
-                    onClick={() => startGame(participant.id)}
-                    disabled={gameStarting === participant.id}
-                    className={`btn text-sm ${
-                      gameStarting === participant.id
-                        ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
-                        : 'btn-success'
-                    }`}
+
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={participantName}
+                    onChange={(e) => {
+                      setParticipantName(e.target.value);
+                      console.log('📝 Input alterado:', e.target.value);
+                    }}
+                    placeholder="Digite o nome do participante..."
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addParticipant();
+                      }
+                    }}
+                    autoComplete="off"
+                  />
+                  <Button
+                    onClick={addParticipant}
+                    disabled={!participantName.trim()}
+                    variant="primary"
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {gameStarting === participant.id ? (
-                      <>⏳ Iniciando...</>
-                    ) : (
-                      <>▶️ Iniciar</>
-                    )}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Pergunta Atual */}
-      {gameState.status === 'active' && gameState.currentQuestion && (
-        <div className="card mb-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className={`text-lg font-bold transition-all duration-300 ${
-              answerState === 'processing'
-                ? 'text-orange-400 animate-pulse'
-                : 'text-white'
-            }`}>
-              🎯 Pergunta {gameState.currentQuestion.level}/10
-              {answerState === 'processing' && ' - Processando...'}
-            </h2>
-            <div className={`px-3 py-1 rounded text-white font-bold transition-all duration-300 ${
-              answerState === 'processing'
-                ? 'bg-orange-600 animate-pulse'
-                : timeLeft > 10 ? 'bg-green-500' :
-                timeLeft > 5 ? 'bg-yellow-700' : 'bg-red-500'
-            }`}>
-              ⏰ {timeLeft}s
-            </div>
-          </div>
-
-          {/* Resultado da Resposta */}
-          {answerState === 'revealing' && lastAnswerResult && (
-            <div className={`text-center mb-4 p-4 rounded-lg border-2 transition-all duration-300 ${
-              lastAnswerResult.correct
-                ? 'bg-green-900 border-green-400 text-green-100 animate-bounce'
-                : 'bg-red-900 border-red-400 text-red-100 animate-bounce'
-            }`}>
-              <div className="text-3xl font-bold mb-2">
-                {lastAnswerResult.correct ? '✅ CORRETO!' : '❌ INCORRETO!'}
-              </div>
-              {!lastAnswerResult.correct && lastAnswerResult.correctAnswer && (
-                <div className="text-xl">
-                  Resposta correta: <strong>{lastAnswerResult.correctAnswer}</strong>
+                    Adicionar
+                  </Button>
                 </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           )}
 
-          <div className="text-white mb-4 text-lg">
-            {gameState.currentQuestion.question}
-          </div>
+          {/* Lista de Participantes */}
+          {gameState.participants && gameState.participants.length > 0 && (
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <Users className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Participantes</h2>
+                    <p className="text-gray-300">{gameState.participants.length} jogador(es) registrado(s)</p>
+                  </div>
+                </div>
 
-          <div className="space-y-2 mb-4">
-            {gameState.currentQuestion.options.map((option: string) => {
-              const isSelected = selectedAnswer === option;
-              const isCorrectAnswer = answerState === 'revealing' &&
-                lastAnswerResult && option === lastAnswerResult.correctAnswer;
-              const isWrongSelected = answerState === 'revealing' &&
-                lastAnswerResult && !lastAnswerResult.correct && isSelected;
+                <div className="grid gap-4">
+                  {gameState.participants.map((participant: any) => (
+                    <div
+                      key={participant.id}
+                      className={`flex justify-between items-center p-4 rounded-xl border-l-4 transition-all duration-200 ${
+                        participant.status === 'playing' ? 'bg-blue-600/20 border-blue-400 shadow-blue-500/20 shadow-lg' :
+                        participant.status === 'winner' ? 'bg-green-600/20 border-green-400 shadow-green-500/20 shadow-lg' :
+                        participant.status === 'eliminated' ? 'bg-red-600/20 border-red-400' :
+                        participant.status === 'quit' ? 'bg-yellow-600/20 border-yellow-400' :
+                        'bg-white/10 border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          participant.status === 'playing' ? 'bg-blue-500' :
+                          participant.status === 'winner' ? 'bg-green-500' :
+                          participant.status === 'eliminated' ? 'bg-red-500' :
+                          participant.status === 'quit' ? 'bg-yellow-500' :
+                          'bg-gray-500'
+                        }`}>
+                          {participant.status === 'playing' ? '🎮' :
+                           participant.status === 'winner' ? '🏆' :
+                           participant.status === 'eliminated' ? '❌' :
+                           participant.status === 'quit' ? '⏸️' : '👤'}
+                        </div>
+                        <div>
+                          <div className="text-white font-semibold text-lg">{participant.name}</div>
+                          <div className="text-sm text-gray-300 flex items-center gap-3">
+                            <span className="flex items-center gap-1">
+                              <Trophy size={14} className="text-orange-400" />
+                              Nível {participant.currentLevel}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              🍯 {participant.totalEarned}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              participant.status === 'playing' ? 'bg-blue-500/30 text-blue-200' :
+                              participant.status === 'winner' ? 'bg-green-500/30 text-green-200' :
+                              participant.status === 'eliminated' ? 'bg-red-500/30 text-red-200' :
+                              participant.status === 'quit' ? 'bg-yellow-500/30 text-yellow-200' :
+                              'bg-gray-500/30 text-gray-200'
+                            }`}>
+                              {participant.status === 'playing' ? 'Jogando' :
+                               participant.status === 'winner' ? 'Vencedor' :
+                               participant.status === 'eliminated' ? 'Eliminado' :
+                               participant.status === 'quit' ? 'Desistiu' : 'Aguardando'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-              return (
-                <button
-                  key={option}
-                  onClick={() => answerState === 'idle' && setSelectedAnswer(option)}
-                  disabled={answerState !== 'idle'}
-                  className={`btn w-full text-left p-3 transition-all duration-300 ${
-                    isCorrectAnswer
-                      ? 'bg-green-600 text-white border-2 border-green-400 animate-pulse shadow-lg shadow-green-400/50 scale-105'
-                      : isWrongSelected
-                      ? 'bg-red-600 text-white border-2 border-red-400 animate-pulse shadow-lg shadow-red-400/50'
-                      : isSelected && answerState === 'processing'
-                      ? 'bg-orange-600 text-white animate-pulse'
-                      : isSelected
-                      ? 'btn-primary'
-                      : answerState !== 'idle'
-                      ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                  style={{display: 'block'}}
-                >
-                  {option}
-                </button>
-              );
-            })}
-          </div>
+                      {gameState.status === 'waiting' && participant.status === 'waiting' && (
+                        <Button
+                          onClick={() => startGame(participant.id)}
+                          disabled={gameStarting === participant.id}
+                          variant={gameStarting === participant.id ? 'secondary' : 'primary'}
+                          className={`${
+                            gameStarting === participant.id
+                              ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700'
+                          }`}
+                          icon={gameStarting === participant.id ? <Timer size={16} /> : <Play size={16} />}
+                        >
+                          {gameStarting === participant.id ? 'Iniciando...' : 'Iniciar Jogo'}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          <div className="flex gap-2 mb-4">
-            {/* Botões para quando o participante está aguardando decisão do host */}
-            {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
-              <>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'continue_to_next_question' } }))}
-                  className="btn btn-success flex-1 py-2 font-bold text-lg"
-                >
-                  ➡️ Próxima Pergunta
-                </button>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'force_quit_participant' } }))}
-                  className="btn btn-warning px-4 py-2 font-bold"
-                >
-                  💰 Parar e Levar
-                </button>
-              </>
-            ) : (
-              /* Botões normais do jogo */
-              <>
-                <button
-                  onClick={submitAnswer}
-                  disabled={!selectedAnswer || answerState !== 'idle'}
-                  className={`btn flex-1 py-2 font-bold transition-all duration-300 ${
+          {/* Pergunta Atual */}
+          {gameState.status === 'active' && gameState.currentQuestion && (
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                      answerState === 'processing'
+                        ? 'bg-orange-500 animate-pulse'
+                        : 'bg-gradient-to-br from-pink-500 to-red-600'
+                    }`}>
+                      🎯
+                    </div>
+                    <div>
+                      <h2 className={`text-xl font-bold transition-all duration-300 ${
+                        answerState === 'processing'
+                          ? 'text-orange-400 animate-pulse'
+                          : 'text-white'
+                      }`}>
+                        Pergunta {gameState.currentQuestion.level}/10
+                      </h2>
+                      {answerState === 'processing' && (
+                        <p className="text-orange-400 text-sm animate-pulse">Processando resposta...</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all duration-300 ${
                     answerState === 'processing'
-                      ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
-                      : answerState === 'revealing'
-                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
-                      : selectedAnswer
-                      ? 'btn-success hover:bg-green-700'
-                      : 'disabled'
-                  }`}
-                >
-                  {answerState === 'processing'
-                    ? '⏳ Processando...'
-                    : answerState === 'revealing'
-                    ? '📊 Resultado'
-                    : '✅ Confirmar Resposta'
-                  }
-                </button>
-                <button
-                  onClick={quitGame}
-                  disabled={answerState !== 'idle'}
-                  className="btn btn-warning px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  🚪 Desistir
-                </button>
-              </>
-            )}
-          </div>
+                      ? 'bg-orange-600 text-white animate-pulse'
+                      : timeLeft > 10 ? 'bg-green-500 text-white' :
+                      timeLeft > 5 ? 'bg-yellow-600 text-white' : 'bg-red-500 text-white animate-pulse'
+                  }`}>
+                    <Timer size={18} />
+                    {timeLeft}s
+                  </div>
+                </div>
 
-          {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
-            <div className="text-center">
-              <div className="bg-green-600 text-white p-3 rounded-lg mb-2 font-bold">
-                ✅ RESPOSTA CORRETA!
-              </div>
-              <div className="text-yellow-400 font-bold">
-                🤝 Aguardando decisão do host: continuar ou parar?
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-yellow-400 font-bold">
-              💰 Prêmio: {gameState.currentQuestion.honeyValue} Honey
-            </div>
+                {/* Resultado da Resposta */}
+                {answerState === 'revealing' && lastAnswerResult && (
+                  <div className={`text-center mb-6 p-6 rounded-xl border-2 transition-all duration-300 ${
+                    lastAnswerResult.correct
+                      ? 'bg-green-600/20 border-green-400 text-green-100 animate-bounce shadow-green-500/20 shadow-lg'
+                      : 'bg-red-600/20 border-red-400 text-red-100 animate-bounce shadow-red-500/20 shadow-lg'
+                  }`}>
+                    <div className="text-4xl font-bold mb-3">
+                      {lastAnswerResult.correct ? '✅ CORRETO!' : '❌ INCORRETO!'}
+                    </div>
+                    {!lastAnswerResult.correct && lastAnswerResult.correctAnswer && (
+                      <div className="text-xl">
+                        Resposta correta: <strong>{lastAnswerResult.correctAnswer}</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="bg-white/10 p-6 rounded-xl mb-6">
+                  <div className="text-white text-xl leading-relaxed">
+                    {gameState.currentQuestion.question}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 mb-6">
+                  {gameState.currentQuestion.options.map((option: string, index: number) => {
+                    const isSelected = selectedAnswer === option;
+                    const isCorrectAnswer = answerState === 'revealing' &&
+                      lastAnswerResult && option === lastAnswerResult.correctAnswer;
+                    const isWrongSelected = answerState === 'revealing' &&
+                      lastAnswerResult && !lastAnswerResult.correct && isSelected;
+
+                    return (
+                      <button
+                        key={option}
+                        onClick={() => answerState === 'idle' && setSelectedAnswer(option)}
+                        disabled={answerState !== 'idle'}
+                        className={`w-full text-left p-4 rounded-xl transition-all duration-300 border-2 font-medium ${
+                          isCorrectAnswer
+                            ? 'bg-green-600/30 border-green-400 text-green-100 shadow-lg shadow-green-400/30 scale-105 animate-pulse'
+                            : isWrongSelected
+                            ? 'bg-red-600/30 border-red-400 text-red-100 shadow-lg shadow-red-400/30 animate-pulse'
+                            : isSelected && answerState === 'processing'
+                            ? 'bg-orange-600/30 border-orange-400 text-orange-100 animate-pulse'
+                            : isSelected
+                            ? 'bg-blue-600/30 border-blue-400 text-blue-100 shadow-lg shadow-blue-400/20'
+                            : answerState !== 'idle'
+                            ? 'bg-gray-800/50 border-gray-600 text-gray-500 cursor-not-allowed'
+                            : 'bg-white/10 border-white/20 text-gray-200 hover:bg-white/20 hover:border-white/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            isCorrectAnswer ? 'bg-green-500' :
+                            isWrongSelected ? 'bg-red-500' :
+                            isSelected ? 'bg-blue-500' : 'bg-gray-600'
+                          }`}>
+                            {String.fromCharCode(65 + index)}
+                          </div>
+                          <span className="flex-1">{option}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3 mb-6">
+                  {/* Botões para quando o participante está aguardando decisão do host */}
+                  {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
+                    <>
+                      <Button
+                        onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'continue_to_next_question' } }))}
+                        variant="primary"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-3"
+                      >
+                        ➡️ Próxima Pergunta
+                      </Button>
+                      <Button
+                        onClick={() => window.dispatchEvent(new CustomEvent('host-action', { detail: { action: 'force_quit_participant' } }))}
+                        variant="secondary"
+                        className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-6 py-3"
+                      >
+                        💰 Parar e Levar
+                      </Button>
+                    </>
+                  ) : (
+                    /* Botões normais do jogo */
+                    <>
+                      <Button
+                        onClick={submitAnswer}
+                        disabled={!selectedAnswer || answerState !== 'idle'}
+                        variant="primary"
+                        className={`flex-1 py-3 font-bold transition-all duration-300 ${
+                          answerState === 'processing'
+                            ? 'bg-orange-600 text-white animate-pulse cursor-not-allowed'
+                            : answerState === 'revealing'
+                            ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                            : selectedAnswer
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        {answerState === 'processing'
+                          ? '⏳ Processando...'
+                          : answerState === 'revealing'
+                          ? '📊 Resultado'
+                          : '✅ Confirmar Resposta'
+                        }
+                      </Button>
+                      <Button
+                        onClick={quitGame}
+                        disabled={answerState !== 'idle'}
+                        variant="secondary"
+                        className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        🚪 Desistir
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {gameState.currentParticipant?.status === 'awaiting_host_decision' ? (
+                  <div className="text-center bg-gradient-to-r from-green-600/20 to-blue-600/20 p-6 rounded-xl border border-green-400/30">
+                    <div className="bg-green-600 text-white p-4 rounded-xl mb-3 font-bold text-lg shadow-lg">
+                      ✅ RESPOSTA CORRETA!
+                    </div>
+                    <div className="text-yellow-400 font-bold text-lg">
+                      🤝 Aguardando decisão do host: continuar ou parar?
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center bg-gradient-to-r from-yellow-600/20 to-orange-600/20 p-4 rounded-xl border border-yellow-400/30">
+                    <div className="text-yellow-400 font-bold text-xl">
+                      💰 Prêmio: {gameState.currentQuestion.honeyValue} Honey
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
-        </div>
-      )}
 
-      {/* Rankings */}
-      {gameState.rankings && gameState.rankings.length > 0 && (
-        <div className="card mb-4 p-4">
-          <h2 className="text-lg font-bold text-white mb-4">🏆 Rankings</h2>
-          <div className="space-y-2">
-            {gameState.rankings.slice(0, 5).map((rank: any) => (
-              <div
-                key={rank.name}
-                className="flex justify-between items-center p-3 bg-gray-700 rounded" // Adicione padding aqui
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">
-                    {rank.rank === 1 ? '🥇' : rank.rank === 2 ? '🥈' : rank.rank === 3 ? '🥉' : '🔸'}
-                  </span>
-                  <span className="text-white">{rank.name}</span>
+          {/* Rankings */}
+          {gameState.rankings && gameState.rankings.length > 0 && (
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <Trophy className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Rankings</h2>
+                    <p className="text-gray-300">Top {gameState.rankings.slice(0, 5).length} melhores jogadores</p>
+                  </div>
                 </div>
-                <div style={{textAlign: 'right'}}>
-                  <div className="text-yellow-400 font-bold">{rank.totalEarned} 🍯</div>
-                  <div className="text-xs text-gray-400">Nível {rank.level}</div>
+
+                <div className="space-y-3">
+                  {gameState.rankings.slice(0, 5).map((rank: any) => (
+                    <div
+                      key={rank.name}
+                      className="flex justify-between items-center p-4 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                          rank.rank === 1 ? 'bg-yellow-500' :
+                          rank.rank === 2 ? 'bg-gray-400' :
+                          rank.rank === 3 ? 'bg-orange-600' :
+                          'bg-blue-500'
+                        }`}>
+                          {rank.rank === 1 ? '🥇' : rank.rank === 2 ? '🥈' : rank.rank === 3 ? '🥉' : '🔸'}
+                        </div>
+                        <div>
+                          <div className="text-white font-semibold">{rank.name}</div>
+                          <div className="text-xs text-gray-400">Posição #{rank.rank}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-yellow-400 font-bold text-lg">{rank.totalEarned} 🍯</div>
+                        <div className="text-xs text-gray-400">Nível {rank.level}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Controles do Host */}
+          <Card variant="glass" padding="lg">
+            <CardContent>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                  <Settings className="text-white" size={20} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Controles do Host</h2>
+                  <p className="text-gray-300">Gerenciar sessão e dados do jogo</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Controles do Host */}
-      <div className="card">
-        <h2 className="text-lg font-bold text-white mb-4">⚙️ Controles</h2>
-        <div className="space-y-3">
-          <button
-            onClick={resetGame}
-            className="btn btn-danger w-full py-2 font-bold"
-          >
-            🔄 Resetar Sessão Atual
-          </button>
-          <button
-            onClick={resetHistory}
-            className="btn btn-danger w-full py-2 font-bold"
-            style={{backgroundColor: '#8B0000', borderColor: '#8B0000'}}
-          >
-            🗑️ Resetar Dados Históricos
-          </button>
-        </div>
-      </div>
+              <div className="space-y-4">
+                <Button
+                  onClick={resetGame}
+                  variant="secondary"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 font-bold"
+                >
+                  🔄 Resetar Sessão Atual
+                </Button>
+                <Button
+                  onClick={resetHistory}
+                  variant="secondary"
+                  className="w-full bg-red-800 hover:bg-red-900 text-white py-3 font-bold border-red-600"
+                >
+                  🗑️ Resetar Dados Históricos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

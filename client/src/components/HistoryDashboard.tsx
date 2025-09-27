@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { BarChart3, Trophy, Users, TrendingUp, HelpCircle, Calendar, ArrowLeft } from 'lucide-react';
 import { apiService, GameStats, TopScore, GameSession, SessionReport, QuestionStats } from '../services/api';
+import { Card, CardContent } from './ui/Card';
+import { Button } from './ui/Button';
 import SimpleCharts from './SimpleCharts';
 
 const HistoryDashboard: React.FC = () => {
@@ -184,85 +187,111 @@ const HistoryDashboard: React.FC = () => {
   );
 
   const renderLeaderboard = () => (
-    <div className="card">
-      <h3 className="text-lg font-bold text-white mb-4">🏆 Top 10 Maiores Pontuações</h3>
-      <div className="space-y-2">
-        {topScores.map((score, index) => (
-          <div
-            key={`${score.name}-${score.session_date}`}
-            className="flex justify-between items-center p-3 bg-gray-700 rounded"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">
-                {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}°`}
-              </span>
-              <div>
-                <div className="font-bold text-white">{score.name}</div>
-                <div className="text-xs text-gray-400">
-                  {formatDate(score.session_date)} • Status: {score.final_status}
+    <Card variant="glass" padding="lg">
+      <CardContent>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+            <Trophy className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">Top 10 Maiores Pontuações</h3>
+            <p className="text-gray-300">Os melhores jogadores de todos os tempos</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {topScores.map((score, index) => (
+            <div
+              key={`${score.name}-${score.session_date}`}
+              className="flex justify-between items-center p-4 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                  index === 0 ? 'bg-yellow-500' :
+                  index === 1 ? 'bg-gray-400' :
+                  index === 2 ? 'bg-orange-600' :
+                  'bg-blue-500'
+                }`}>
+                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}°`}
+                </div>
+                <div>
+                  <div className="font-bold text-white text-lg">{score.name}</div>
+                  <div className="text-xs text-gray-400">
+                    {formatDate(score.session_date)} • Status: {score.final_status}
+                  </div>
                 </div>
               </div>
+              <div className="text-right">
+                <div className="text-xl font-bold text-yellow-400">{score.total_earned} 🍯</div>
+                <div className="text-sm text-gray-300">Nível {score.final_level}</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-xl font-bold text-yellow-400">{score.total_earned} 🍯</div>
-              <div className="text-sm text-gray-300">Nível {score.final_level}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 
   const renderSessions = () => (
     <div className="space-y-6">
       {selectedSession ? (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <button
+          <div className="flex items-center gap-3 mb-6">
+            <Button
               onClick={() => setSelectedSession(null)}
-              className="btn bg-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-500 transition-colors flex items-center gap-2"
+              variant="ghost"
+              icon={<ArrowLeft size={16} />}
+              className="text-white hover:bg-white/10"
             >
-              ← Voltar
-            </button>
-            <h3 className="text-xl font-bold text-white">
+              Voltar
+            </Button>
+            <h3 className="text-2xl font-bold text-white">
               Sessão: {selectedSession.session.session_id}
             </h3>
           </div>
 
-          <div className="card p-6">
-            <h4 className="font-bold text-white mb-4 flex items-center gap-2 text-lg">
-              <span>ℹ️</span> Informações da Sessão
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
-              <div className="flex flex-col">
-                <span className="text-gray-400">Iniciada</span>
-                <span className="text-white font-medium">{formatDate(selectedSession.session.started_at)}</span>
+          <Card variant="glass" padding="lg">
+            <CardContent>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Calendar className="text-white" size={18} />
+                </div>
+                <h4 className="font-bold text-white text-lg">Informações da Sessão</h4>
               </div>
-              <div className="flex flex-col">
-                <span className="text-gray-400">Finalizada</span>
-                <span className="text-white font-medium">
-                  {selectedSession.session.ended_at ? formatDate(selectedSession.session.ended_at) : 'Em andamento'}
-                </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                <div className="flex flex-col">
+                  <span className="text-gray-400">Iniciada</span>
+                  <span className="text-white font-medium">{formatDate(selectedSession.session.started_at)}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-400">Finalizada</span>
+                  <span className="text-white font-medium">
+                    {selectedSession.session.ended_at ? formatDate(selectedSession.session.ended_at) : 'Em andamento'}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-400">Status</span>
+                  <span className={`font-medium px-2 py-1 rounded text-xs w-fit ${
+                    selectedSession.session.status === 'active' ? 'bg-green-600' : 'bg-gray-600'
+                  }`}>
+                    {selectedSession.session.status}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-400">Participantes</span>
+                  <span className="text-white font-medium">{selectedSession.session.total_participants}</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-gray-400">Status</span>
-                <span className={`font-medium px-2 py-1 rounded text-xs w-fit ${
-                  selectedSession.session.status === 'active' ? 'bg-green-600' : 'bg-gray-600'
-                }`}>
-                  {selectedSession.session.status}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-400">Participantes</span>
-                <span className="text-white font-medium">{selectedSession.session.total_participants}</span>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="card p-6">
-            <h4 className="font-bold text-white mb-4 flex items-center gap-2 text-lg">
-              <span>👥</span> Participantes
-            </h4>
+          <Card variant="glass" padding="lg">
+            <CardContent>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <Users className="text-white" size={18} />
+                </div>
+                <h4 className="font-bold text-white text-lg">Participantes</h4>
+              </div>
             <div className="space-y-4">
               {selectedSession.participants.map((participant) => (
                 <div key={participant.participant_id} className="bg-gray-800 rounded-xl p-5 border border-gray-700 shadow-lg">
@@ -317,21 +346,28 @@ const HistoryDashboard: React.FC = () => {
                   )}
                 </div>
               ))}
-            </div>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="card p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <span>📋</span> Sessões Recentes
-                {filteredSessions.length !== sessions.length && (
-                  <span className="text-sm font-normal text-gray-400">
-                    ({filteredSessions.length} de {sessions.length})
-                  </span>
-                )}
-              </h3>
+        <div className="space-y-6">
+          <Card variant="glass" padding="lg">
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <Calendar className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Sessões Recentes</h3>
+                    {filteredSessions.length !== sessions.length && (
+                      <p className="text-gray-300 text-sm">
+                        ({filteredSessions.length} de {sessions.length})
+                      </p>
+                    )}
+                  </div>
+                </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-2 sm:mt-0">
                 <div className="relative">
@@ -353,9 +389,10 @@ const HistoryDashboard: React.FC = () => {
                   <option value="active">Ativas</option>
                   <option value="completed">Finalizadas</option>
                 </select>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {filteredSessions.length > 0 ? (
             <div className="grid gap-4">
@@ -366,84 +403,93 @@ const HistoryDashboard: React.FC = () => {
                 const timeDiff = Math.floor((now.getTime() - sessionDate.getTime()) / (1000 * 60));
 
                 return (
-                  <div
+                  <Card
                     key={session.session_id}
-                    className="card p-5 hover:bg-gray-750 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] border border-gray-700 hover:border-blue-500 shadow-md rounded-xl"
+                    variant="glass"
+                    padding="lg"
+                    className="group cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:border-blue-500"
                     onClick={() => loadSessionDetail(session.session_id)}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="font-bold text-white text-xl">{session.session_id}</div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            isActive
-                              ? 'bg-green-600 text-green-100 animate-pulse'
-                              : 'bg-gray-600 text-gray-100'
-                          }`}>
-                            {isActive ? '🟢 Ativa' : '⚫ Finalizada'}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-3">
-                          <div className="flex flex-col">
-                            <span className="text-gray-400 text-xs">Iniciada</span>
-                            <span className="text-white font-medium">{formatDate(session.started_at)}</span>
-                            <span className="text-gray-400 text-xs">
-                              {timeDiff < 60 ? `${timeDiff} min atrás` : `${Math.floor(timeDiff / 60)}h atrás`}
+                    <CardContent>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="font-bold text-white text-xl">{session.session_id}</div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              isActive
+                                ? 'bg-green-600 text-green-100 animate-pulse'
+                                : 'bg-gray-600 text-gray-100'
+                            }`}>
+                              {isActive ? '🟢 Ativa' : '⚫ Finalizada'}
                             </span>
                           </div>
 
-                          <div className="flex flex-col">
-                            <span className="text-gray-400 text-xs">Participantes</span>
-                            <span className="text-blue-400 font-extrabold text-2xl">
-                              👥 {session.total_participants}
-                            </span>
-                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-3">
+                            <div className="flex flex-col">
+                              <span className="text-gray-400 text-xs">Iniciada</span>
+                              <span className="text-white font-medium">{formatDate(session.started_at)}</span>
+                              <span className="text-gray-400 text-xs">
+                                {timeDiff < 60 ? `${timeDiff} min atrás` : `${Math.floor(timeDiff / 60)}h atrás`}
+                              </span>
+                            </div>
 
-                          <div className="flex flex-col">
-                            <span className="text-gray-400 text-xs">Status</span>
-                            <span className="text-white font-medium capitalize">{session.status}</span>
-                          </div>
+                            <div className="flex flex-col">
+                              <span className="text-gray-400 text-xs">Participantes</span>
+                              <span className="text-blue-400 font-extrabold text-2xl">
+                                👥 {session.total_participants}
+                              </span>
+                            </div>
 
-                          <div className="flex flex-col justify-end text-right md:text-left">
-                            <span className="text-blue-400 hover:text-blue-300 text-sm font-semibold flex items-center justify-end md:justify-start gap-1 cursor-pointer">
-                              Ver detalhes <span>→</span>
-                            </span>
+                            <div className="flex flex-col">
+                              <span className="text-gray-400 text-xs">Status</span>
+                              <span className="text-white font-medium capitalize">{session.status}</span>
+                            </div>
+
+                            <div className="flex flex-col justify-end text-right md:text-left">
+                              <span className="text-blue-400 hover:text-blue-300 text-sm font-semibold flex items-center justify-end md:justify-start gap-1 cursor-pointer">
+                                Ver detalhes <span>→</span>
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
           ) : (
-            <div className="card text-center py-12">
-              <div className="text-4xl mb-4">🔍</div>
-              <div className="text-gray-300 mb-2 font-semibold">
-                {sessions.length === 0
-                  ? 'Nenhuma sessão encontrada.'
-                  : 'Nenhuma sessão corresponde aos filtros aplicados.'
-                }
-              </div>
-              <div className="text-sm text-gray-400">
-                {sessions.length === 0
-                  ? 'As sessões aparecerão aqui conforme forem criadas.'
-                  : 'Tente ajustar os filtros ou limpar a busca.'
-                }
-              </div>
-              {(searchTerm || statusFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setStatusFilter('all');
-                  }}
-                  className="btn btn-primary mt-4 text-sm"
-                >
-                  Limpar filtros
-                </button>
-              )}
-            </div>
+            <Card variant="glass" padding="lg">
+              <CardContent>
+                <div className="text-center py-12">
+                  <div className="text-4xl mb-4">🔍</div>
+                  <div className="text-gray-300 mb-2 font-semibold">
+                    {sessions.length === 0
+                      ? 'Nenhuma sessão encontrada.'
+                      : 'Nenhuma sessão corresponde aos filtros aplicados.'
+                    }
+                  </div>
+                  <div className="text-sm text-gray-400 mb-4">
+                    {sessions.length === 0
+                      ? 'As sessões aparecerão aqui conforme forem criadas.'
+                      : 'Tente ajustar os filtros ou limpar a busca.'
+                    }
+                  </div>
+                  {(searchTerm || statusFilter !== 'all') && (
+                    <Button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setStatusFilter('all');
+                      }}
+                      variant="primary"
+                      className="text-sm"
+                    >
+                      Limpar filtros
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
@@ -451,72 +497,107 @@ const HistoryDashboard: React.FC = () => {
   );
 
   const renderQuestions = () => (
-    <div className="card">
-      <h3 className="text-lg font-bold text-white mb-4">❓ Estatísticas de Perguntas</h3>
-      <div className="space-y-2 max-h-96 overflow-y-auto">
-        {questionStats.map((stat) => (
-          <div key={stat.question_id} className="bg-gray-700 rounded p-3">
-            <div className="text-white font-medium mb-1">
-              Nível {stat.level}: {stat.question_text.substring(0, 80)}...
-            </div>
-            <div className="grid grid-cols-3 gap-4 text-sm text-gray-300">
-              <div>Perguntada: {stat.times_asked}x</div>
-              <div>Acertos: {stat.correct_count}</div>
-              <div className={`font-bold ${
-                stat.accuracy_rate > 70 ? 'text-green-400' :
-                stat.accuracy_rate > 40 ? 'text-yellow-400' : 'text-red-400'
-              }`}>
-                {stat.accuracy_rate.toFixed(1)}% acerto
+    <Card variant="glass" padding="lg">
+      <CardContent>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+            <HelpCircle className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">Estatísticas de Perguntas</h3>
+            <p className="text-gray-300">Performance por pergunta do banco</p>
+          </div>
+        </div>
+        <div className="space-y-3 max-h-96 overflow-y-auto">
+          {questionStats.map((stat) => (
+            <div key={stat.question_id} className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <div className="text-white font-medium mb-3">
+                Nível {stat.level}: {stat.question_text.substring(0, 80)}...
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="flex flex-col items-center p-2 bg-blue-600/20 rounded-lg">
+                  <span className="text-blue-400 font-bold">{stat.times_asked}x</span>
+                  <span className="text-gray-300 text-xs">Perguntada</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-green-600/20 rounded-lg">
+                  <span className="text-green-400 font-bold">{stat.correct_count}</span>
+                  <span className="text-gray-300 text-xs">Acertos</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-purple-600/20 rounded-lg">
+                  <span className={`font-bold ${
+                    stat.accuracy_rate > 70 ? 'text-green-400' :
+                    stat.accuracy_rate > 40 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {stat.accuracy_rate.toFixed(1)}%
+                  </span>
+                  <span className="text-gray-300 text-xs">Taxa de acerto</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 
   return (
-<div className="space-y-4">
+<div className="space-y-6">
   {/* Navegação */}
-  <div className="card p-4">
-    <div className="flex flex-col gap-2">
-      {[
-        { key: 'stats', label: '📊 Estatísticas', icon: '📊' },
-        { key: 'leaderboard', label: '🏆 Ranking', icon: '🏆' },
-        { key: 'sessions', label: '📋 Sessões', icon: '📋' },
-        { key: 'questions', label: '❓ Perguntas', icon: '❓' },
-        { key: 'charts', label: '📈 Gráficos', icon: '📈' }
-      ].map(tab => (
-        <button
-          key={tab.key}
-          onClick={() => setActiveTab(tab.key as any)}
-          // Adicione 'w-full' aqui e ajuste o padding
-          className={`btn w-full py-2 text-left ${
-            activeTab === tab.key ? 'btn-primary' : 'bg-gray-600'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  </div>
-  {/* Conteúdo (sem alteração) */}
+  <Card variant="glass" padding="lg">
+    <CardContent>
+      <div className="border-b border-white/20 mb-6 bg-black/20 rounded-t-xl p-1">
+        <div className="flex flex-wrap gap-1">
+          {[
+            { key: 'stats', label: 'Estatísticas', icon: BarChart3 },
+            { key: 'leaderboard', label: 'Ranking', icon: Trophy },
+            { key: 'sessions', label: 'Sessões', icon: Calendar },
+            { key: 'questions', label: 'Perguntas', icon: HelpCircle },
+            { key: 'charts', label: 'Gráficos', icon: TrendingUp }
+          ].map(tab => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-200 min-w-[140px] justify-center ${
+                  activeTab === tab.key
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-102'
+                }`}
+              >
+                <IconComponent size={16} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+  {/* Conteúdo */}
   {loading && (
-    <div className="text-center text-white py-8">
-      <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-      Carregando dados históricos...
-    </div>
+    <Card variant="glass" padding="lg">
+      <CardContent>
+        <div className="text-center text-white py-8">
+          <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+          Carregando dados históricos...
+        </div>
+      </CardContent>
+    </Card>
   )}
   {error && (
-    <div className="card bg-red-900 border-red-500">
-      <div className="text-red-200">❌ {error}</div>
-      <button
-        onClick={() => window.location.reload()}
-        className="btn btn-danger mt-2 text-sm"
-      >
-        Tentar novamente
-      </button>
-    </div>
+    <Card variant="glass" padding="lg" className="border-red-500">
+      <CardContent>
+        <div className="text-red-200 mb-4">❌ {error}</div>
+        <Button
+          onClick={() => window.location.reload()}
+          variant="secondary"
+          className="bg-red-600 hover:bg-red-700 text-white text-sm"
+        >
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
   )}
   {!loading && !error && (
     <>
