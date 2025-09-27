@@ -105,7 +105,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
       category: question.category,
       questionText: question.question_text,
       options: question.options,
-      correctAnswer: question.correct_answer,
+      correctAnswer: question.correct_answer, // Já deve ser A, B, C ou D
       level: question.level,
       honeyValue: question.honey_value,
       explanation: question.explanation || ''
@@ -282,18 +282,22 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                     <h3 className="text-white font-semibold mb-2">{question.question_text}</h3>
 
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      {question.options.map((option, index) => (
-                        <div
-                          key={index}
-                          className={`p-2 rounded text-sm ${
-                            option === question.correct_answer
-                              ? 'bg-green-700 text-white'
-                              : 'bg-gray-700 text-gray-300'
-                          }`}
-                        >
-                          {option}
-                        </div>
-                      ))}
+                      {question.options.map((option, index) => {
+                        const optionLetter = String.fromCharCode(65 + index);
+                        const isCorrect = optionLetter === question.correct_answer;
+                        return (
+                          <div
+                            key={index}
+                            className={`p-2 rounded text-sm ${
+                              isCorrect
+                                ? 'bg-green-700 text-white'
+                                : 'bg-gray-700 text-gray-300'
+                            }`}
+                          >
+                            {optionLetter}) {option}
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {question.explanation && (
@@ -415,7 +419,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                   <option value="">Selecione...</option>
                   {formData.options.map((option, index) => (
                     option && (
-                      <option key={index} value={option}>
+                      <option key={index} value={String.fromCharCode(65 + index)}>
                         {String.fromCharCode(65 + index)} - {option}
                       </option>
                     )
