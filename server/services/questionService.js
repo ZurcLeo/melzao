@@ -169,6 +169,156 @@ class QuestionService {
   }
 
   /**
+   * Get ALL questions available in the system (default + custom) for admins
+   */
+  async getAllSystemQuestions(filters = {}) {
+    const { page = 1, limit = 50, level, category, isActive, search } = filters;
+    const offset = (page - 1) * limit;
+
+    try {
+      // Get default questions from QuestionBank
+      const { QuestionBank } = require('../questionBank');
+      const defaultQuestions = QuestionBank.getAllQuestions() || [];
+
+      // Get custom questions from database
+      let query = `
+        SELECT
+          id, question_id, category, question_text, options, correct_answer,
+          level, honey_value, is_active, usage_count, created_at, updated_at,
+          explanation, created_by
+        FROM questions
+        WHERE 1=1
+      `;
+      const params = [];
+
+      // Apply filters to custom questions
+      if (level) {
+        query += ` AND level = ?`;
+        params.push(parseInt(level));
+      }
+
+      if (category) {
+        query += ` AND category = ?`;
+        params.push(category);
+      }
+
+      if (isActive !== null && isActive !== undefined) {
+        query += ` AND is_active = ?`;
+        params.push(isActive ? 1 : 0);
+      }
+
+      if (search) {
+        query += ` AND (question_text LIKE ? OR category LIKE ?)`;
+        params.push(`%${search}%`, `%${search}%`);
+      }
+
+      query += ` ORDER BY created_at DESC`;
+
+      const customQuestionsData = await Database.all(query, params);
+
+      // Convert custom questions to standard format
+      const customQuestions = await Promise.all(customQuestionsData.map(async (q) => {
+        const options = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
+
+        // Get creator info
+        const creator = await Database.get('SELECT name, email FROM users WHERE id = ?', [q.created_by]);
+
+        return {
+          id: q.id,
+          question_id: q.question_id,
+          category: q.category,
+          question_text: q.question_text,
+          options: options,
+          correct_answer: q.correct_answer,
+          level: q.level,
+          honey_value: q.honey_value,
+          is_active: q.is_active,
+          usage_count: q.usage_count,
+          created_at: q.created_at,
+          updated_at: q.updated_at,
+          explanation: q.explanation,
+          created_by: q.created_by,
+          source: 'custom',
+          isActive: q.is_active === 1,
+          createdBy: creator ? {
+            name: creator.name,
+            email: creator.email
+          } : null
+        };
+      }));
+
+      // Convert default questions to standard format
+      const formattedDefaultQuestions = defaultQuestions.map((q, index) => ({
+        id: `default_${index + 1}`,
+        question_id: `default_${q.level}_${index + 1}`,
+        category: q.category || 'Padrão',
+        question_text: q.question,
+        options: q.options,
+        correct_answer: q.correct,
+        level: q.level,
+        honey_value: q.honey || 10,
+        is_active: 1,
+        usage_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        explanation: q.explanation || '',
+        created_by: null,
+        source: 'default',
+        isActive: true,
+        createdBy: {
+          name: 'Sistema',
+          email: 'sistema@melzao.com'
+        }
+      }));
+
+      // Combine and filter all questions
+      let allQuestions = [...formattedDefaultQuestions, ...customQuestions];
+
+      // Apply filters to combined list
+      if (level) {
+        allQuestions = allQuestions.filter(q => q.level === parseInt(level));
+      }
+
+      if (category) {
+        allQuestions = allQuestions.filter(q =>
+          q.category.toLowerCase().includes(category.toLowerCase())
+        );
+      }
+
+      if (search) {
+        allQuestions = allQuestions.filter(q =>
+          q.question_text.toLowerCase().includes(search.toLowerCase()) ||
+          q.category.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      // Sort by level and category
+      allQuestions.sort((a, b) => {
+        if (a.level !== b.level) return a.level - b.level;
+        return a.category.localeCompare(b.category);
+      });
+
+      // Apply pagination
+      const total = allQuestions.length;
+      const paginatedQuestions = allQuestions.slice(offset, offset + limit);
+
+      return {
+        questions: paginatedQuestions,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+
+    } catch (error) {
+      console.error('Erro ao buscar todas as questões do sistema:', error);
+      throw new Error('Erro ao buscar questões do sistema');
+    }
+  }
+
+  /**
    * Get user's questions with filtering and pagination
    */
   async getUserQuestions(userId, filters = {}, userRole = 'host') {

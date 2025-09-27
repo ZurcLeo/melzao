@@ -61,7 +61,10 @@ router.get('/my', async (req, res) => {
       search: req.query.search
     };
 
-    const result = await questionService.getUserQuestions(userId, filters, userRole);
+    // Para administradores, mostrar todas as questões do sistema (padrão + customizadas)
+    const result = userRole === 'admin'
+      ? await questionService.getAllSystemQuestions(filters)
+      : await questionService.getUserQuestions(userId, filters, userRole);
 
     res.json({
       success: true,
