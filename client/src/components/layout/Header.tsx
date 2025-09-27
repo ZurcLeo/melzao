@@ -57,8 +57,9 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16">
           {/* Logo/Title */}
           <motion.div
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-3 cursor-pointer"
             whileHover={{ scale: 1.05 }}
+            onClick={() => navigate('/')}
           >
             <div className="w-10 h-10 rounded-xl bg-lgbt-gradient flex items-center justify-center">
               <span className="text-white font-bold text-xl">🌈</span>

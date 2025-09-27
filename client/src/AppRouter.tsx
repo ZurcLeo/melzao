@@ -29,8 +29,11 @@ const AppRouter: React.FC<AppRouterProps> = ({
   onLogin,
   onLogout
 }) => {
+  // Use basename only in production (GitHub Pages)
+  const basename = process.env.NODE_ENV === 'production' ? '/melzao' : '';
+
   return (
-    <Router>
+    <Router basename={basename}>
       <motion.div
         className="min-h-screen"
         initial={{ opacity: 0 }}
@@ -71,6 +74,20 @@ const AppRouter: React.FC<AppRouterProps> = ({
                 currentUser={currentUser}
                 authToken={authToken || ''}
               />
+            }
+          />
+
+          {/* Fallback route - redirect to home */}
+          <Route
+            path="*"
+            element={
+              <Container size="full" padding="none" className="pt-20">
+                <HostDashboard
+                  socket={offlineMode ? null : socket}
+                  gameState={offlineMode ? null : gameState}
+                  offlineMode={offlineMode}
+                />
+              </Container>
             }
           />
         </Routes>
