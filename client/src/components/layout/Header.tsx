@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Wifi, WifiOff, Music, Users, Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
-import { Modal, ModalBody } from '../ui/Modal';
-import UserProfile from '../UserProfile';
 import { cn } from '../../utils/cn';
 
 interface HeaderProps {
@@ -26,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   className,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
   const getConnectionStatus = () => {
     if (offlineMode) return { text: 'Offline', icon: Music, color: 'text-purple-400' };
     if (isConnected) {
@@ -112,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="p-2">
                           <button
                             onClick={() => {
-                              setShowProfile(true);
+                              navigate('/profile');
                               setShowUserMenu(false);
                             }}
                             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -168,22 +167,6 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* User Profile Modal */}
-      <Modal
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-        title=""
-        size="xl"
-        className="max-w-4xl"
-      >
-        <ModalBody>
-          <UserProfile
-            currentUser={currentUser}
-            authToken={(window as any).authToken || localStorage.getItem('authToken') || ''}
-            onClose={() => setShowProfile(false)}
-          />
-        </ModalBody>
-      </Modal>
 
       {/* Click outside to close menu */}
       {showUserMenu && (

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import io from 'socket.io-client';
-import HostDashboard from './HostDashboard';
 import AuthModal from './components/AuthModal';
-import { Header, Container } from './components/layout';
-import { ToastContainer, toast } from 'react-toastify';
+import AppRouter from './AppRouter';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com', {
@@ -141,30 +139,18 @@ function App() {
   };
 
   return (
-    <motion.div
-      className="min-h-screen"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Header moderno */}
-      <Header
+    <>
+      <AppRouter
         currentUser={currentUser}
+        authToken={authToken}
         isConnected={isConnected}
         offlineMode={offlineMode}
+        socket={socket}
+        gameState={gameState}
         onToggleOffline={() => setOfflineMode(!offlineMode)}
         onLogin={() => setShowAuthModal(true)}
         onLogout={handleLogout}
       />
-
-      {/* Conteúdo principal com espaçamento para o header */}
-      <Container size="full" padding="none" className="pt-20">
-        <HostDashboard
-          socket={offlineMode ? null : socket}
-          gameState={offlineMode ? null : gameState}
-          offlineMode={offlineMode}
-        />
-      </Container>
 
       {/* Authentication Modal */}
       <AuthModal
@@ -172,24 +158,7 @@ function App() {
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
       />
-
-      {/* Notificações modernas */}
-      {!offlineMode && (
-        <ToastContainer
-          position="top-center"
-          autoClose={4000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable
-          pauseOnHover
-          theme="dark"
-          toastClassName="glass-card border-0"
-        />
-      )}
-    </motion.div>
+    </>
   );
 }
 

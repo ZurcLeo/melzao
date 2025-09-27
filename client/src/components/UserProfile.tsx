@@ -30,9 +30,10 @@ interface UserProfileProps {
   currentUser: any;
   authToken: string;
   onClose: () => void;
+  isFullPage?: boolean;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClose }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClose, isFullPage = false }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'security'>('profile');
@@ -234,28 +235,30 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${isFullPage ? 'w-full' : ''}`}>
       {/* Header */}
-      <Card variant="glass" padding="lg">
+      <Card variant="glass" padding="lg" className={isFullPage ? 'w-full' : ''}>
         <CardContent>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <User className="text-white" size={24} />
+          {!isFullPage && (
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <User className="text-white" size={24} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>
+                  <p className="text-gray-300">Gerencie suas informações pessoais</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>
-                <p className="text-gray-300">Gerencie suas informações pessoais</p>
-              </div>
+              <Button
+                variant="ghost"
+                onClick={onClose}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕ Fechar
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕ Fechar
-            </Button>
-          </div>
+          )}
 
           {/* Navigation Tabs */}
           <div className="border-b border-white/20 mb-6 bg-black/20 rounded-t-xl p-1">
