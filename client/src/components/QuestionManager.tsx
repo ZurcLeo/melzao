@@ -47,7 +47,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
     explanation: ''
   });
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
+  const API_BASE = process.env.REACT_APP_SERVER_URL || 'http://localhost:5001';
 
   const makeRequest = async (url: string, options: RequestInit = {}) => {
     try {

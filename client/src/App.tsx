@@ -5,7 +5,7 @@ import AppRouter from './AppRouter';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com', {
+const socket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:5001', {
   transports: ['polling', 'websocket'],
   upgrade: true,
   rememberUpgrade: false

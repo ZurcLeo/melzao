@@ -38,6 +38,7 @@ export const Modal: React.FC<ModalProps> = ({
   const modalRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useRef(generateId('modal-title'));
   const descriptionId = React.useRef(generateId('modal-description'));
+  const hasInitiallyFocused = React.useRef(false);
 
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -61,15 +62,33 @@ export const Modal: React.FC<ModalProps> = ({
       setTimeout(() => {
         if (modalRef.current) {
           removeFocusTrap = trapFocus(modalRef.current);
-          // Focar no primeiro elemento focalizável
-          const firstFocusable = modalRef.current.querySelector(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          ) as HTMLElement;
-          if (firstFocusable) {
-            firstFocusable.focus();
+
+          // Apenas focar inicialmente, não em re-renders subsequentes
+          if (!hasInitiallyFocused.current) {
+            hasInitiallyFocused.current = true;
+            // Focar no primeiro input/textarea ao invés do botão de fechar
+            const firstInput = modalRef.current.querySelector(
+              'input, select, textarea'
+            ) as HTMLElement;
+            if (firstInput) {
+              firstInput.focus();
+            } else {
+              // Fallback: focar no primeiro elemento focalizável que não seja o botão de fechar
+              const focusableElements = modalRef.current.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+              );
+              // Pular o primeiro elemento se for o botão de fechar
+              const firstFocusable = focusableElements[1] || focusableElements[0];
+              if (firstFocusable) {
+                (firstFocusable as HTMLElement).focus();
+              }
+            }
           }
         }
       }, 100);
+    } else {
+      // Reset flag quando modal fechar
+      hasInitiallyFocused.current = false;
     }
 
     return () => {

@@ -31,7 +31,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const [stats, setStats] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats' | 'questions'>('pending');
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
+  const API_BASE = process.env.REACT_APP_SERVER_URL || 'http://localhost:5001';
 
   const makeRequest = async (url: string, options: RequestInit = {}) => {
     try {
