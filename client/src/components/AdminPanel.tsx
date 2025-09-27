@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, UserX, RotateCcw, BarChart3, Activity } from 'lucide-react';
+import { Users, CheckCircle, UserX, RotateCcw, BarChart3, Activity, FileText } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card, CardContent } from './ui/Card';
 import { Modal, ModalBody } from './ui/Modal';
 import { toast } from 'react-toastify';
+import QuestionManager from './QuestionManager';
 
 interface User {
   id: number;
@@ -28,7 +29,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [stats, setStats] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats' | 'questions'>('pending');
 
   const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
 
@@ -209,6 +210,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
               icon={<BarChart3 size={16} />}
             >
               Estatísticas
+            </Button>
+            <Button
+              variant={activeTab === 'questions' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('questions')}
+              icon={<FileText size={16} />}
+            >
+              Questões
             </Button>
           </div>
         </CardContent>
@@ -460,6 +469,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
             </>
           )}
         </div>
+      )}
+
+      {/* Questions Tab */}
+      {activeTab === 'questions' && (
+        <QuestionManager authToken={authToken} />
       )}
 
       {/* User Details Modal */}

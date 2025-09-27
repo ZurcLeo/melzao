@@ -28,7 +28,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   // Timer para resposta com som de alerta
   useEffect(() => {
     if (gameState?.status === 'active' && gameState.currentQuestion) {
-      setTimeLeft(30);
+      // Reiniciar temporizador sempre que há uma nova pergunta
+      setTimeLeft(gameState.currentQuestion.timeLimit || 30);
       const timer = setInterval(() => {
         setTimeLeft(prev => {
           if (prev === 6) {
@@ -44,7 +45,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
 
       return () => clearInterval(timer);
     }
-  }, [gameState?.currentQuestion, gameState?.status, playSound]);
+  }, [gameState?.currentQuestion?.id, gameState?.currentQuestion, gameState?.status, playSound]); // Mudança: usar currentQuestion.id para garantir reset
 
   // Reset answerState quando nova pergunta começar
   useEffect(() => {
@@ -76,12 +77,21 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
       setGameStarting(null); // Clear loading state on error
     };
 
+    const handleTimerStarted = (data: any) => {
+      console.log('📨 Timer iniciado pelo servidor:', data);
+      if (data.timeLimit) {
+        setTimeLeft(data.timeLimit);
+      }
+    };
+
     socket.on('game-started', handleGameStarted);
     socket.on('error', handleError);
+    socket.on('timer-started', handleTimerStarted);
 
     return () => {
       socket.off('game-started', handleGameStarted);
       socket.off('error', handleError);
+      socket.off('timer-started', handleTimerStarted);
     };
   }, [socket]);
 
