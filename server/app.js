@@ -15,7 +15,7 @@ const io = socketIo(server, {
       "https://zurcleo.github.io/melzao/",
       "http://localhost:3001"
     ],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   },
   transports: ['polling', 'websocket'],

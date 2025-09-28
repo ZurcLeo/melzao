@@ -278,6 +278,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                       <span className="bg-yellow-600 text-white px-2 py-1 rounded text-sm">
                         {question.honey_value} 🍯
                       </span>
+                      <span className={`px-2 py-1 rounded text-sm ${
+                        question.question_id.startsWith('default_')
+                          ? 'bg-green-600 text-white'
+                          : 'bg-orange-600 text-white'
+                      }`}>
+                        {question.question_id.startsWith('default_') ? '🔒 Padrão' : '✏️ Personalizada'}
+                      </span>
                       <span className="text-gray-400 text-sm">
                         Usado {question.usage_count}x
                       </span>
@@ -317,18 +324,31 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => openEditModal(question)}
-                      className="bg-blue-600 hover:bg-blue-700 px-3 py-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => deleteQuestion(question.id)}
-                      className="bg-red-600 hover:bg-red-700 px-3 py-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {question.question_id.startsWith('default_') ? (
+                      <div className="flex gap-2">
+                        <div className="bg-gray-600 px-3 py-2 rounded opacity-50 cursor-not-allowed" title="Questões padrão não podem ser editadas">
+                          <Edit className="w-4 h-4" />
+                        </div>
+                        <div className="bg-gray-600 px-3 py-2 rounded opacity-50 cursor-not-allowed" title="Questões padrão não podem ser removidas">
+                          <Trash2 className="w-4 h-4" />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={() => openEditModal(question)}
+                          className="bg-blue-600 hover:bg-blue-700 px-3 py-2"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => deleteQuestion(question.id)}
+                          className="bg-red-600 hover:bg-red-700 px-3 py-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>
