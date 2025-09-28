@@ -14,9 +14,9 @@ class QuestionService {
       const existingDefaults = await Database.get(`
         SELECT COUNT(*) as count FROM questions
         WHERE question_id LIKE 'default_%'
-      `);
+      `).catch(() => ({ count: 0 })); // Handle case where table doesn't exist yet
 
-      if (existingDefaults.count > 0) {
+      if (existingDefaults && existingDefaults.count > 0) {
         console.log('✅ Questões padrão já existem no banco de dados');
         return;
       }
@@ -262,6 +262,9 @@ class QuestionService {
     const offset = (page - 1) * limit;
 
     try {
+      // Ensure default questions are loaded first
+      await this.ensureDefaultQuestions();
+
       // Get all questions from database (now includes default questions)
       let query = `
         SELECT
@@ -295,15 +298,21 @@ class QuestionService {
       }
 
       // Count total before pagination
-      const countQuery = query.replace('SELECT id, question_id, category, question_text, options, correct_answer, level, honey_value, is_active, usage_count, created_at, updated_at, explanation, created_by', 'SELECT COUNT(*) as total');
-      const totalResult = await Database.get(countQuery, params);
-      const total = totalResult.total;
+      const countQuery = query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) as total FROM');
+      const totalResult = await Database.get(countQuery, params).catch((error) => {
+        console.error('Erro ao contar questões:', error);
+        return { total: 0 };
+      });
+      const total = totalResult ? totalResult.total : 0;
 
       // Add pagination and ordering
       query += ` ORDER BY level ASC, created_at DESC LIMIT ? OFFSET ?`;
       params.push(parseInt(limit), offset);
 
-      const questionsData = await Database.all(query, params);
+      const questionsData = await Database.all(query, params).catch((error) => {
+        console.error('Erro ao buscar questões:', error);
+        return [];
+      });
 
       // Convert to standard format
       const allQuestions = await Promise.all(questionsData.map(async (q) => {
@@ -312,7 +321,7 @@ class QuestionService {
         // Get creator info if it exists
         let creator = null;
         if (q.created_by) {
-          creator = await Database.get('SELECT name, email FROM users WHERE id = ?', [q.created_by]);
+          creator = await Database.get('SELECT name, email FROM users WHERE id = ?', [q.created_by]).catch(() => null);
         }
 
         return {
@@ -330,12 +339,12 @@ class QuestionService {
           updated_at: q.updated_at,
           explanation: q.explanation,
           created_by: q.created_by,
-          source: q.question_id.startsWith('default_') ? 'default' : 'custom',
+          source: q.question_id && q.question_id.startsWith('default_') ? 'default' : 'custom',
           isActive: q.is_active === 1,
           createdBy: creator ? {
             name: creator.name,
             email: creator.email
-          } : (q.question_id.startsWith('default_') ? {
+          } : (q.question_id && q.question_id.startsWith('default_') ? {
             name: 'Sistema',
             email: 'sistema@melzao.com'
           } : null)
@@ -354,7 +363,17 @@ class QuestionService {
 
     } catch (error) {
       console.error('Erro ao buscar todas as questões do sistema:', error);
-      throw new Error('Erro ao buscar questões do sistema');
+
+      // Fallback: return empty result instead of throwing
+      return {
+        questions: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          totalPages: 0
+        }
+      };
     }
   }
 
