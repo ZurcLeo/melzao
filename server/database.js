@@ -26,6 +26,11 @@ class Database {
             await migrationRunner.initialize();
             await migrationRunner.runMigrations();
 
+            // Inserir questões padrão se necessário
+            const QuestionService = require('./services/questionService');
+            const questionService = new QuestionService();
+            await questionService.ensureDefaultQuestions();
+
             resolve();
           } catch (error) {
             reject(error);

@@ -30,7 +30,8 @@ app.use(cors({
     "https://zurcleo.github.io/melzao/",
     "http://localhost:3001"
   ],
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 app.use(express.json());

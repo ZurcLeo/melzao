@@ -5,6 +5,85 @@ const Database = require('../database');
  * Manages custom questions created by hosts
  */
 class QuestionService {
+  /**
+   * Insert default questions into database if they don't exist
+   */
+  async ensureDefaultQuestions() {
+    try {
+      // Check if we already have default questions
+      const existingDefaults = await Database.get(`
+        SELECT COUNT(*) as count FROM questions
+        WHERE question_id LIKE 'default_%'
+      `);
+
+      if (existingDefaults.count > 0) {
+        console.log('✅ Questões padrão já existem no banco de dados');
+        return;
+      }
+
+      console.log('📝 Inserindo questões padrão no banco de dados...');
+
+      const { QuestionBank } = require('../questionBank');
+      const defaultQuestions = QuestionBank.getAllQuestions() || [];
+
+      for (const question of defaultQuestions) {
+        const questionData = {
+          category: question.category || 'Padrão',
+          questionText: question.question,
+          options: question.options,
+          correctAnswer: this.convertToLetterAnswer(question.correctAnswer, question.options),
+          level: question.level,
+          honeyValue: question.honeyValue || this.getDefaultHoneyValue(question.level),
+          explanation: question.explanation || ''
+        };
+
+        // Insert without user ID (system questions)
+        await Database.run(`
+          INSERT INTO questions (
+            question_id, category, question_text, options, correct_answer,
+            level, honey_value, explanation, is_active, usage_count,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `, [
+          question.id,
+          questionData.category.trim(),
+          questionData.questionText.trim(),
+          JSON.stringify(questionData.options),
+          questionData.correctAnswer.toUpperCase(),
+          parseInt(questionData.level),
+          parseInt(questionData.honeyValue),
+          questionData.explanation ? questionData.explanation.trim() : null
+        ]);
+      }
+
+      console.log(`✅ ${defaultQuestions.length} questões padrão inseridas no banco`);
+    } catch (error) {
+      console.error('❌ Erro ao inserir questões padrão:', error);
+    }
+  }
+
+  /**
+   * Convert answer text to letter (A, B, C, D)
+   */
+  convertToLetterAnswer(correctAnswer, options) {
+    if (typeof correctAnswer === 'string' && correctAnswer.match(/^[ABCD]$/)) {
+      return correctAnswer;
+    }
+
+    const index = options.findIndex(option => option === correctAnswer);
+    return index >= 0 ? String.fromCharCode(65 + index) : 'A';
+  }
+
+  /**
+   * Get default honey value based on level
+   */
+  getDefaultHoneyValue(level) {
+    const values = {
+      1: 5, 2: 10, 3: 20, 4: 40, 5: 80,
+      6: 160, 7: 320, 8: 640, 9: 1280, 10: 2560
+    };
+    return values[level] || 10;
+  }
   constructor() {
     this.HONEY_VALUE_RANGES = {
       1: { min: 5, max: 50 },
@@ -183,11 +262,7 @@ class QuestionService {
     const offset = (page - 1) * limit;
 
     try {
-      // Get default questions from QuestionBank
-      const { QuestionBank } = require('../questionBank');
-      const defaultQuestions = QuestionBank.getAllQuestions() || [];
-
-      // Get custom questions from database
+      // Get all questions from database (now includes default questions)
       let query = `
         SELECT
           id, question_id, category, question_text, options, correct_answer,
@@ -198,7 +273,7 @@ class QuestionService {
       `;
       const params = [];
 
-      // Apply filters to custom questions
+      // Apply filters
       if (level) {
         query += ` AND level = ?`;
         params.push(parseInt(level));
@@ -219,16 +294,26 @@ class QuestionService {
         params.push(`%${search}%`, `%${search}%`);
       }
 
-      query += ` ORDER BY created_at DESC`;
+      // Count total before pagination
+      const countQuery = query.replace('SELECT id, question_id, category, question_text, options, correct_answer, level, honey_value, is_active, usage_count, created_at, updated_at, explanation, created_by', 'SELECT COUNT(*) as total');
+      const totalResult = await Database.get(countQuery, params);
+      const total = totalResult.total;
 
-      const customQuestionsData = await Database.all(query, params);
+      // Add pagination and ordering
+      query += ` ORDER BY level ASC, created_at DESC LIMIT ? OFFSET ?`;
+      params.push(parseInt(limit), offset);
 
-      // Convert custom questions to standard format
-      const customQuestions = await Promise.all(customQuestionsData.map(async (q) => {
+      const questionsData = await Database.all(query, params);
+
+      // Convert to standard format
+      const allQuestions = await Promise.all(questionsData.map(async (q) => {
         const options = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
 
-        // Get creator info
-        const creator = await Database.get('SELECT name, email FROM users WHERE id = ?', [q.created_by]);
+        // Get creator info if it exists
+        let creator = null;
+        if (q.created_by) {
+          creator = await Database.get('SELECT name, email FROM users WHERE id = ?', [q.created_by]);
+        }
 
         return {
           id: q.id,
@@ -245,72 +330,20 @@ class QuestionService {
           updated_at: q.updated_at,
           explanation: q.explanation,
           created_by: q.created_by,
-          source: 'custom',
+          source: q.question_id.startsWith('default_') ? 'default' : 'custom',
           isActive: q.is_active === 1,
           createdBy: creator ? {
             name: creator.name,
             email: creator.email
-          } : null
+          } : (q.question_id.startsWith('default_') ? {
+            name: 'Sistema',
+            email: 'sistema@melzao.com'
+          } : null)
         };
       }));
 
-      // Convert default questions to standard format
-      const formattedDefaultQuestions = defaultQuestions.map((q, index) => ({
-        id: `default_${index + 1}`,
-        question_id: `default_${q.level}_${index + 1}`,
-        category: q.category || 'Padrão',
-        question_text: q.question,
-        options: q.options,
-        correct_answer: q.correct,
-        level: q.level,
-        honey_value: q.honey || 10,
-        is_active: 1,
-        usage_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        explanation: q.explanation || '',
-        created_by: null,
-        source: 'default',
-        isActive: true,
-        createdBy: {
-          name: 'Sistema',
-          email: 'sistema@melzao.com'
-        }
-      }));
-
-      // Combine and filter all questions
-      let allQuestions = [...formattedDefaultQuestions, ...customQuestions];
-
-      // Apply filters to combined list
-      if (level) {
-        allQuestions = allQuestions.filter(q => q.level === parseInt(level));
-      }
-
-      if (category) {
-        allQuestions = allQuestions.filter(q =>
-          q.category.toLowerCase().includes(category.toLowerCase())
-        );
-      }
-
-      if (search) {
-        allQuestions = allQuestions.filter(q =>
-          q.question_text.toLowerCase().includes(search.toLowerCase()) ||
-          q.category.toLowerCase().includes(search.toLowerCase())
-        );
-      }
-
-      // Sort by level and category
-      allQuestions.sort((a, b) => {
-        if (a.level !== b.level) return a.level - b.level;
-        return a.category.localeCompare(b.category);
-      });
-
-      // Apply pagination
-      const total = allQuestions.length;
-      const paginatedQuestions = allQuestions.slice(offset, offset + limit);
-
       return {
-        questions: paginatedQuestions,
+        questions: allQuestions,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
