@@ -73,15 +73,19 @@ class QuestionService {
   /**
    * Update an existing question
    */
-  async updateQuestion(questionId, questionData, userId) {
-    // Check if question exists and belongs to user
+  async updateQuestion(questionId, questionData, userId, userRole = 'host') {
+    // Check if question exists
     const existingQuestion = await Database.get(`
-      SELECT * FROM questions
-      WHERE id = ? AND created_by = ?
-    `, [questionId, userId]);
+      SELECT * FROM questions WHERE id = ?
+    `, [questionId]);
 
     if (!existingQuestion) {
-      throw new Error('Questão não encontrada ou não pertence ao usuário');
+      throw new Error('Questão não encontrada');
+    }
+
+    // Check permissions: admins can edit any question, hosts only their own
+    if (userRole !== 'admin' && existingQuestion.created_by !== userId) {
+      throw new Error('Questão não pertence ao usuário');
     }
 
     // Validate updated data
@@ -111,7 +115,7 @@ class QuestionService {
         honey_value = ?,
         explanation = ?,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ? AND created_by = ?
+      WHERE id = ?
     `, [
       category.trim(),
       questionText.trim(),
@@ -120,8 +124,7 @@ class QuestionService {
       parseInt(level),
       parseInt(honeyValue),
       explanation ? explanation.trim() : null,
-      questionId,
-      userId
+      questionId
     ]);
 
     console.log(`📝 Questão atualizada: ${existingQuestion.question_id} por usuário ${userId}`);
@@ -132,15 +135,19 @@ class QuestionService {
   /**
    * Delete a question
    */
-  async deleteQuestion(questionId, userId) {
-    // Check if question exists and belongs to user
+  async deleteQuestion(questionId, userId, userRole = 'host') {
+    // Check if question exists
     const existingQuestion = await Database.get(`
-      SELECT * FROM questions
-      WHERE id = ? AND created_by = ?
-    `, [questionId, userId]);
+      SELECT * FROM questions WHERE id = ?
+    `, [questionId]);
 
     if (!existingQuestion) {
-      throw new Error('Questão não encontrada ou não pertence ao usuário');
+      throw new Error('Questão não encontrada');
+    }
+
+    // Check permissions: admins can delete any question, hosts only their own
+    if (userRole !== 'admin' && existingQuestion.created_by !== userId) {
+      throw new Error('Questão não pertence ao usuário');
     }
 
     // Check if question has been used in games
@@ -484,14 +491,18 @@ class QuestionService {
   /**
    * Update question honey value
    */
-  async updateQuestionHoneyValue(questionId, newValue, userId) {
+  async updateQuestionHoneyValue(questionId, newValue, userId, userRole = 'host') {
     const question = await Database.get(`
-      SELECT * FROM questions
-      WHERE id = ? AND created_by = ?
-    `, [questionId, userId]);
+      SELECT * FROM questions WHERE id = ?
+    `, [questionId]);
 
     if (!question) {
-      throw new Error('Questão não encontrada ou não pertence ao usuário');
+      throw new Error('Questão não encontrada');
+    }
+
+    // Check permissions: admins can edit any question, hosts only their own
+    if (userRole !== 'admin' && question.created_by !== userId) {
+      throw new Error('Questão não pertence ao usuário');
     }
 
     // Validate honey value for level
@@ -517,14 +528,18 @@ class QuestionService {
   /**
    * Toggle question active status
    */
-  async toggleQuestionStatus(questionId, userId) {
+  async toggleQuestionStatus(questionId, userId, userRole = 'host') {
     const question = await Database.get(`
-      SELECT * FROM questions
-      WHERE id = ? AND created_by = ?
-    `, [questionId, userId]);
+      SELECT * FROM questions WHERE id = ?
+    `, [questionId]);
 
     if (!question) {
-      throw new Error('Questão não encontrada ou não pertence ao usuário');
+      throw new Error('Questão não encontrada');
+    }
+
+    // Check permissions: admins can edit any question, hosts only their own
+    if (userRole !== 'admin' && question.created_by !== userId) {
+      throw new Error('Questão não pertence ao usuário');
     }
 
     const newStatus = question.is_active ? 0 : 1;

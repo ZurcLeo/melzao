@@ -162,7 +162,7 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    const result = await questionService.updateQuestion(questionId, questionData, userId);
+    const result = await questionService.updateQuestion(questionId, questionData, userId, req.user.role);
 
     res.json({
       success: true,
@@ -207,7 +207,7 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    const result = await questionService.deleteQuestion(questionId, userId);
+    const result = await questionService.deleteQuestion(questionId, userId, req.user.role);
 
     res.json({
       success: true,
@@ -260,7 +260,8 @@ router.put('/:id/honey-value', async (req, res) => {
     const result = await questionService.updateQuestionHoneyValue(
       questionId,
       parseInt(honeyValue),
-      userId
+      userId,
+      req.user.role
     );
 
     res.json({
@@ -307,7 +308,7 @@ router.put('/:id/toggle-status', async (req, res) => {
       });
     }
 
-    const result = await questionService.toggleQuestionStatus(questionId, userId);
+    const result = await questionService.toggleQuestionStatus(questionId, userId, req.user.role);
 
     res.json({
       success: true,

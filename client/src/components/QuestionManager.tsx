@@ -47,7 +47,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
     explanation: ''
   });
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'http://localhost:5001';
+  const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
 
   const makeRequest = async (url: string, options: RequestInit = {}) => {
     try {
@@ -324,31 +324,18 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
                   </div>
 
                   <div className="flex gap-2">
-                    {question.question_id.startsWith('default_') ? (
-                      <div className="flex gap-2">
-                        <div className="bg-gray-600 px-3 py-2 rounded opacity-50 cursor-not-allowed" title="Questões padrão não podem ser editadas">
-                          <Edit className="w-4 h-4" />
-                        </div>
-                        <div className="bg-gray-600 px-3 py-2 rounded opacity-50 cursor-not-allowed" title="Questões padrão não podem ser removidas">
-                          <Trash2 className="w-4 h-4" />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <Button
-                          onClick={() => openEditModal(question)}
-                          className="bg-blue-600 hover:bg-blue-700 px-3 py-2"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => deleteQuestion(question.id)}
-                          className="bg-red-600 hover:bg-red-700 px-3 py-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+                    <Button
+                      onClick={() => openEditModal(question)}
+                      className="bg-blue-600 hover:bg-blue-700 px-3 py-2"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={() => deleteQuestion(question.id)}
+                      className="bg-red-600 hover:bg-red-700 px-3 py-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
