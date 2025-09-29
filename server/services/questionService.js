@@ -108,8 +108,8 @@ class QuestionService {
    */
   getDefaultHoneyValue(level) {
     const values = {
-      1: 5, 2: 10, 3: 20, 4: 40, 5: 80,
-      6: 160, 7: 320, 8: 640, 9: 1280, 10: 2560
+      1: 5, 2: 10, 3: 15, 4: 20, 5: 25,
+      6: 35, 7: 75, 8: 125, 9: 250, 10: 500
     };
     return values[level] || 10;
   }
@@ -117,14 +117,14 @@ class QuestionService {
     this.HONEY_VALUE_RANGES = {
       1: { min: 5, max: 50 },
       2: { min: 10, max: 100 },
-      3: { min: 25, max: 250 },
-      4: { min: 50, max: 500 },
-      5: { min: 100, max: 1000 },
-      6: { min: 250, max: 2500 },
-      7: { min: 500, max: 5000 },
-      8: { min: 1000, max: 10000 },
-      9: { min: 2500, max: 25000 },
-      10: { min: 5000, max: 50000 }
+      3: { min: 15, max: 250 },
+      4: { min: 20, max: 500 },
+      5: { min: 25, max: 1000 },
+      6: { min: 35, max: 2500 },
+      7: { min: 75, max: 5000 },
+      8: { min: 125, max: 10000 },
+      9: { min: 250, max: 25000 },
+      10: { min: 500, max: 50000 }
     };
   }
 
