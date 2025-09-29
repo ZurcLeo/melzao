@@ -64,9 +64,9 @@ class QuestionService {
           explanation: question.explanation || ''
         };
 
-        // Insert without user ID (system questions)
+        // Insert without user ID (system questions) - use INSERT OR IGNORE to avoid duplicates
         await Database.run(`
-          INSERT INTO questions (
+          INSERT OR IGNORE INTO questions (
             question_id, category, question_text, options, correct_answer,
             level, honey_value, explanation, is_active, usage_count,
             created_at, updated_at
