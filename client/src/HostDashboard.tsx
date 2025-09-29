@@ -167,6 +167,23 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
     return () => socket.off('answer-result', handleAnswerResult);
   }, [answerState, socket, playSound]);
 
+  // Detect quando uma nova pergunta foi carregada para forçar reset de estado
+  const [lastQuestionId, setLastQuestionId] = useState<number | null>(null);
+  useEffect(() => {
+    if (gameState?.currentQuestion?.id && gameState.currentQuestion.id !== lastQuestionId) {
+      console.log('🔄 Nova pergunta detectada, resetando estado:', {
+        old: lastQuestionId,
+        new: gameState.currentQuestion.id,
+        question: gameState.currentQuestion.question
+      });
+      setLastQuestionId(gameState.currentQuestion.id);
+      // Reset imediato do estado para nova pergunta
+      setAnswerState('idle');
+      setLastAnswerResult(null);
+      setSelectedAnswer('');
+    }
+  }, [gameState?.currentQuestion?.id, lastQuestionId]);
+
   const quitGame = () => {
     if (gameState.currentParticipant && window.confirm('Tem certeza que quer desistir?')) {
       socket.emit('quit-game', gameState.currentParticipant.id);
