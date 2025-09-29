@@ -185,7 +185,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
       // Tocar som de nova pergunta
       playSound('processing');
     }
-  }, [gameState?.currentQuestion?.id, gameState?.currentQuestion?.question, lastQuestionId, playSound]);
+  }, [gameState?.currentQuestion?.id, gameState?.currentQuestion?.question, gameState?.currentQuestion?.level, lastQuestionId, playSound]);
 
   const quitGame = () => {
     if (gameState.currentParticipant && window.confirm('Tem certeza que quer desistir?')) {
