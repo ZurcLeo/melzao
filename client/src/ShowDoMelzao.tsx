@@ -458,10 +458,32 @@ const ShowDoMelzao = () => {
                   </button>
                 </div>
 
+                {/* Botão de continuar após acerto */}
+                {currentParticipant.status === 'awaiting_host_decision' && (
+                  <button
+                    onClick={continueToNextQuestion}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-lg font-bold text-lg hover:from-green-600 hover:to-green-700 shadow-lg animate-pulse flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle size={24} />
+                    ➡️ Continuar para Próxima Pergunta
+                  </button>
+                )}
+
+                {/* Botão de encerrar após erro */}
+                {currentParticipant.status === 'eliminated' && (
+                  <button
+                    onClick={nextParticipant}
+                    className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 rounded-lg font-bold text-lg hover:from-red-600 hover:to-red-700 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <XCircle size={24} />
+                    Fechar Jogada e Próximo Participante
+                  </button>
+                )}
+
                 <div className="flex gap-2">
                   <button
                     onClick={skipQuestion}
-                    disabled={currentParticipant.skipsUsed >= 1 || answerState !== 'idle'}
+                    disabled={currentParticipant.skipsUsed >= 1 || answerState !== 'idle' || currentParticipant.status !== 'playing'}
                     className="flex-1 bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                   >
                     <Clock size={16} />
@@ -469,7 +491,7 @@ const ShowDoMelzao = () => {
                   </button>
                   <button
                     onClick={useAudienceHelp}
-                    disabled={currentParticipant.helpUsed || answerState !== 'idle'}
+                    disabled={currentParticipant.helpUsed || answerState !== 'idle' || currentParticipant.status !== 'playing'}
                     className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                   >
                     <Users size={16} />
@@ -477,7 +499,7 @@ const ShowDoMelzao = () => {
                   </button>
                   <button
                     onClick={giveUp}
-                    disabled={answerState !== 'idle'}
+                    disabled={answerState !== 'idle' || currentParticipant.status !== 'playing'}
                     className="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                   >
                     Desistir
