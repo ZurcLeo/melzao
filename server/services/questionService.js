@@ -16,9 +16,26 @@ class QuestionService {
         WHERE question_id LIKE 'default_%'
       `).catch(() => ({ count: 0 })); // Handle case where table doesn't exist yet
 
-      if (existingDefaults && existingDefaults.count > 0) {
-        console.log('✅ Questões padrão já existem no banco de dados');
+      // Also check if we have questions for levels 9 and 10 specifically
+      const level9Count = await Database.get(`
+        SELECT COUNT(*) as count FROM questions
+        WHERE question_id LIKE 'default_%' AND level = 9
+      `).catch(() => ({ count: 0 }));
+
+      const level10Count = await Database.get(`
+        SELECT COUNT(*) as count FROM questions
+        WHERE question_id LIKE 'default_%' AND level = 10
+      `).catch(() => ({ count: 0 }));
+
+      const hasAllLevels = level9Count.count > 0 && level10Count.count > 0;
+
+      if (existingDefaults && existingDefaults.count > 0 && hasAllLevels) {
+        console.log(`✅ Questões padrão já existem no banco (${existingDefaults.count} total, ${level9Count.count} nível 9, ${level10Count.count} nível 10)`);
         return;
+      }
+
+      if (existingDefaults.count > 0 && !hasAllLevels) {
+        console.log('⚠️ Questões padrão incompletas - recarregando níveis 9 e 10...');
       }
 
       console.log('📝 Inserindo questões padrão no banco de dados...');
@@ -26,6 +43,16 @@ class QuestionService {
       const { QuestionBank } = require('../questionBank');
       const defaultQuestions = QuestionBank.getAllQuestions() || [];
 
+      console.log(`🔢 Total de questões encontradas: ${defaultQuestions.length}`);
+
+      // Count by level for debugging
+      const levelCounts = {};
+      defaultQuestions.forEach(q => {
+        levelCounts[q.level] = (levelCounts[q.level] || 0) + 1;
+      });
+      console.log('📊 Questões por nível:', levelCounts);
+
+      let insertedCount = 0;
       for (const question of defaultQuestions) {
         const questionData = {
           category: question.category || 'Padrão',
@@ -54,9 +81,14 @@ class QuestionService {
           parseInt(questionData.honeyValue),
           questionData.explanation ? questionData.explanation.trim() : null
         ]);
+
+        insertedCount++;
+        if (question.level >= 9) {
+          console.log(`✅ Inserida: ${question.id} (Level ${question.level})`);
+        }
       }
 
-      console.log(`✅ ${defaultQuestions.length} questões padrão inseridas no banco`);
+      console.log(`✅ ${insertedCount} questões padrão inseridas no banco`);
     } catch (error) {
       console.error('❌ Erro ao inserir questões padrão:', error);
     }
@@ -258,7 +290,7 @@ class QuestionService {
    * Get ALL questions available in the system (default + custom) for admins
    */
   async getAllSystemQuestions(filters = {}) {
-    const { page = 1, limit = 50, level, category, isActive, search } = filters;
+    const { page = 1, limit = 200, level, category, isActive, search } = filters;
     const offset = (page - 1) * limit;
 
     try {
@@ -313,6 +345,13 @@ class QuestionService {
         console.error('Erro ao buscar questões:', error);
         return [];
       });
+
+      // Debug: Count questions by level
+      const foundLevels = {};
+      questionsData.forEach(q => {
+        foundLevels[q.level] = (foundLevels[q.level] || 0) + 1;
+      });
+      console.log('🔍 Questões encontradas no BD por nível:', foundLevels);
 
       // Convert to standard format
       const allQuestions = await Promise.all(questionsData.map(async (q) => {
