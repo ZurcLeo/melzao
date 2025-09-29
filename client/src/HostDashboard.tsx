@@ -50,14 +50,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
     }
   }, [gameState?.currentQuestion?.id, gameState?.currentQuestion, gameState?.status, playSound]); // Mudança: usar currentQuestion.id para garantir reset
 
-  // Reset answerState quando nova pergunta começar
-  useEffect(() => {
-    if (gameState?.currentQuestion) {
-      setAnswerState('idle');
-      setLastAnswerResult(null);
-    }
-  }, [gameState?.currentQuestion]);
-
   // Clear loading state when game actually starts or when status changes
   useEffect(() => {
     if (gameState?.status === 'active' && gameState?.currentQuestion) {
@@ -154,12 +146,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
         // Sons são tocados pelo ShowDoMelzao.tsx para evitar duplicação
         // A lógica de sons foi movida para lá para melhor controle
 
+        // Se a resposta está correta e há próxima pergunta, resetar mais rápido
+        const delay = result.correct && result.nextQuestion ? 1500 : 2000;
+
         setTimeout(() => {
           // Fase 3: Reset para próxima pergunta
           setAnswerState('idle');
           setLastAnswerResult(null);
           setSelectedAnswer('');
-        }, 2000); // Tempo para mostrar o resultado
+        }, delay);
       }
     };
 
@@ -172,20 +167,25 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   useEffect(() => {
     const currentQuestionId = gameState?.currentQuestion?.id;
     const currentQuestionText = gameState?.currentQuestion?.question;
+    const currentQuestionLevel = gameState?.currentQuestion?.level;
 
     if (currentQuestionId && currentQuestionId !== lastQuestionId) {
       console.log('🔄 Nova pergunta detectada, resetando estado:', {
         old: lastQuestionId,
         new: currentQuestionId,
+        level: currentQuestionLevel,
         question: currentQuestionText
       });
       setLastQuestionId(currentQuestionId);
-      // Reset imediato do estado para nova pergunta
+      // Reset IMEDIATO do estado para nova pergunta (ignora timeout pendente)
       setAnswerState('idle');
       setLastAnswerResult(null);
       setSelectedAnswer('');
+
+      // Tocar som de nova pergunta
+      playSound('processing');
     }
-  }, [gameState?.currentQuestion?.id, gameState?.currentQuestion?.question, lastQuestionId]);
+  }, [gameState?.currentQuestion?.id, gameState?.currentQuestion?.question, lastQuestionId, playSound]);
 
   const quitGame = () => {
     if (gameState.currentParticipant && window.confirm('Tem certeza que quer desistir?')) {

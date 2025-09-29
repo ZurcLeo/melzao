@@ -63,6 +63,9 @@ function App() {
       console.log('📊 Novo game-state recebido:', {
         status: data?.status,
         hasCurrentQuestion: !!data?.currentQuestion,
+        questionId: data?.currentQuestion?.id,
+        questionLevel: data?.currentQuestion?.level,
+        participantLevel: data?.currentParticipant?.currentLevel,
         hasCurrentParticipant: !!data?.currentParticipant,
         totalParticipants: data?.totalParticipants
       });
