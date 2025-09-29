@@ -73,7 +73,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const loadAllUsers = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/admin/users?limit=100');
+      const data = await makeRequest('/api/admin/users?limit=200');
       setAllUsers(data.users || []);
     } catch (error) {
       toast.error(`Erro ao carregar usuários: ${error instanceof Error ? error.message : String(error)}`);

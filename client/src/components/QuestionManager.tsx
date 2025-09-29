@@ -77,7 +77,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
   const loadQuestions = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/questions/my?limit=100');
+      const data = await makeRequest('/api/questions/my?limit=200');
       setQuestions(data.questions || []);
     } catch (error) {
       toast.error(`Erro ao carregar questões: ${error instanceof Error ? error.message : String(error)}`);
