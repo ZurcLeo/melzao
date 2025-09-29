@@ -83,9 +83,6 @@ class QuestionService {
         ]);
 
         insertedCount++;
-        if (question.level >= 9) {
-          console.log(`✅ Inserida: ${question.id} (Level ${question.level})`);
-        }
       }
 
       console.log(`✅ ${insertedCount} questões padrão inseridas no banco`);
@@ -290,7 +287,7 @@ class QuestionService {
    * Get ALL questions available in the system (default + custom) for admins
    */
   async getAllSystemQuestions(filters = {}) {
-    const { page = 1, limit = 200, level, category, isActive, search } = filters;
+    const { page = 1, limit = 500, level, category, isActive, search } = filters;
     const offset = (page - 1) * limit;
 
     try {
@@ -337,9 +334,12 @@ class QuestionService {
       });
       const total = totalResult ? totalResult.total : 0;
 
-      // Add pagination and ordering
-      query += ` ORDER BY level ASC, created_at DESC LIMIT ? OFFSET ?`;
+      // Add pagination and ordering - prioritize showing all levels
+      query += ` ORDER BY level ASC, question_id ASC LIMIT ? OFFSET ?`;
       params.push(parseInt(limit), offset);
+
+      console.log('🔍 Executando query:', query);
+      console.log('🔍 Parâmetros:', params);
 
       const questionsData = await Database.all(query, params).catch((error) => {
         console.error('Erro ao buscar questões:', error);
