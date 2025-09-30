@@ -355,9 +355,13 @@ class MultiUserGameController {
       throw new Error('Sessão não encontrada');
     }
 
-    const availableQuestions = session.questionBank[level]?.filter(
-      q => !session.usedQuestions.has(q.question_id || q.id)
-    ) || [];
+    // ✅ SOLUÇÃO: Recarregar questões do banco para garantir versão mais recente
+    const availableQuestions = await this.getAvailableQuestionsFromDB(
+      userId,
+      level,
+      Array.from(session.usedQuestions),
+      session.config
+    );
 
     if (availableQuestions.length === 0) {
       throw new Error(`Não há mais questões disponíveis para o nível ${level}`);
@@ -409,6 +413,83 @@ class MultiUserGameController {
     } catch (error) {
       console.warn('Erro ao carregar questões padrão:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get available questions from database (fresh data, not cached)
+   * This ensures users always see the most recent version of questions
+   */
+  async getAvailableQuestionsFromDB(userId, level, usedQuestionIds, config) {
+    const Database = require('./database');
+    const allQuestions = [];
+
+    try {
+      // Build exclusion clause for used questions
+      const exclusionClause = usedQuestionIds.length > 0
+        ? `AND question_id NOT IN (${usedQuestionIds.map(() => '?').join(',')})`
+        : '';
+
+      // Load default questions from database if not custom_questions_only
+      if (!config.custom_questions_only) {
+        const defaultQuestions = await Database.all(`
+          SELECT * FROM questions
+          WHERE level = ?
+            AND is_active = 1
+            AND question_id LIKE 'default_%'
+            ${exclusionClause}
+        `, [level, ...usedQuestionIds]);
+
+        defaultQuestions.forEach(q => {
+          allQuestions.push({
+            id: q.question_id,
+            question_id: q.question_id,
+            question_text: q.question_text,
+            question: q.question_text,
+            options: JSON.parse(q.options),
+            correct_answer: q.correct_answer,
+            correctAnswer: q.correct_answer,
+            level: q.level,
+            honey_value: q.honey_value,
+            honeyValue: q.honey_value,
+            explanation: q.explanation,
+            source: 'default'
+          });
+        });
+      }
+
+      // Load custom questions from database
+      const customQuestions = await Database.all(`
+        SELECT * FROM questions
+        WHERE level = ?
+          AND is_active = 1
+          AND created_by = ?
+          ${exclusionClause}
+      `, [level, userId, ...usedQuestionIds]);
+
+      customQuestions.forEach(q => {
+        allQuestions.push({
+          id: q.id,
+          question_id: q.question_id,
+          question_text: q.question_text,
+          question: q.question_text,
+          options: JSON.parse(q.options),
+          correct_answer: q.correct_answer,
+          correctAnswer: q.correct_answer,
+          level: q.level,
+          honey_value: q.honey_value,
+          honeyValue: q.honey_value,
+          explanation: q.explanation,
+          source: 'custom'
+        });
+      });
+
+      console.log(`✅ ${allQuestions.length} questões carregadas do banco (nível ${level}, ${usedQuestionIds.length} usadas)`);
+      return allQuestions;
+
+    } catch (error) {
+      console.error('❌ Erro ao buscar questões do banco:', error);
+      throw error;
     }
   }
 
