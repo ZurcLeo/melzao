@@ -415,11 +415,14 @@ class AuthService {
         (SELECT COUNT(*) FROM users) as total_users,
         (SELECT COUNT(*) FROM users WHERE status = 'active') as active_users,
         (SELECT COUNT(*) FROM users WHERE status = 'pending') as pending_users,
+        (SELECT COUNT(*) FROM users WHERE status = 'inactive') as inactive_users,
         (SELECT COUNT(*) FROM users WHERE role = 'admin') as admin_users,
         (SELECT COUNT(*) FROM users WHERE role = 'host') as host_users,
         (SELECT COUNT(*) FROM game_sessions) as total_sessions,
+        (SELECT COUNT(*) FROM participants) as total_participants,
         (SELECT COUNT(*) FROM questions) as total_custom_questions,
-        (SELECT COUNT(*) FROM questions WHERE is_active = 1) as active_custom_questions
+        (SELECT COUNT(*) FROM questions WHERE is_active = 1) as active_custom_questions,
+        (SELECT COUNT(*) FROM answers) as total_questions
     `);
 
     return stats[0] || {};
