@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import io from 'socket.io-client';
 import AuthModal from './components/AuthModal';
 import AppRouter from './AppRouter';
 import { toast } from 'react-toastify';
+import { apiService } from './services/api';
+import { setTokenExpiredCallback } from './utils/apiClient';
 import 'react-toastify/dist/ReactToastify.css';
 
 const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com', {
@@ -10,6 +12,8 @@ const socket = io(process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.on
   upgrade: true,
   rememberUpgrade: false
 });
+
+const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
 
 function App() {
   const [gameState, setGameState] = useState<any>(null);
@@ -19,35 +23,71 @@ function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
 
+  // Handle token expiration
+  const handleTokenExpired = useCallback(() => {
+    console.warn('🔐 Token expirado, fazendo logout');
+    setCurrentUser(null);
+    setAuthToken(null);
+    (window as any).currentUser = null;
+    (window as any).authToken = null;
+    toast.warning('⚠️ Sua sessão expirou. Faça login novamente.');
+  }, []);
+
+  // Setup token expiration handler
   useEffect(() => {
-    // Check for saved auth on app start
-    const savedToken = localStorage.getItem('authToken');
-    const savedUser = localStorage.getItem('authUser');
+    apiService.setTokenExpiredCallback(handleTokenExpired);
+    setTokenExpiredCallback(handleTokenExpired);
+  }, [handleTokenExpired]);
 
-    if (savedToken && savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        setAuthToken(savedToken);
-        setCurrentUser(user);
+  // Validate token on app start
+  useEffect(() => {
+    const validateToken = async () => {
+      const savedToken = localStorage.getItem('authToken');
+      const savedUser = localStorage.getItem('authUser');
 
-        // Make user and token globally available for HostDashboard
-        (window as any).currentUser = user;
-        (window as any).authToken = savedToken;
-      } catch (e) {
-        // Invalid saved data, clear it
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('authUser');
+      if (savedToken && savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+
+          // Verify token is still valid
+          const response = await fetch(`${API_BASE}/api/auth/verify`, {
+            headers: {
+              'Authorization': `Bearer ${savedToken}`
+            }
+          });
+
+          if (response.ok) {
+            setAuthToken(savedToken);
+            setCurrentUser(user);
+            (window as any).currentUser = user;
+            (window as any).authToken = savedToken;
+          } else {
+            // Token is invalid or expired
+            const errorData = await response.json().catch(() => ({}));
+            console.warn('🔐 Token inválido ao iniciar:', errorData.code);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+          }
+        } catch (e) {
+          console.error('Erro ao validar token:', e);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+        }
       }
-    }
+    };
 
+    validateToken();
+  }, []);
+
+  useEffect(() => {
     // Connection events
     socket.on('connect', () => {
       setIsConnected(true);
       toast.success('🔌 Conectado ao servidor!');
 
       // Send auth token if available
-      if (savedToken || authToken) {
-        socket.auth = { token: savedToken || authToken };
+      if (authToken) {
+        socket.auth = { token: authToken };
       }
 
       socket.emit('join-game');

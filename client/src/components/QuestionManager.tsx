@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { Card, CardContent } from './ui/Card';
 import { Modal, ModalBody } from './ui/Modal';
 import { toast } from 'react-toastify';
+import { apiClient } from '../utils/apiClient';
 
 interface Question {
   id: number;
@@ -47,37 +48,10 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
     explanation: ''
   });
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
-
-  const makeRequest = async (url: string, options: RequestInit = {}) => {
-    try {
-      const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro na requisição' }));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Erro de conexão');
-    }
-  };
-
   const loadQuestions = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/questions/my?limit=200');
+      const data = await apiClient('/api/questions/my?limit=200');
       setQuestions(data.questions || []);
     } catch (error) {
       toast.error(`Erro ao carregar questões: ${error instanceof Error ? error.message : String(error)}`);
@@ -135,13 +109,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
       };
 
       if (editingQuestion) {
-        await makeRequest(`/api/questions/${editingQuestion.id}`, {
+        await apiClient(`/api/questions/${editingQuestion.id}`, {
           method: 'PUT',
           body: JSON.stringify(questionData)
         });
         toast.success('Questão atualizada com sucesso!');
       } else {
-        await makeRequest('/api/questions', {
+        await apiClient('/api/questions', {
           method: 'POST',
           body: JSON.stringify(questionData)
         });
@@ -165,7 +139,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ authToken }) => {
 
     try {
       setLoading(true);
-      await makeRequest(`/api/questions/${questionId}`, { method: 'DELETE' });
+      await apiClient(`/api/questions/${questionId}`, { method: 'DELETE' });
       toast.success('Questão excluída com sucesso!');
       loadQuestions();
     } catch (error) {

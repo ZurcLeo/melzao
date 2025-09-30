@@ -4,6 +4,7 @@ import { Button } from './ui/Button';
 import { Card, CardContent } from './ui/Card';
 import { Input } from './ui/Input';
 import { toast } from 'react-toastify';
+import { apiClient } from '../utils/apiClient';
 
 interface UserData {
   id: number;
@@ -59,37 +60,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
   const [profileLoading, setProfileLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'https://melzao-backend.onrender.com';
-
-  const makeRequest = async (url: string, options: RequestInit = {}) => {
-    try {
-      const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro na requisição' }));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Erro de conexão');
-    }
-  };
-
   const loadUserProfile = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/auth/me');
+      const data = await apiClient('/api/auth/me');
       setUserData(data.user);
       setProfileForm({
         name: data.user.name,
@@ -122,7 +96,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
 
     try {
       setPasswordLoading(true);
-      await makeRequest('/api/auth/change-password', {
+      await apiClient('/api/auth/change-password', {
         method: 'POST',
         body: JSON.stringify({
           currentPassword: passwordForm.currentPassword,
@@ -155,7 +129,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ currentUser, authToken, onClo
     try {
       setProfileLoading(true);
 
-      const data = await makeRequest('/api/auth/profile', {
+      const data = await apiClient('/api/auth/profile', {
         method: 'PUT',
         body: JSON.stringify({
           name: profileForm.name,

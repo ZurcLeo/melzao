@@ -5,6 +5,7 @@ import { Card, CardContent } from './ui/Card';
 import { Modal, ModalBody } from './ui/Modal';
 import { toast } from 'react-toastify';
 import QuestionManager from './QuestionManager';
+import { apiClient } from '../utils/apiClient';
 
 interface User {
   id: number;
@@ -31,37 +32,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const [stats, setStats] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats' | 'questions'>('pending');
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || 'http://localhost:5001';
-
-  const makeRequest = async (url: string, options: RequestInit = {}) => {
-    try {
-      const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro na requisição' }));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Erro de conexão');
-    }
-  };
-
   const loadPendingUsers = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/admin/users/pending');
+      const data = await apiClient('/api/admin/users/pending');
       setPendingUsers(data.users || []);
     } catch (error) {
       toast.error(`Erro ao carregar usuários pendentes: ${error instanceof Error ? error.message : String(error)}`);
@@ -73,7 +47,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const loadAllUsers = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/admin/users?limit=200');
+      const data = await apiClient('/api/admin/users?limit=200');
       setAllUsers(data.users || []);
     } catch (error) {
       toast.error(`Erro ao carregar usuários: ${error instanceof Error ? error.message : String(error)}`);
@@ -85,7 +59,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const data = await makeRequest('/api/admin/stats');
+      const data = await apiClient('/api/admin/stats');
       setStats(data.stats);
     } catch (error) {
       toast.error(`Erro ao carregar estatísticas: ${error instanceof Error ? error.message : String(error)}`);
@@ -96,7 +70,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
 
   const approveUser = async (userId: number) => {
     try {
-      await makeRequest(`/api/admin/users/${userId}/approve`, { method: 'PUT' });
+      await apiClient(`/api/admin/users/${userId}/approve`, { method: 'PUT' });
       toast.success('Usuário aprovado com sucesso!');
       loadPendingUsers();
       loadAllUsers();
@@ -107,7 +81,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
 
   const deactivateUser = async (userId: number) => {
     try {
-      await makeRequest(`/api/admin/users/${userId}/deactivate`, { method: 'PUT' });
+      await apiClient(`/api/admin/users/${userId}/deactivate`, { method: 'PUT' });
       toast.success('Usuário desativado com sucesso!');
       loadAllUsers();
     } catch (error) {
@@ -117,7 +91,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
 
   const reactivateUser = async (userId: number) => {
     try {
-      await makeRequest(`/api/admin/users/${userId}/reactivate`, { method: 'PUT' });
+      await apiClient(`/api/admin/users/${userId}/reactivate`, { method: 'PUT' });
       toast.success('Usuário reativado com sucesso!');
       loadAllUsers();
     } catch (error) {
