@@ -436,7 +436,7 @@ class MultiUserGameController {
           SELECT * FROM questions
           WHERE level = ?
             AND is_active = 1
-            AND question_id LIKE 'default_%'
+            AND (question_id LIKE 'default_%' OR created_by IS NULL)
             ${exclusionClause}
         `, [level, ...usedQuestionIds]);
 
@@ -458,12 +458,13 @@ class MultiUserGameController {
         });
       }
 
-      // Load custom questions from database
+      // Load custom questions from database (only those created by this user)
       const customQuestions = await Database.all(`
         SELECT * FROM questions
         WHERE level = ?
           AND is_active = 1
           AND created_by = ?
+          AND created_by IS NOT NULL
           ${exclusionClause}
       `, [level, userId, ...usedQuestionIds]);
 
