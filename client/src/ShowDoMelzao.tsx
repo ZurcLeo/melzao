@@ -163,7 +163,7 @@ const ShowDoMelzao = () => {
       updatedParticipant.status = 'eliminated';
       // Som dramático para eliminação
       setTimeout(() => playSound('elimination'), 500);
-      nextParticipant();
+      // NÃO chama nextParticipant() automaticamente - deixa o host clicar no botão
     }
 
     updateCurrentParticipant(updatedParticipant);
@@ -222,8 +222,13 @@ const ShowDoMelzao = () => {
     if (nextIndex !== -1) {
       setCurrentParticipant(participants[nextIndex]);
       setCurrentQuestion(1);
+      setAnswerState('idle');
+      setLastAnswerResult(null);
     } else {
       setGameState('finished');
+      setCurrentParticipant(null);
+      setAnswerState('idle');
+      setLastAnswerResult(null);
     }
   }, [participants]);
 
