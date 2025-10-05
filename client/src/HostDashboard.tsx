@@ -519,16 +519,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
 
                 <div className="grid gap-3 mb-6">
                   {gameState.currentQuestion.options.map((option: string, index: number) => {
-                    const isSelected = selectedAnswer === option;
+                    const optionLetter = String.fromCharCode(65 + index); // A, B, C, D
+                    const isSelected = selectedAnswer === optionLetter;
                     const isCorrectAnswer = answerState === 'revealing' &&
-                      lastAnswerResult && option === lastAnswerResult.correctAnswer;
+                      lastAnswerResult && optionLetter === lastAnswerResult.correctAnswer;
                     const isWrongSelected = answerState === 'revealing' &&
                       lastAnswerResult && !lastAnswerResult.correct && isSelected;
 
                     return (
                       <button
                         key={option}
-                        onClick={() => answerState === 'idle' && setSelectedAnswer(option)}
+                        onClick={() => answerState === 'idle' && setSelectedAnswer(optionLetter)}
                         disabled={answerState !== 'idle'}
                         className={`w-full text-left p-4 rounded-xl transition-all duration-300 border-2 font-medium ${
                           isCorrectAnswer
