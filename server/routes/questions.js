@@ -19,6 +19,17 @@ router.post('/', async (req, res) => {
 
     const result = await questionService.createQuestion(questionData, userId);
 
+    // Broadcast creation to all connected clients
+    const io = req.app.locals.io;
+    if (io) {
+      io.emit('questions-updated', {
+        action: 'create',
+        questionId: result.id,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     res.status(201).json({
       success: true,
       message: result.message,
@@ -164,6 +175,17 @@ router.put('/:id', async (req, res) => {
 
     const result = await questionService.updateQuestion(questionId, questionData, userId, req.user.role);
 
+    // Broadcast update to all connected clients
+    const io = req.app.locals.io;
+    if (io) {
+      io.emit('questions-updated', {
+        action: 'update',
+        questionId,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     res.json({
       success: true,
       message: result.message
@@ -208,6 +230,17 @@ router.delete('/:id', async (req, res) => {
     }
 
     const result = await questionService.deleteQuestion(questionId, userId, req.user.role);
+
+    // Broadcast deletion to all connected clients
+    const io = req.app.locals.io;
+    if (io) {
+      io.emit('questions-updated', {
+        action: 'delete',
+        questionId,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+    }
 
     res.json({
       success: true,

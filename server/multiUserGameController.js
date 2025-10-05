@@ -536,7 +536,7 @@ class MultiUserGameController {
       honeyEarned,
       responseTime: responseTime || null,
       answeredAt: new Date().toISOString(),
-      level: participant.currentLevel + 1,
+      level: participant.currentLevel,
       source: question.source
     };
 
@@ -598,7 +598,7 @@ class MultiUserGameController {
 
       } else {
         // Continue to next level
-        const nextLevel = participant.currentLevel + 1;
+        const nextLevel = participant.currentLevel;
         const nextQuestion = await this.getNextQuestion(userId, nextLevel);
         session.currentQuestion = nextQuestion;
 

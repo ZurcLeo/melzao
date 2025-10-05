@@ -49,6 +49,9 @@ const questionRoutes = require('./routes/questions');
 const configRoutes = require('./routes/configs');
 const gameRoutes = require('./routes/game');
 
+// Make io available to routes via app.locals
+app.locals.io = io;
+
 // Use API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
