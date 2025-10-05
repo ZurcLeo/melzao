@@ -340,9 +340,26 @@ module.exports = function(io) {
         socket.emit('answer-result', result);
         broadcastToUser(userId, 'answer-result', result);
 
+        // Send updated game state after answer is processed
+        const session = multiUserGameController.getUserSession(userId);
+        if (session) {
+          const gameState = {
+            status: session.gameStatus,
+            participants: session.participants,
+            currentQuestion: session.currentQuestion,
+            currentParticipant: session.currentParticipant,
+            session: {
+              id: session.sessionId,
+              config: session.config
+            },
+            totalParticipants: session.participants.length
+          };
+          socket.emit('game-state', gameState);
+          broadcastToUser(userId, 'game-state', gameState);
+        }
+
         // If game continues, start next question timer
         if (result.correct && !result.completed && result.nextQuestion) {
-          const session = multiUserGameController.getUserSession(userId);
           if (session && session.config.time_limit > 0) {
             startQuestionTimer(userId, session.config.time_limit);
           }
