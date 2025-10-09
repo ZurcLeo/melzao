@@ -3,3 +3,8 @@ node_modules
 *.db
 server/game.db
 IMPLEMENTACAO_COMPLETA.md
+
+# Environment variables
+.env
+server/.env
+client/.env

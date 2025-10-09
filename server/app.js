@@ -1,20 +1,30 @@
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const helmet = require('helmet');
 const database = require('./database');
 
 const app = express();
 const server = http.createServer(app);
+
+// Allowed origins for CORS
+const allowedOrigins = [
+  'https://zurcleo.github.io',
+  'http://localhost:3001'
+];
+
 const io = socketIo(server, {
   cors: {
-    origin: [
-      "https://zurcleo.github.io",
-      "https://zurcleo.github.io/",
-      "https://zurcleo.github.io/melzao",
-      "https://zurcleo.github.io/melzao/",
-      "http://localhost:3001"
-    ],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.some(allowed =>
+        origin === allowed || origin.startsWith(allowed + '/')
+      );
+      callback(null, isAllowed);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   },
@@ -22,18 +32,47 @@ const io = socketIo(server, {
   allowEIO3: true
 });
 
+// CORS configuration with origin validation
 app.use(cors({
-  origin: [
-    "https://zurcleo.github.io",
-    "https://zurcleo.github.io/",
-    "https://zurcleo.github.io/melzao",
-    "https://zurcleo.github.io/melzao/",
-    "http://localhost:3001"
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+
+    // Check if origin matches exactly or is a path under allowed origins
+    const isAllowed = allowedOrigins.some(allowed =>
+      origin === allowed || origin.startsWith(allowed + '/')
+    );
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  credentials: true,
+  maxAge: 86400 // Cache preflight for 24h
 }));
+
+// Security headers with helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "wss:", "https://zurcleo.github.io"]
+    }
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
 app.use(express.json());
 
 // Trust proxy for accurate IP addresses (important for rate limiting)

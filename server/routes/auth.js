@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authService = require('../services/authService');
 const { authenticateToken, authRateLimit, logAuthEvents } = require('../middleware/auth');
+const { validate } = require('../middleware/validation');
 
 // Apply rate limiting and logging to all auth routes
 router.use(authRateLimit);
@@ -12,17 +13,9 @@ router.use(logAuthEvents);
  * @desc Register a new host user
  * @access Public
  */
-router.post('/register', async (req, res) => {
+router.post('/register', validate('register'), async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
-    // Validação básica
-    if (!email || !password || !name) {
-      return res.status(400).json({
-        error: 'Email, senha e nome são obrigatórios',
-        code: 'MISSING_REQUIRED_FIELDS'
-      });
-    }
 
     const result = await authService.registerUser({
       email,
@@ -66,16 +59,9 @@ router.post('/register', async (req, res) => {
  * @desc Authenticate user and return JWT token
  * @access Public
  */
-router.post('/login', async (req, res) => {
+router.post('/login', validate('login'), async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email e senha são obrigatórios',
-        code: 'MISSING_CREDENTIALS'
-      });
-    }
 
     const result = await authService.authenticateUser(email, password);
 
@@ -132,30 +118,9 @@ router.get('/verify', authenticateToken, (req, res) => {
  * @desc Change user password
  * @access Private
  */
-router.post('/change-password', authenticateToken, async (req, res) => {
+router.post('/change-password', authenticateToken, validate('changePassword'), async (req, res) => {
   try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return res.status(400).json({
-        error: 'Todos os campos de senha são obrigatórios',
-        code: 'MISSING_PASSWORD_FIELDS'
-      });
-    }
-
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({
-        error: 'Nova senha e confirmação não coincidem',
-        code: 'PASSWORD_MISMATCH'
-      });
-    }
-
-    if (currentPassword === newPassword) {
-      return res.status(400).json({
-        error: 'Nova senha deve ser diferente da atual',
-        code: 'SAME_PASSWORD'
-      });
-    }
+    const { currentPassword, newPassword } = req.body;
 
     const result = await authService.changePassword(
       req.user.userId,
@@ -193,16 +158,9 @@ router.post('/change-password', authenticateToken, async (req, res) => {
  * @desc Update user profile
  * @access Private
  */
-router.put('/profile', authenticateToken, async (req, res) => {
+router.put('/profile', authenticateToken, validate('updateProfile'), async (req, res) => {
   try {
     const { name, email } = req.body;
-
-    if (!name && !email) {
-      return res.status(400).json({
-        error: 'Pelo menos um campo (nome ou email) deve ser fornecido',
-        code: 'MISSING_FIELDS'
-      });
-    }
 
     const result = await authService.updateProfile(req.user.userId, { name, email });
 
@@ -249,16 +207,9 @@ router.put('/profile', authenticateToken, async (req, res) => {
  * @desc Generate password reset token
  * @access Public
  */
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', validate('forgotPassword'), async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        error: 'Email é obrigatório',
-        code: 'MISSING_EMAIL'
-      });
-    }
 
     const result = await authService.generatePasswordResetToken(email);
 

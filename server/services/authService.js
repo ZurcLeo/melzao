@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const Database = require('../database');
 
 /**
@@ -8,7 +9,10 @@ const Database = require('../database');
  */
 class AuthService {
   constructor() {
-    this.JWT_SECRET = process.env.JWT_SECRET || 'melzao-super-secret-key-2024';
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET must be defined in environment variables');
+    }
+    this.JWT_SECRET = process.env.JWT_SECRET;
     this.SALT_ROUNDS = 12;
     this.TOKEN_EXPIRY = '24h';
   }
@@ -53,7 +57,7 @@ class AuthService {
       'pending'
     ]);
 
-    console.log(`👤 Novo usuário registrado: ${email} (ID: ${result.id})`);
+    console.log(`👤 Novo usuário registrado (ID: ${result.id})`);
 
     return {
       userId: result.id,
@@ -68,9 +72,11 @@ class AuthService {
   async authenticateUser(email, password) {
     const user = await this.getUserByEmail(email);
 
-    if (!user) {
-      // Use mesmo tempo de delay para não revelar se email existe
-      await this.simulatePasswordCheck();
+    // Always execute bcrypt.compare to prevent timing attacks
+    const userHash = user?.password_hash || await bcrypt.hash('dummy', this.SALT_ROUNDS);
+    const isValidPassword = await bcrypt.compare(password, userHash);
+
+    if (!user || !isValidPassword) {
       throw new Error('Credenciais inválidas');
     }
 
@@ -80,12 +86,6 @@ class AuthService {
         'inactive': 'Usuário foi desativado pelo administrador'
       };
       throw new Error(statusMessages[user.status] || 'Status do usuário inválido');
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
-
-    if (!isValidPassword) {
-      throw new Error('Credenciais inválidas');
     }
 
     // Gerar JWT
@@ -103,7 +103,7 @@ class AuthService {
     // Atualizar último login
     await this.updateUserLastLogin(user.id);
 
-    console.log(`🔐 Login realizado: ${user.email} (${user.role})`);
+    console.log(`🔐 Login realizado (ID: ${user.id}, Role: ${user.role})`);
 
     return {
       token,
@@ -262,11 +262,10 @@ class AuthService {
       { expiresIn: '1h' }
     );
 
-    console.log(`🔑 Token de reset gerado para ${email}: ${resetToken}`);
+    console.log(`🔑 Token de reset gerado`);
 
     return {
-      message: 'Se o email existir, um link de redefinição será enviado',
-      resetToken // Remover em produção
+      message: 'Se o email existir, um link de redefinição será enviado'
     };
   }
 
@@ -293,8 +292,10 @@ class AuthService {
   }
 
   isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && email.length <= 254;
+    return validator.isEmail(email, {
+      allow_utf8_local_part: false,
+      require_tld: true
+    }) && email.length <= 254;
   }
 
   isValidPassword(password) {
@@ -302,11 +303,6 @@ class AuthService {
            typeof password === 'string' &&
            password.length >= 8 &&
            password.length <= 128;
-  }
-
-  async simulatePasswordCheck() {
-    // Simular tempo de verificação para não revelar se email existe
-    await bcrypt.hash('dummy', this.SALT_ROUNDS);
   }
 
   /**
@@ -359,7 +355,7 @@ class AuthService {
     }
 
     const user = await this.getUserById(userId);
-    console.log(`✅ Usuário aprovado: ${user.email}`);
+    console.log(`✅ Usuário aprovado (ID: ${userId})`);
 
     return { message: 'Usuário aprovado com sucesso', user };
   }
@@ -376,7 +372,7 @@ class AuthService {
     }
 
     const user = await this.getUserById(userId);
-    console.log(`❌ Usuário desativado: ${user.email}`);
+    console.log(`❌ Usuário desativado (ID: ${userId})`);
 
     return { message: 'Usuário desativado com sucesso', user };
   }
@@ -404,7 +400,7 @@ class AuthService {
     }
 
     await Database.run(`DELETE FROM users WHERE id = ?`, [userId]);
-    console.log(`🗑️ Usuário deletado: ${user.email}`);
+    console.log(`🗑️ Usuário deletado (ID: ${userId})`);
 
     return { message: 'Usuário deletado com sucesso' };
   }
