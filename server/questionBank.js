@@ -556,7 +556,7 @@ const QUESTION_BANK = {
       id: 'lgbtq_7_3', level: 7, category: 'lgbtq',
       question: 'Qual foi a primeira escola brasileira a adotar nome social para estudantes trans?',
       options: ['Colégio Pedro II', 'UFSC', 'USP', 'UFRGS'],
-      correctAnswer: 'UFRGS', honeyValue: 320
+      correctAnswer: 'Colégio Pedro II', honeyValue: 320
     },
     {
       id: 'brasil_7_3', level: 7, category: 'brasil',
