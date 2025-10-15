@@ -130,595 +130,595 @@ const QUESTION_BANK = {
     }
   ],
 
-  // Nível 3 - Médio-Fácil (20 honey)
+  // Nível 3 - Médio-Fácil (15 honey)
   level3: [
     {
       id: 'lgbtq_3_1', level: 3, category: 'lgbtq',
       question: 'Em que ano foi aprovado o casamento igualitário no Brasil?',
       options: ['2011', '2013', '2015', '2019'],
-      correctAnswer: '2013', honeyValue: 20
+      correctAnswer: '2013', honeyValue: 15
     },
     {
       id: 'brasil_3_1', level: 3, category: 'brasil',
       question: 'Qual escritor brasileiro ganhou o Prêmio Nobel de Literatura?',
       options: ['Machado de Assis', 'Jorge Amado', 'Clarice Lispector', 'Nenhum ainda'],
-      correctAnswer: 'Nenhum ainda', honeyValue: 20
+      correctAnswer: 'Nenhum ainda', honeyValue: 15
     },
     {
       id: 'atual_3_1', level: 3, category: 'atual',
       question: 'Qual criptomoeda teve o maior crescimento em 2021?',
       options: ['Bitcoin', 'Ethereum', 'Dogecoin', 'Cardano'],
-      correctAnswer: 'Dogecoin', honeyValue: 20
+      correctAnswer: 'Dogecoin', honeyValue: 15
     },
     {
       id: 'lgbtq_3_2', level: 3, category: 'lgbtq',
       question: 'Qual foi a primeira novela brasileira com beijo gay?',
       options: ['Torre de Babel', 'América', 'Mulheres Apaixonadas', 'A Próxima Vítima'],
-      correctAnswer: 'Torre de Babel', honeyValue: 20
+      correctAnswer: 'Torre de Babel', honeyValue: 15
     },
     {
       id: 'brasil_3_2', level: 3, category: 'brasil',
       question: 'Em que ano foi abolida a escravidão no Brasil?',
       options: ['1885', '1888', '1889', '1890'],
-      correctAnswer: '1888', honeyValue: 20
+      correctAnswer: '1888', honeyValue: 15
     },
     {
       id: 'atual_3_2', level: 3, category: 'atual',
       question: 'Qual é o nome da inteligência artificial do Google?',
       options: ['Alexa', 'Siri', 'Gemini', 'Cortana'],
-      correctAnswer: 'Gemini', honeyValue: 20
+      correctAnswer: 'Gemini', honeyValue: 15
     },
     {
       id: 'lgbtq_3_3', level: 3, category: 'lgbtq',
       question: 'Qual país foi o primeiro a legalizar a adoção por casais do mesmo sexo?',
       options: ['Holanda', 'Suécia', 'Canadá', 'Noruega'],
-      correctAnswer: 'Holanda', honeyValue: 20
+      correctAnswer: 'Holanda', honeyValue: 15
     },
     {
       id: 'brasil_3_3', level: 3, category: 'brasil',
       question: 'Qual é a montanha mais alta do Brasil?',
       options: ['Pico da Neblina', 'Pico da Bandeira', 'Pedra da Mina', 'Monte Roraima'],
-      correctAnswer: 'Pico da Neblina', honeyValue: 20
+      correctAnswer: 'Pico da Neblina', honeyValue: 15
     },
     {
       id: 'atual_3_3', level: 3, category: 'atual',
       question: 'Qual rede social foi banida no Brasil em 2024?',
       options: ['TikTok', 'X (Twitter)', 'Instagram', 'Facebook'],
-      correctAnswer: 'X (Twitter)', honeyValue: 20
+      correctAnswer: 'X (Twitter)', honeyValue: 15
     },
     {
       id: 'lgbtq_3_4', level: 3, category: 'lgbtq',
       question: 'Qual é o significado da letra "Q" em LGBTQ+?',
       options: ['Questionando', 'Queer', 'Qualidade', 'Quieto'],
-      correctAnswer: 'Queer', honeyValue: 20
+      correctAnswer: 'Queer', honeyValue: 15
     },
     {
       id: 'lgbtq_3_5', level: 3, category: 'lgbtq',
       question: 'O que é PrEP (Profilaxia Pré-Exposição)?',
       options: ['Medicamento para tratar HIV', 'Medicamento para prevenir HIV', 'Exame para detectar HIV', 'Vacina contra HIV'],
-      correctAnswer: 'Medicamento para prevenir HIV', honeyValue: 20
+      correctAnswer: 'Medicamento para prevenir HIV', honeyValue: 15
     },
     {
       id: 'lgbtq_3_6', level: 3, category: 'lgbtq',
       question: 'Qual medicamento é usado na PrEP no Brasil?',
       options: ['Efavirenz', 'Tenofovir + Entricitabina', 'Zidovudina', 'Ritonavir'],
-      correctAnswer: 'Tenofovir + Entricitabina', honeyValue: 20
+      correctAnswer: 'Tenofovir + Entricitabina', honeyValue: 15
     },
     {
       id: 'lgbtq_3_7', level: 3, category: 'lgbtq',
       question: 'O que significa PeP (Profilaxia Pós-Exposição)?',
       options: ['Prevenção após exposição ao HIV', 'Prevenção antes da exposição ao HIV', 'Tratamento do HIV', 'Cura do HIV'],
-      correctAnswer: 'Prevenção após exposição ao HIV', honeyValue: 20
+      correctAnswer: 'Prevenção após exposição ao HIV', honeyValue: 15
     },
     {
       id: 'lgbtq_3_8', level: 3, category: 'lgbtq',
       question: 'Quanto tempo após a exposição de risco a PeP deve ser iniciada?',
       options: ['Até 24 horas', 'Até 72 horas', 'Até 7 dias', 'Até 30 dias'],
-      correctAnswer: 'Até 72 horas', honeyValue: 20
+      correctAnswer: 'Até 72 horas', honeyValue: 15
     },
     {
       id: 'lgbtq_3_9', level: 3, category: 'lgbtq',
       question: 'Por quanto tempo deve ser tomada a PeP?',
       options: ['15 dias', '28 dias', '45 dias', '60 dias'],
-      correctAnswer: '28 dias', honeyValue: 20
+      correctAnswer: '28 dias', honeyValue: 15
     },
     {
       id: 'lgbtq_3_10', level: 3, category: 'lgbtq',
       question: 'Qual a eficácia da PrEP quando usada corretamente?',
       options: ['Até 70%', 'Até 85%', 'Até 99%', '100%'],
-      correctAnswer: 'Até 99%', honeyValue: 20
+      correctAnswer: 'Até 99%', honeyValue: 15
     },
     {
       id: 'atual_3_10', level: 3, category: 'atual',
       question: 'Em 2025, Trump impôs uma tarifa de quanto por cento sobre produtos brasileiros?',
       options: ['25%', '40%', '50%', '75%'],
-      correctAnswer: '50%', honeyValue: 20
+      correctAnswer: '50%', honeyValue: 15
     },
     {
       id: 'lgbtq_3_11', level: 3, category: 'lgbtq',
       question: 'A PrEP está disponível gratuitamente no SUS?',
       options: ['Sim, para todos', 'Não, apenas em clínicas privadas', 'Sim, para grupos prioritários', 'Apenas com prescrição especial'],
-      correctAnswer: 'Sim, para grupos prioritários', honeyValue: 20
+      correctAnswer: 'Sim, para grupos prioritários', honeyValue: 15
     },
     {
       id: 'lgbtq_3_12', level: 3, category: 'lgbtq',
       question: 'Quais grupos são prioritários para PrEP no Brasil?',
       options: ['Apenas profissionais de saúde', 'HSH, pessoas trans, trabalhadores do sexo', 'Apenas casais sorodiscordantes', 'Todos os adultos'],
-      correctAnswer: 'HSH, pessoas trans, trabalhadores do sexo', honeyValue: 20
+      correctAnswer: 'HSH, pessoas trans, trabalhadores do sexo', honeyValue: 15
     },
     {
       id: 'lgbtq_3_13', level: 3, category: 'lgbtq',
       question: 'A PrEP protege contra outras ISTs além do HIV?',
       options: ['Sim, contra todas as ISTs', 'Não, apenas contra HIV', 'Sim, contra sífilis e gonorreia', 'Sim, mas apenas contra hepatite B'],
-      correctAnswer: 'Não, apenas contra HIV', honeyValue: 20
+      correctAnswer: 'Não, apenas contra HIV', honeyValue: 15
     },
     {
       id: 'lgbtq_3_14', level: 3, category: 'lgbtq',
       question: 'Qual exame é obrigatório antes de iniciar a PrEP?',
       options: ['Teste de HIV', 'Hemograma completo', 'Função renal', 'Todos os anteriores'],
-      correctAnswer: 'Todos os anteriores', honeyValue: 20
+      correctAnswer: 'Todos os anteriores', honeyValue: 15
     },
     {
       id: 'lgbtq_3_15', level: 3, category: 'lgbtq',
       question: 'Com que frequência deve-se fazer acompanhamento médico durante o uso da PrEP?',
       options: ['Mensalmente', 'A cada 3 meses', 'A cada 6 meses', 'Anualmente'],
-      correctAnswer: 'A cada 3 meses', honeyValue: 20
+      correctAnswer: 'A cada 3 meses', honeyValue: 15
     },
     {
       id: 'lgbtq_3_16', level: 3, category: 'lgbtq',
       question: 'A PeP pode ser usada repetidas vezes?',
       options: ['Não, apenas uma vez na vida', 'Sim, quando houver nova exposição de risco', 'Apenas duas vezes por ano', 'Apenas com autorização especial'],
-      correctAnswer: 'Sim, quando houver nova exposição de risco', honeyValue: 20
+      correctAnswer: 'Sim, quando houver nova exposição de risco', honeyValue: 15
     },
     {
       id: 'lgbtq_3_17', level: 3, category: 'lgbtq',
       question: 'Em que ano a PrEP foi incorporada ao SUS no Brasil?',
       options: ['2015', '2017', '2019', '2020'],
-      correctAnswer: '2017', honeyValue: 20
+      correctAnswer: '2017', honeyValue: 15
     },
     {
       id: 'lgbtq_3_18', level: 3, category: 'lgbtq',
       question: 'Qual a principal diferença entre PrEP e PeP?',
       options: ['PrEP é mais cara que PeP', 'PrEP é preventiva, PeP é emergencial', 'PeP é mais eficaz que PrEP', 'Não há diferença significativa'],
-      correctAnswer: 'PrEP é preventiva, PeP é emergencial', honeyValue: 20
+      correctAnswer: 'PrEP é preventiva, PeP é emergencial', honeyValue: 15
     },
     {
       id: 'lgbtq_3_19', level: 3, category: 'lgbtq',
       question: 'A PrEP pode ser interrompida e retomada?',
       options: ['Não, deve ser contínua', 'Sim, conforme necessidade e orientação médica', 'Apenas uma vez', 'Apenas durante feriados'],
-      correctAnswer: 'Sim, conforme necessidade e orientação médica', honeyValue: 20
+      correctAnswer: 'Sim, conforme necessidade e orientação médica', honeyValue: 15
     },
     {
       id: 'lgbtq_3_20', level: 3, category: 'lgbtq',
       question: 'A PrEP (Profilaxia Pré-Exposição) previne qual infecção?',
       options: ['Sífilis', 'HIV', 'Gonorreia', 'Hepatite B'],
-      correctAnswer: 'HIV', honeyValue: 20
+      correctAnswer: 'HIV', honeyValue: 15
     }
   ],
 
-  // Nível 4 - Médio (40 honey)
+  // Nível 4 - Médio (20 honey)
   level4: [
     {
       id: 'lgbtq_4_1', level: 4, category: 'lgbtq',
       question: 'Qual drag queen brasileira ganhou o RuPaul\'s Drag Race?',
       options: ['Pabllo Vittar', 'Gloria Groove', 'Sasha Velour', 'Nenhuma ainda'],
-      correctAnswer: 'Nenhuma ainda', honeyValue: 40
+      correctAnswer: 'Nenhuma ainda', honeyValue: 20
     },
     {
       id: 'brasil_4_1', level: 4, category: 'brasil',
       question: 'Qual foi o último presidente militar do Brasil?',
       options: ['Ernesto Geisel', 'João Figueiredo', 'Emílio Garrastazu Médici', 'Artur da Costa e Silva'],
-      correctAnswer: 'João Figueiredo', honeyValue: 40
+      correctAnswer: 'João Figueiredo', honeyValue: 20
     },
     {
       id: 'atual_4_1', level: 4, category: 'atual',
       question: 'Qual empresa comprou o WhatsApp?',
       options: ['Google', 'Apple', 'Meta (Facebook)', 'Microsoft'],
-      correctAnswer: 'Meta (Facebook)', honeyValue: 40
+      correctAnswer: 'Meta (Facebook)', honeyValue: 20
     },
     {
       id: 'lgbtq_4_2', level: 4, category: 'lgbtq',
       question: 'Em que cidade aconteceu a Rebelião de Stonewall?',
       options: ['Los Angeles', 'Nova York', 'San Francisco', 'Chicago'],
-      correctAnswer: 'Nova York', honeyValue: 40
+      correctAnswer: 'Nova York', honeyValue: 20
     },
     {
       id: 'brasil_4_2', level: 4, category: 'brasil',
       question: 'Qual é o segundo maior estado do Brasil?',
       options: ['Pará', 'Minas Gerais', 'Bahia', 'Mato Grosso'],
-      correctAnswer: 'Pará', honeyValue: 40
+      correctAnswer: 'Pará', honeyValue: 20
     },
     {
       id: 'atual_4_2', level: 4, category: 'atual',
       question: 'Qual foi o primeiro filme a arrecadar mais de 1 bilhão de dólares?',
       options: ['Titanic', 'Avatar', 'Avengers', 'Star Wars'],
-      correctAnswer: 'Titanic', honeyValue: 40
+      correctAnswer: 'Titanic', honeyValue: 20
     },
     {
     id: 'lgbtq_4_3', level: 4, category: 'lgbtq',
     question: 'Qual foi o primeiro grupo LGBT organizado no Brasil?',
     options: ['Grupo Gay da Bahia', 'Somos - Grupo de Afirmação Homossexual', 'Triângulo Rosa', 'Lambda'],
     correctAnswer: 'Somos - Grupo de Afirmação Homossexual', 
-    honeyValue: 40
+    honeyValue: 20
   },
     {
       id: 'brasil_4_3', level: 4, category: 'brasil',
       question: 'Qual foi o primeiro jornal do Brasil?',
       options: ['Correio Braziliense', 'Gazeta do Rio de Janeiro', 'Diário de Pernambuco', 'O Estado de S. Paulo'],
-      correctAnswer: 'Correio Braziliense', honeyValue: 40
+      correctAnswer: 'Correio Braziliense', honeyValue: 20
     },
     {
       id: 'atual_4_3', level: 4, category: 'atual',
       question: 'Qual é a criptomoeda promovida por Elon Musk como meme?',
       options: ['Bitcoin', 'Ethereum', 'Dogecoin', 'Shiba Inu'],
-      correctAnswer: 'Dogecoin', honeyValue: 40
+      correctAnswer: 'Dogecoin', honeyValue: 20
     },
     {
       id: 'lgbtq_4_4', level: 4, category: 'lgbtq',
       question: 'Qual presidente brasileiro sancionou a lei de criminalização da homofobia?',
       options: ['Lula', 'Dilma', 'Temer', 'STF decidiu'],
-      correctAnswer: 'STF decidiu', honeyValue: 40
+      correctAnswer: 'STF decidiu', honeyValue: 20
     },
     {
       id: 'lgbtq_4_5', level: 4, category: 'lgbtq',
       question: 'Complete o nome do filme: "_____, A Rainha do ____"',
       options: ['Priscilla, Deserto', 'Gloria, Palco', 'Pabllo, Noite', 'Roberta, Cidade'],
-      correctAnswer: 'Priscilla, Deserto', honeyValue: 40
+      correctAnswer: 'Priscilla, Deserto', honeyValue: 20
     },
     {
       id: 'lgbtq_4_6', level: 4, category: 'lgbtq',
       question: 'O que significa a sigla HSH, grupo prioritário para PrEP no Brasil?',
       options: ['Homens Solteiros Homossexuais', 'Homens que fazem Sexo com Homens', 'Homens Sarados e Hiperssexualizados', 'Homens com Síndrome Hemofílica'],
-      correctAnswer: 'Homens que fazem Sexo com Homens', honeyValue: 40
+      correctAnswer: 'Homens que fazem Sexo com Homens', honeyValue: 20
     }
   ],
 
-  // Nível 5 - Médio-Difícil (80 honey)
+  // Nível 5 - Médio-Difícil (25 honey)
   level5: [
     {
       id: 'lgbtq_5_1', level: 5, category: 'lgbtq',
       question: 'Na bandeira não-binária, qual cor representa pessoas fora do sistema binário de gênero?',
       options: ['Amarelo', 'Roxo', 'Verde', 'Laranja'],
-      correctAnswer: 'Amarelo', honeyValue: 80
+      correctAnswer: 'Amarelo', honeyValue: 25
     },
     {
       id: 'brasil_5_1', level: 5, category: 'brasil',
       question: 'Qual foi a primeira capital do Brasil?',
       options: ['Salvador', 'Rio de Janeiro', 'São Vicente', 'Olinda'],
-      correctAnswer: 'Salvador', honeyValue: 80
+      correctAnswer: 'Salvador', honeyValue: 25
     },
     {
       id: 'atual_5_1', level: 5, category: 'atual',
       question: 'Qual é o nome da nave espacial que levou turistas ao espaço em 2021?',
       options: ['Dragon', 'New Shepard', 'Virgin Galactic', 'Todas as anteriores'],
-      correctAnswer: 'Todas as anteriores', honeyValue: 80
+      correctAnswer: 'Todas as anteriores', honeyValue: 25
     },
     {
       id: 'lgbtq_5_2', level: 5, category: 'lgbtq',
       question: 'Qual foi a primeira série brasileira com protagonista trans na TV aberta?',
       options: ['A Força do Querer', 'Liberdade Liberdade', 'Amor de Mãe', 'Travessia'],
-      correctAnswer: 'A Força do Querer', honeyValue: 80
+      correctAnswer: 'A Força do Querer', honeyValue: 25
     },
     {
       id: 'brasil_5_2', level: 5, category: 'brasil',
       question: 'Qual é o nome do hino nacional brasileiro antes da Independência?',
       options: ['Hino da Independência', 'Hino Nacional Brasileiro', 'Não existia', 'Hino Real'],
-      correctAnswer: 'Não existia', honeyValue: 80
+      correctAnswer: 'Não existia', honeyValue: 25
     },
     {
       id: 'atual_5_2', level: 5, category: 'atual',
       question: 'Qual tecnologia está por trás do ChatGPT?',
       options: ['Machine Learning', 'Deep Learning', 'Transformer', 'Neural Networks'],
-      correctAnswer: 'Transformer', honeyValue: 80
+      correctAnswer: 'Transformer', honeyValue: 25
     },
     {
       id: 'lgbtq_5_3', level: 5, category: 'lgbtq',
       question: 'Em que ano foi fundado o primeiro grupo LGBT do Brasil?',
       options: ['1978', '1980', '1975', '1982'],
-      correctAnswer: '1978', honeyValue: 80
+      correctAnswer: '1978', honeyValue: 25
     },
     {
       id: 'brasil_5_3', level: 5, category: 'brasil',
       question: 'Qual é a origem da palavra "Brasil"?',
       options: ['Pau-brasil', 'Terra Brasilis', 'Brasa', 'Brasil (ilha mítica)'],
-      correctAnswer: 'Pau-brasil', honeyValue: 80
+      correctAnswer: 'Pau-brasil', honeyValue: 25
     },
     {
       id: 'atual_5_3', level: 5, category: 'atual',
       question: 'Qual país foi o primeiro a regulamentar o uso de inteligência artificial?',
       options: ['Estados Unidos', 'China', 'Reino Unido', 'União Europeia'],
-      correctAnswer: 'União Europeia', honeyValue: 80
+      correctAnswer: 'União Europeia', honeyValue: 25
     },
     {
       id: 'lgbtq_5_4', level: 5, category: 'lgbtq',
       question: 'Qual é o nome do primeiro jornal LGBT do Brasil?',
       options: ['Lampião da Esquina', 'O Snob', 'ChanacomChana', 'Nós Por Exemplo'],
-      correctAnswer: 'Lampião da Esquina', honeyValue: 80
+      correctAnswer: 'Lampião da Esquina', honeyValue: 25
     },
     {
       id: 'lgbtq_5_5', level: 5, category: 'lgbtq',
       question: 'Harvey Milk, retratado no filme "Milk: A Voz da Igualdade", foi o primeiro parlamentar americano declaradamente gay eleito para qual cargo?',
       options: ['Prefeito', 'Vereador', 'Deputado', 'Senador'],
-      correctAnswer: 'Vereador', honeyValue: 80
+      correctAnswer: 'Vereador', honeyValue: 25
     }
   ],
 
-  // Nível 6 - Difícil (160 honey)
+  // Nível 6 - Difícil (35 honey)
   level6: [
     {
       id: 'lgbtq_6_1', level: 6, category: 'lgbtq',
       question: 'Qual cidade brasileira tem o maior número de casais homoafetivos?',
       options: ['São Paulo', 'Rio de Janeiro', 'Fortaleza', 'Porto Alegre'],
-      correctAnswer: 'São Paulo', honeyValue: 160
+      correctAnswer: 'São Paulo', honeyValue: 35
     },
     {
       id: 'brasil_6_1', level: 6, category: 'brasil',
       question: 'Qual foi a duração da ditadura militar brasileira?',
       options: ['20 anos', '21 anos', '19 anos', '22 anos'],
-      correctAnswer: '21 anos', honeyValue: 160
+      correctAnswer: '21 anos', honeyValue: 35
     },
     {
       id: 'atual_6_1', level: 6, category: 'atual',
       question: 'Qual é o nome do modelo de IA da Anthropic?',
       options: ['GPT', 'LaMDA', 'Claude', 'Bard'],
-      correctAnswer: 'Claude', honeyValue: 160
+      correctAnswer: 'Claude', honeyValue: 35
     },
     {
       id: 'lgbtq_6_2', level: 6, category: 'lgbtq',
       question: 'Quem é a primeira mulher trans na ativa das Forças Armadas brasileiras?',
       options: ['Indianara Siqueira', 'Bruna Benevides', 'Duda Salabert', 'Erika Hilton'],
       correctAnswer: 'Bruna Benevides', 
-      honeyValue: 160
+      honeyValue: 35
     },
     {
       id: 'brasil_6_2', level: 6, category: 'brasil',
       question: 'Qual é o nome da primeira mulher presidente do Brasil?',
       options: ['Dilma Rousseff', 'Marina Silva', 'Marta Suplicy', 'Benedita da Silva'],
-      correctAnswer: 'Dilma Rousseff', honeyValue: 160
+      correctAnswer: 'Dilma Rousseff', honeyValue: 35
     },
     {
       id: 'atual_6_2', level: 6, category: 'atual',
       question: 'Qual empresa criou o primeiro carro elétrico de massa?',
       options: ['Tesla', 'BMW', 'General Motors', 'Nissan'],
-      correctAnswer: 'Tesla', honeyValue: 160
+      correctAnswer: 'Tesla', honeyValue: 35
     },
     {
       id: 'lgbtq_6_3', level: 6, category: 'lgbtq',
       question: 'Qual é o nome da organização internacional pelos direitos LGBT?',
       options: ['ILGA', 'GLAAD', 'HRC', 'OutRight'],
-      correctAnswer: 'ILGA', honeyValue: 160
+      correctAnswer: 'ILGA', honeyValue: 35
     },
     {
       id: 'brasil_6_3', level: 6, category: 'brasil',
       question: 'Em que ano foi criada a Constituição atual do Brasil?',
       options: ['1985', '1988', '1989', '1990'],
-      correctAnswer: '1988', honeyValue: 160
+      correctAnswer: '1988', honeyValue: 35
     },
     {
       id: 'atual_6_3', level: 6, category: 'atual',
       question: 'Qual foi a primeira vacina contra COVID-19 aprovada no mundo?',
       options: ['Pfizer', 'Moderna', 'AstraZeneca', 'Sputnik V'],
-      correctAnswer: 'Pfizer', honeyValue: 160
+      correctAnswer: 'Pfizer', honeyValue: 35
     },
     {
       id: 'lgbtq_6_4', level: 6, category: 'lgbtq',
       question: 'Qual país tem a maior Parada do Orgulho do mundo?',
       options: ['Brasil', 'Estados Unidos', 'Alemanha', 'Reino Unido'],
-      correctAnswer: 'Brasil', honeyValue: 160
+      correctAnswer: 'Brasil', honeyValue: 35
     },
     {
       id: 'brasil_6_5', level: 6, category: 'brasil',
       question: 'O Brasil possui a segunda maior reserva mundial de que tipo de mineral estratégico?',
       options: ['Terras raras', 'Petróleo', 'Ouro', 'Diamantes'],
-      correctAnswer: 'Terras raras', honeyValue: 160
+      correctAnswer: 'Terras raras', honeyValue: 35
     }
   ],
 
-  // Nível 7 - Muito Difícil (320 honey)
+  // Nível 7 - Muito Difícil (75 honey)
   level7: [
     {
       id: 'lgbtq_7_1', level: 7, category: 'lgbtq',
       question: 'Em que década surgiu o termo "bear" ou "urso" na comunidade gay?',
       options: ['1970', '1980', '1990', '2000'],
-      correctAnswer: '1980', honeyValue: 320
+      correctAnswer: '1980', honeyValue: 75
     },
     {
       id: 'brasil_7_1', level: 7, category: 'brasil',
       question: 'Qual foi o nome da operação que derrubou João Goulart?',
       options: ['Operação Brother Sam', 'Operação Condor', 'Operação Lava Jato', 'Operação Bandeirante'],
-      correctAnswer: 'Operação Brother Sam', honeyValue: 320
+      correctAnswer: 'Operação Brother Sam', honeyValue: 75
     },
     {
       id: 'atual_7_1', level: 7, category: 'atual',
       question: 'Qual é o nome do algoritmo usado pelo TikTok?',
       options: ['For You Algorithm', 'Recommendation Engine', 'ByteDance AI', 'Não é público'],
-      correctAnswer: 'Não é público', honeyValue: 320
+      correctAnswer: 'Não é público', honeyValue: 75
     },
     {
       id: 'lgbtq_7_2', level: 7, category: 'lgbtq',
       question: 'Qual filme de 1967 foi o primeiro brasileiro a tratar a homossexualidade de forma séria?',
       options: ['O Menino e o Vento', 'Vera', 'A Hora da Estrela', 'Torre de Babel'],
-      correctAnswer: 'O Menino e o Vento', honeyValue: 320
+      correctAnswer: 'O Menino e o Vento', honeyValue: 75
     },
     {
       id: 'brasil_7_2', level: 7, category: 'brasil',
       question: 'Qual é o nome da primeira universidade do Brasil?',
       options: ['USP', 'UFRJ', 'UFBA', 'Universidade do Rio de Janeiro'],
-      correctAnswer: 'Universidade do Rio de Janeiro', honeyValue: 320
+      correctAnswer: 'Universidade do Rio de Janeiro', honeyValue: 75
     },
     {
       id: 'atual_7_2', level: 7, category: 'atual',
       question: 'Qual foi o primeiro robô humanoide da Boston Dynamics?',
       options: ['Atlas', 'BigDog', 'PETMAN', 'Spot'],
-      correctAnswer: 'PETMAN', honeyValue: 320
+      correctAnswer: 'PETMAN', honeyValue: 75
     },
     {
       id: 'lgbtq_7_3', level: 7, category: 'lgbtq',
       question: 'Qual foi a primeira escola brasileira a adotar nome social para estudantes trans?',
       options: ['Colégio Pedro II', 'UFSC', 'USP', 'UFRGS'],
-      correctAnswer: 'Colégio Pedro II', honeyValue: 320
+      correctAnswer: 'Colégio Pedro II', honeyValue: 75
     },
     {
       id: 'brasil_7_3', level: 7, category: 'brasil',
       question: 'Em que ano foi assinada a Lei Áurea?',
       options: ['13 de maio de 1888', '15 de novembro de 1889', '7 de setembro de 1822', '12 de outubro de 1888'],
-      correctAnswer: '13 de maio de 1888', honeyValue: 320
+      correctAnswer: '13 de maio de 1888', honeyValue: 75
     },
     {
       id: 'atual_7_3', level: 7, category: 'atual',
       question: 'Qual foi o primeiro NFT vendido por mais de 69 milhões de dólares?',
       options: ['Everydays: The First 5000 Days', 'CryptoPunks', 'Bored Ape', 'The Pixel'],
-      correctAnswer: 'Everydays: The First 5000 Days', honeyValue: 320
+      correctAnswer: 'Everydays: The First 5000 Days', honeyValue: 75
     },
     {
       id: 'lgbtq_7_4', level: 7, category: 'lgbtq',
       question: 'Qual é o nome da primeira deputada federal trans eleita no Brasil?',
       options: ['Erika Hilton', 'Duda Salabert', 'Indianara Siqueira', 'Robeyoncé Lima'],
-      correctAnswer: 'Erika Hilton', honeyValue: 320
+      correctAnswer: 'Erika Hilton', honeyValue: 75
     },
     {
       id: 'brasil_7_5', level: 7, category: 'brasil',
       question: 'Qual percentual das reservas globais de terras raras o Brasil possui?',
       options: ['15%', '18%', '23%', '28%'],
-      correctAnswer: '23%', honeyValue: 320
+      correctAnswer: '23%', honeyValue: 75
     }
   ],
 
-  // Nível 8 - Extremo (640 honey)
+  // Nível 8 - Extremo (125 honey)
   level8: [
     {
       id: 'lgbtq_8_1', level: 8, category: 'lgbtq',
       question: 'Qual o primeiro país a legalizar o casamento igualitário?',
       options: ['Holanda', 'Bélgica', 'Canadá', 'Espanha'],
-      correctAnswer: 'Holanda', honeyValue: 640
+      correctAnswer: 'Holanda', honeyValue: 125
     },
     {
       id: 'brasil_8_1', level: 8, category: 'brasil',
       question: 'Qual foi o nome do plano econômico que criou o Real?',
       options: ['Plano Collor', 'Plano Verão', 'Plano Real', 'Plano Cruzado'],
-      correctAnswer: 'Plano Real', honeyValue: 640
+      correctAnswer: 'Plano Real', honeyValue: 125
     },
     {
       id: 'atual_8_1', level: 8, category: 'atual',
       question: 'Qual é o nome do primeiro computador quântico da Google?',
       options: ['Sycamore', 'Quantum', 'Bristlecone', 'Foxtail'],
-      correctAnswer: 'Sycamore', honeyValue: 640
+      correctAnswer: 'Sycamore', honeyValue: 125
     },
     {
       id: 'lgbtq_8_2', level: 8, category: 'lgbtq',
       question: 'Qual foi a primeira pessoa conhecida a fazer cirurgia de redesignação sexual?',
       options: ['Christine Jorgensen (1952)', 'Lili Elbe (1930)', 'Dora Richter (1921)', 'Karl M. Baer (1906)'],
-      correctAnswer: 'Lili Elbe (1930)', honeyValue: 640
+      correctAnswer: 'Lili Elbe (1930)', honeyValue: 125
     },
     {
       id: 'brasil_8_2', level: 8, category: 'brasil',
       question: 'Qual foi o primeiro partido político do Brasil?',
       options: ['Partido Conservador', 'Partido Liberal', 'Partido Republicano', 'Não existia'],
-      correctAnswer: 'Partido Conservador', honeyValue: 640
+      correctAnswer: 'Partido Conservador', honeyValue: 125
     },
     {
       id: 'atual_8_2', level: 8, category: 'atual',
       question: 'Qual é o nome da primeira mulher CEO da General Motors?',
       options: ['Mary Barra', 'Susan Wojcicki', 'Ginni Rometty', 'Safra Catz'],
-      correctAnswer: 'Mary Barra', honeyValue: 640
+      correctAnswer: 'Mary Barra', honeyValue: 125
     },
     {
       id: 'lgbtq_8_3', level: 8, category: 'lgbtq',
       question: 'Qual foi a primeira pessoa intersexo a competir nas Olimpíadas?',
       options: ['Caster Semenya', 'Dutee Chand', 'Annet Negesa', 'Não se sabe'],
-      correctAnswer: 'Não se sabe', honeyValue: 640
+      correctAnswer: 'Não se sabe', honeyValue: 125
     },
     {
       id: 'brasil_8_3', level: 8, category: 'brasil',
       question: 'Qual foi o nome da primeira estrada de ferro do Brasil?',
       options: ['Central do Brasil', 'Estrada de Ferro Dom Pedro II', 'Estrada de Ferro Mauá', 'São Paulo Railway'],
-      correctAnswer: 'Estrada de Ferro Mauá', honeyValue: 640
+      correctAnswer: 'Estrada de Ferro Mauá', honeyValue: 125
     },
     {
       id: 'atual_8_3', level: 8, category: 'atual',
       question: 'Qual foi o primeiro país a banir completamente o TikTok?',
       options: ['China', 'Estados Unidos', 'Índia', 'Afeganistão'],
-      correctAnswer: 'Índia', honeyValue: 640
+      correctAnswer: 'Índia', honeyValue: 125
     },
     {
       id: 'lgbtq_8_4', level: 8, category: 'lgbtq',
       question: 'Qual é o nome do médico alemão que criou o termo "homossexualidade"?',
       options: ['Magnus Hirschfeld', 'Karl Heinrich Ulrichs', 'Károly Mária Kertbeny', 'Richard von Krafft-Ebing'],
-      correctAnswer: 'Károly Mária Kertbeny', honeyValue: 640
+      correctAnswer: 'Károly Mária Kertbeny', honeyValue: 125
     }
   ],
 
-  // Nível 9 - Lendário (1280 honey)
+  // Nível 9 - Lendário (250 honey)
   level9: [
     {
       id: 'lgbtq_9_1', level: 9, category: 'lgbtq',
       question: 'Quantas cores tem a bandeira original do orgulho LGBT criada por Gilbert Baker?',
       options: ['6', '7', '8', '9'],
-      correctAnswer: '8', honeyValue: 1280
+      correctAnswer: '8', honeyValue: 250
     },
     {
       id: 'brasil_9_1', level: 9, category: 'brasil',
       question: 'Qual foi o nome do primeiro computador brasileiro?',
       options: ['Patinho Feio', 'G-10', 'Cobra', 'Zezinho'],
-      correctAnswer: 'Patinho Feio', honeyValue: 1280
+      correctAnswer: 'Patinho Feio', honeyValue: 250
     },
     {
       id: 'atual_9_1', level: 9, category: 'atual',
       question: 'Qual é o nome da primeira foto de um buraco negro?',
       options: ['Event Horizon', 'M87*', 'Sagittarius A*', 'Black Hole One'],
-      correctAnswer: 'M87*', honeyValue: 1280
+      correctAnswer: 'M87*', honeyValue: 250
     },
     {
       id: 'lgbtq_9_2', level: 9, category: 'lgbtq',
       question: 'Qual foi o nome da primeira organização LGBT da história?',
       options: ['Scientific-Humanitarian Committee', 'Mattachine Society', 'One Magazine', 'Society for Human Rights'],
-      correctAnswer: 'Scientific-Humanitarian Committee', honeyValue: 1280
+      correctAnswer: 'Scientific-Humanitarian Committee', honeyValue: 250
     },
     {
       id: 'brasil_9_2', level: 9, category: 'brasil',
       question: 'Qual foi o primeiro satélite brasileiro lançado ao espaço?',
       options: ['Brasilsat A1', 'SCD-1', 'Amazonia-1', 'CBERS-1'],
-      correctAnswer: 'SCD-1', honeyValue: 1280
+      correctAnswer: 'SCD-1', honeyValue: 250
     },
     {
       id: 'atual_9_2', level: 9, category: 'atual',
       question: 'Qual é o nome do algoritmo usado pelo Bitcoin?',
       options: ['SHA-256', 'Scrypt', 'X11', 'Ethash'],
-      correctAnswer: 'SHA-256', honeyValue: 1280
+      correctAnswer: 'SHA-256', honeyValue: 250
     },
     {
       id: 'lgbtq_9_3', level: 9, category: 'lgbtq',
       question: 'Em que ano foi criado o símbolo do triângulo rosa?',
       options: ['1935', '1940', '1945', '1950'],
-      correctAnswer: '1935', honeyValue: 1280
+      correctAnswer: '1935', honeyValue: 250
     },
     {
       id: 'brasil_9_3', level: 9, category: 'brasil',
       question: 'Qual foi o nome do primeiro código penal brasileiro?',
       options: ['Código Criminal do Império', 'Código Penal Republicano', 'Ordenações Filipinas', 'Código de Processo Criminal'],
-      correctAnswer: 'Código Criminal do Império', honeyValue: 1280
+      correctAnswer: 'Código Criminal do Império', honeyValue: 250
     },
     {
       id: 'atual_9_3', level: 9, category: 'atual',
       question: 'Qual foi o primeiro videogame a usar inteligência artificial?',
       options: ['Pac-Man', 'Space Invaders', 'Pong', 'Computer Space'],
-      correctAnswer: 'Pac-Man', honeyValue: 1280
+      correctAnswer: 'Pac-Man', honeyValue: 250
     },
     {
       id: 'lgbtq_9_4', level: 9, category: 'lgbtq',
       question: 'Qual é o nome da primeira pessoa trans a ser nomeada ministra no mundo?',
       options: ['Georgina Beyer', 'Amanda Simpson', 'Rachel Levine', 'Não se sabe'],
-      correctAnswer: 'Não se sabe', honeyValue: 1280
+      correctAnswer: 'Não se sabe', honeyValue: 250
     },
     {
       id: 'atual_9_4', level: 9, category: 'atual',
       question: 'A China controla aproximadamente quanto por cento da cadeia produtiva mundial de terras raras?',
       options: ['85%', '90%', '95%', '98%'],
-      correctAnswer: '95%', honeyValue: 160
+      correctAnswer: '95%', honeyValue: 250
     }
   ],
 
-  // Nível 10 - Mítico (2560 honey)
+  // Nível 10 - Mítico (500 honey)
   level10: [
     {
       id: 'lgbtq_10_1', level: 10, category: 'lgbtq',
@@ -730,61 +730,61 @@ const QUESTION_BANK = {
         'Lésbicas, Gays, Bissexuais, Trans, Queer, Intersexo, Andróginos, Pansexuais, Neutros e outras identidades'
       ],
       correctAnswer: 'Lésbicas, Gays, Bissexuais, Trans, Queer, Intersexo, Assexuais, Pansexuais, Não-binários e outras identidades',
-      honeyValue: 2560
+      honeyValue: 500
     },
     {
       id: 'brasil_10_1', level: 10, category: 'brasil',
       question: 'Qual foi o nome do primeiro mapa do Brasil?',
       options: ['Mapa de Pero Vaz de Caminha', 'Carta de Pero Vaz', 'Terra Brasilis', 'Mapa de Cantino'],
-      correctAnswer: 'Mapa de Cantino', honeyValue: 2560
+      correctAnswer: 'Mapa de Cantino', honeyValue: 500
     },
     {
       id: 'atual_10_1', level: 10, category: 'atual',
       question: 'Qual é o nome do primeiro robô humanoide a ganhar cidadania?',
       options: ['Sophia', 'Atlas', 'ASIMO', 'Pepper'],
-      correctAnswer: 'Sophia', honeyValue: 2560
+      correctAnswer: 'Sophia', honeyValue: 500
     },
     {
       id: 'lgbtq_10_2', level: 10, category: 'lgbtq',
       question: 'Qual foi a primeira cirurgia de mudança de sexo registrada na história?',
       options: ['Lili Elbe (1930)', 'Christine Jorgensen (1952)', 'Roberta Cowell (1951)', 'Não se sabe'],
-      correctAnswer: 'Lili Elbe (1930)', honeyValue: 2560
+      correctAnswer: 'Lili Elbe (1930)', honeyValue: 500
     },
     {
       id: 'brasil_10_2', level: 10, category: 'brasil',
       question: 'Qual foi o primeiro imposto criado no Brasil?',
       options: ['Quinto Real', 'Dízimo', 'Derrama', 'Capitação'],
-      correctAnswer: 'Quinto Real', honeyValue: 2560
+      correctAnswer: 'Quinto Real', honeyValue: 500
     },
     {
       id: 'atual_10_2', level: 10, category: 'atual',
       question: 'Qual é o nome do primeiro programa de TV gerado completamente por IA?',
       options: ['Nothing, Forever', 'AI Talk Show', 'Digital Humans', 'Synthetic Media'],
-      correctAnswer: 'Nothing, Forever', honeyValue: 2560
+      correctAnswer: 'Nothing, Forever', honeyValue: 500
     },
     {
       id: 'lgbtq_10_3', level: 10, category: 'lgbtq',
       question: 'Qual foi o primeiro país a reconhecer oficialmente um terceiro gênero?',
       options: ['Tailândia', 'Nepal', 'Malta', 'Alemanha'],
-      correctAnswer: 'Nepal', honeyValue: 2560
+      correctAnswer: 'Nepal', honeyValue: 500
     },
     {
       id: 'brasil_10_3', level: 10, category: 'brasil',
       question: 'Qual foi a primeira fábrica instalada no Brasil?',
       options: ['Fábrica de Ferro de Ipanema', 'Real Fábrica de Ferro', 'Companhia Siderúrgica Nacional', 'Usina de Volta Redonda'],
-      correctAnswer: 'Real Fábrica de Ferro', honeyValue: 2560
+      correctAnswer: 'Real Fábrica de Ferro', honeyValue: 500
     },
     {
       id: 'atual_10_3', level: 10, category: 'atual',
       question: 'Qual foi o primeiro país a criar uma moeda digital nacional?',
       options: ['China', 'Bahamas', 'Suécia', 'Uruguai'],
-      correctAnswer: 'Bahamas', honeyValue: 2560
+      correctAnswer: 'Bahamas', honeyValue: 500
     },
     {
       id: 'lgbtq_10_4', level: 10, category: 'lgbtq',
       question: 'Qual é o nome da primeira pessoa LGBT canonizada pela Igreja Católica?',
       options: ['São Sebastião', 'Santo Antônio', 'São João', 'Nenhuma'],
-      correctAnswer: 'Nenhuma', honeyValue: 2560
+      correctAnswer: 'Nenhuma', honeyValue: 500
     }
   ]
 };
