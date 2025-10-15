@@ -1,7 +1,7 @@
-const Database = require('../database');
+const Database = require('../databaseAdapter');
 
 /**
- * Migration 001: Multi-User Schema
+ * Migration 001: Multi-User Schema (PostgreSQL-compatible)
  * Adds tables for users, custom questions, user configurations, and question categories
  * Also updates existing tables to support multi-user functionality
  */
@@ -10,20 +10,36 @@ class Migration001MultiUserSchema {
   static async up() {
     console.log('🔄 Executando migração 001: Multi-User Schema...');
 
+    const dbType = Database.getDatabaseType();
+    console.log(`📊 Tipo de banco: ${dbType}`);
+
     try {
+      // Helper function to get correct syntax based on DB type
+      const getPKColumn = () => dbType === 'postgres'
+        ? 'id SERIAL PRIMARY KEY'
+        : 'id INTEGER PRIMARY KEY AUTOINCREMENT';
+
+      const getTimestamp = () => dbType === 'postgres'
+        ? 'TIMESTAMP DEFAULT NOW()'
+        : 'DATETIME DEFAULT CURRENT_TIMESTAMP';
+
+      const getBoolean = (defaultValue) => dbType === 'postgres'
+        ? `BOOLEAN DEFAULT ${defaultValue ? 'TRUE' : 'FALSE'}`
+        : `BOOLEAN DEFAULT ${defaultValue ? 1 : 0}`;
+
       // 1. Criar tabela de usuários
       await Database.run(`
         CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ${getPKColumn()},
           email TEXT UNIQUE NOT NULL,
           password_hash TEXT NOT NULL,
           name TEXT NOT NULL,
           role TEXT DEFAULT 'host' CHECK (role IN ('admin', 'host')),
           status TEXT DEFAULT 'pending' CHECK (status IN ('active', 'inactive', 'pending')),
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          approved_at DATETIME,
+          created_at ${getTimestamp()},
+          approved_at ${dbType === 'postgres' ? 'TIMESTAMP' : 'DATETIME'},
           approved_by INTEGER,
-          last_login DATETIME,
+          last_login ${dbType === 'postgres' ? 'TIMESTAMP' : 'DATETIME'},
           profile_image TEXT,
 
           FOREIGN KEY (approved_by) REFERENCES users(id)
@@ -40,14 +56,14 @@ class Migration001MultiUserSchema {
       // 2. Criar tabela de categorias de questões
       await Database.run(`
         CREATE TABLE IF NOT EXISTS question_categories (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ${getPKColumn()},
           name TEXT UNIQUE NOT NULL,
           description TEXT,
           color_hex TEXT DEFAULT '#FF6B35',
           icon_name TEXT,
-          is_active BOOLEAN DEFAULT 1,
+          is_active ${getBoolean(true)},
           created_by INTEGER,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          created_at ${getTimestamp()},
 
           FOREIGN KEY (created_by) REFERENCES users(id)
         )
@@ -58,20 +74,20 @@ class Migration001MultiUserSchema {
       // 3. Criar tabela de questões personalizadas
       await Database.run(`
         CREATE TABLE IF NOT EXISTS questions (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ${getPKColumn()},
           question_id TEXT UNIQUE NOT NULL,
           category TEXT NOT NULL,
           question_text TEXT NOT NULL,
-          options TEXT NOT NULL, -- JSON: ["A) Opção 1", "B) Opção 2", ...]
-          correct_answer TEXT NOT NULL, -- 'A', 'B', 'C', 'D'
+          options ${dbType === 'postgres' ? 'JSONB NOT NULL' : 'TEXT NOT NULL'},
+          correct_answer TEXT NOT NULL,
           level INTEGER NOT NULL CHECK (level BETWEEN 1 AND 10),
           honey_value INTEGER NOT NULL CHECK (honey_value >= 5),
           created_by INTEGER,
-          is_active BOOLEAN DEFAULT 1,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          is_active ${getBoolean(true)},
+          created_at ${getTimestamp()},
+          updated_at ${getTimestamp()},
           usage_count INTEGER DEFAULT 0,
-          difficulty_rating DECIMAL(3,2),
+          difficulty_rating ${dbType === 'postgres' ? 'NUMERIC(3,2)' : 'DECIMAL(3,2)'},
           explanation TEXT,
 
           FOREIGN KEY (created_by) REFERENCES users(id)
@@ -89,18 +105,18 @@ class Migration001MultiUserSchema {
       // 4. Criar tabela de configurações por usuário
       await Database.run(`
         CREATE TABLE IF NOT EXISTS user_game_configs (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ${getPKColumn()},
           user_id INTEGER NOT NULL,
           config_name TEXT NOT NULL DEFAULT 'Padrão',
-          honey_multiplier DECIMAL(3,2) DEFAULT 1.0 CHECK (honey_multiplier BETWEEN 0.1 AND 5.0),
+          honey_multiplier ${dbType === 'postgres' ? 'NUMERIC(3,2)' : 'DECIMAL(3,2)'} DEFAULT 1.0 CHECK (honey_multiplier BETWEEN 0.1 AND 5.0),
           time_limit INTEGER DEFAULT 30 CHECK (time_limit BETWEEN 10 AND 120),
-          custom_questions_only BOOLEAN DEFAULT 0,
-          allow_lifelines BOOLEAN DEFAULT 1,
+          custom_questions_only ${getBoolean(false)},
+          allow_lifelines ${getBoolean(true)},
           max_participants INTEGER DEFAULT 100,
-          auto_advance BOOLEAN DEFAULT 0,
+          auto_advance ${getBoolean(false)},
           theme_color TEXT DEFAULT '#FF6B35',
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          is_default BOOLEAN DEFAULT 0,
+          created_at ${getTimestamp()},
+          is_default ${getBoolean(false)},
 
           FOREIGN KEY (user_id) REFERENCES users(id),
           UNIQUE(user_id, config_name)
@@ -110,9 +126,20 @@ class Migration001MultiUserSchema {
       console.log('✅ Tabela user_game_configs criada');
 
       // 5. Verificar se as colunas já existem nas tabelas existentes antes de adicionar
-      const gameSessionsInfo = await Database.all(`PRAGMA table_info(game_sessions)`);
-      const hasUserId = gameSessionsInfo.some(col => col.name === 'user_id');
-      const hasConfigId = gameSessionsInfo.some(col => col.name === 'config_id');
+      const gameSessionsInfo = await Database.all(`
+        ${dbType === 'postgres'
+          ? "SELECT column_name FROM information_schema.columns WHERE table_name = 'game_sessions'"
+          : "PRAGMA table_info(game_sessions)"
+        }
+      `);
+
+      const hasUserId = dbType === 'postgres'
+        ? gameSessionsInfo.some(col => col.column_name === 'user_id')
+        : gameSessionsInfo.some(col => col.name === 'user_id');
+
+      const hasConfigId = dbType === 'postgres'
+        ? gameSessionsInfo.some(col => col.column_name === 'config_id')
+        : gameSessionsInfo.some(col => col.name === 'config_id');
 
       if (!hasUserId) {
         await Database.run(`ALTER TABLE game_sessions ADD COLUMN user_id INTEGER`);
@@ -126,9 +153,20 @@ class Migration001MultiUserSchema {
       }
 
       // 6. Verificar e adicionar colunas em answers
-      const answersInfo = await Database.all(`PRAGMA table_info(answers)`);
-      const hasQuestionSource = answersInfo.some(col => col.name === 'question_source');
-      const hasCustomQuestionId = answersInfo.some(col => col.name === 'custom_question_id');
+      const answersInfo = await Database.all(`
+        ${dbType === 'postgres'
+          ? "SELECT column_name FROM information_schema.columns WHERE table_name = 'answers'"
+          : "PRAGMA table_info(answers)"
+        }
+      `);
+
+      const hasQuestionSource = dbType === 'postgres'
+        ? answersInfo.some(col => col.column_name === 'question_source')
+        : answersInfo.some(col => col.name === 'question_source');
+
+      const hasCustomQuestionId = dbType === 'postgres'
+        ? answersInfo.some(col => col.column_name === 'custom_question_id')
+        : answersInfo.some(col => col.name === 'custom_question_id');
 
       if (!hasQuestionSource) {
         await Database.run(`ALTER TABLE answers ADD COLUMN question_source TEXT DEFAULT 'default'`);
@@ -219,7 +257,6 @@ class Migration001MultiUserSchema {
     console.log('🔄 Revertendo migração 001: Multi-User Schema...');
 
     try {
-      // Remover colunas adicionadas (SQLite não suporta DROP COLUMN, então recriamos as tabelas)
       await Database.run(`DROP TABLE IF EXISTS user_game_configs`);
       await Database.run(`DROP TABLE IF EXISTS questions`);
       await Database.run(`DROP TABLE IF EXISTS question_categories`);
@@ -235,13 +272,22 @@ class Migration001MultiUserSchema {
 
   static async isApplied() {
     try {
-      // Verificar se a tabela users existe
-      const tables = await Database.all(`
-        SELECT name FROM sqlite_master
-        WHERE type='table' AND name='users'
-      `);
+      const dbType = Database.getDatabaseType();
 
-      return tables.length > 0;
+      if (dbType === 'postgres') {
+        const tables = await Database.all(`
+          SELECT table_name
+          FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_name = 'users'
+        `);
+        return tables.length > 0;
+      } else {
+        const tables = await Database.all(`
+          SELECT name FROM sqlite_master
+          WHERE type='table' AND name='users'
+        `);
+        return tables.length > 0;
+      }
     } catch (error) {
       return false;
     }
