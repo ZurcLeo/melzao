@@ -8,9 +8,15 @@ const bcrypt = require('bcrypt');
 const Database = require('../database');
 
 async function createAdminUser() {
+  let shouldCloseDb = false;
+
   try {
-    console.log('🔄 Conectando ao banco de dados...');
-    await Database.initialize();
+    // Only initialize if not already initialized
+    if (!Database.getDatabase()) {
+      console.log('🔄 Conectando ao banco de dados...');
+      await Database.initialize();
+      shouldCloseDb = true;
+    }
 
     const dbType = Database.getDatabaseType();
     console.log(`📊 Tipo de banco: ${dbType}`);
@@ -80,7 +86,10 @@ async function createAdminUser() {
     console.error('❌ Erro ao criar/verificar usuário admin:', error);
     throw error;
   } finally {
-    await Database.close();
+    // Only close if we opened it
+    if (shouldCloseDb) {
+      await Database.close();
+    }
   }
 }
 
