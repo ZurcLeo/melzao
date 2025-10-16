@@ -124,6 +124,14 @@ class DatabaseAdapter {
       try {
         // Convert SQL for PostgreSQL if needed
         const pgSql = this.convertSQLToPostgreSQL(sql);
+
+        // Debug logging for SQL conversion in production
+        if (process.env.NODE_ENV === 'production' && sql !== pgSql) {
+          console.log('🔄 SQL Convertido:');
+          console.log('Original:', sql);
+          console.log('Convertido:', pgSql);
+        }
+
         const result = await this.db.query(pgSql, params);
 
         // Extract inserted ID if available (from RETURNING clause)
