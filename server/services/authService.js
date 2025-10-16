@@ -286,10 +286,9 @@ class AuthService {
   }
 
   async updateUserLastLogin(userId) {
-    const dbType = Database.getDatabaseType();
-    const timestamp = dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
+    // The Database Adapter will automatically convert CURRENT_TIMESTAMP to NOW() for PostgreSQL
     await Database.run(`
-      UPDATE users SET last_login = ${timestamp} WHERE id = ?
+      UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?
     `, [userId]);
   }
 
@@ -320,11 +319,10 @@ class AuthService {
   }
 
   async approveUser(userId, approvedBy) {
-    const dbType = Database.getDatabaseType();
-    const timestamp = dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
+    // The Database Adapter will automatically convert CURRENT_TIMESTAMP to NOW() for PostgreSQL
     const result = await Database.run(`
       UPDATE users
-      SET status = 'active', approved_at = ${timestamp}, approved_by = ?
+      SET status = 'active', approved_at = CURRENT_TIMESTAMP, approved_by = ?
       WHERE id = ? AND status = 'pending'
     `, [approvedBy, userId]);
 
