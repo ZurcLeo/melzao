@@ -243,6 +243,10 @@ class DatabaseAdapter {
     converted = converted.replace(/BOOLEAN DEFAULT 1/gi, 'BOOLEAN DEFAULT TRUE');
     converted = converted.replace(/BOOLEAN DEFAULT 0/gi, 'BOOLEAN DEFAULT FALSE');
 
+    // Convert ? placeholders to $1, $2, $3, etc. for PostgreSQL
+    let paramIndex = 1;
+    converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
+
     // Add RETURNING id to INSERT statements for getting lastID (if not already present)
     if (converted.match(/^\s*INSERT\s+INTO/i) && !converted.match(/RETURNING/i) && !converted.match(/ON CONFLICT/i)) {
       converted = converted.replace(/;?\s*$/, ' RETURNING id;');
