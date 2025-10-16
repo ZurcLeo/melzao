@@ -286,8 +286,10 @@ class AuthService {
   }
 
   async updateUserLastLogin(userId) {
+    const dbType = Database.getDatabaseType();
+    const timestamp = dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
     await Database.run(`
-      UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?
+      UPDATE users SET last_login = ${timestamp} WHERE id = ?
     `, [userId]);
   }
 
@@ -318,9 +320,11 @@ class AuthService {
   }
 
   async approveUser(userId, approvedBy) {
+    const dbType = Database.getDatabaseType();
+    const timestamp = dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
     const result = await Database.run(`
       UPDATE users
-      SET status = 'active', approved_at = CURRENT_TIMESTAMP, approved_by = ?
+      SET status = 'active', approved_at = ${timestamp}, approved_by = ?
       WHERE id = ? AND status = 'pending'
     `, [approvedBy, userId]);
 

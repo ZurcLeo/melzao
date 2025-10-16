@@ -6,6 +6,15 @@ const Database = require('../database');
  */
 class QuestionService {
   /**
+   * Helper to get correct timestamp syntax based on database type
+   */
+  getTimestampSyntax() {
+    const Database = require('../database');
+    const dbType = Database.getDatabaseType();
+    return dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
+  }
+
+  /**
    * Insert default questions into database if they don't exist
    */
   async ensureDefaultQuestions() {
@@ -65,12 +74,13 @@ class QuestionService {
         };
 
         // Insert without user ID (system questions) - use INSERT OR IGNORE to avoid duplicates
+        const timestamp = this.getTimestampSyntax();
         await Database.run(`
           INSERT OR IGNORE INTO questions (
             question_id, category, question_text, options, correct_answer,
             level, honey_value, explanation, is_active, usage_count,
             created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ${timestamp}, ${timestamp})
         `, [
           question.id,
           questionData.category.trim(),
@@ -213,6 +223,7 @@ class QuestionService {
     } = questionData;
 
     // Update question
+    const timestamp = this.getTimestampSyntax();
     await Database.run(`
       UPDATE questions SET
         category = ?,
@@ -222,7 +233,7 @@ class QuestionService {
         level = ?,
         honey_value = ?,
         explanation = ?,
-        updated_at = CURRENT_TIMESTAMP
+        updated_at = ${timestamp}
       WHERE id = ?
     `, [
       category.trim(),
@@ -604,10 +615,11 @@ class QuestionService {
       throw new Error(`Valor deve estar entre ${min} e ${max} para o nível ${level}`);
     }
 
+    const timestamp = this.getTimestampSyntax();
     await Database.run(`
       UPDATE questions SET
         honey_value = ?,
-        updated_at = CURRENT_TIMESTAMP
+        updated_at = ${timestamp}
       WHERE id = ?
     `, [parseInt(newValue), questionId]);
 
@@ -635,10 +647,11 @@ class QuestionService {
 
     const newStatus = question.is_active ? 0 : 1;
 
+    const timestamp = this.getTimestampSyntax();
     await Database.run(`
       UPDATE questions SET
         is_active = ?,
-        updated_at = CURRENT_TIMESTAMP
+        updated_at = ${timestamp}
       WHERE id = ?
     `, [newStatus, questionId]);
 
@@ -819,10 +832,11 @@ class QuestionService {
    * Increment usage count when question is used in a game
    */
   async incrementUsageCount(questionId) {
+    const timestamp = this.getTimestampSyntax();
     await Database.run(`
       UPDATE questions SET
         usage_count = usage_count + 1,
-        updated_at = CURRENT_TIMESTAMP
+        updated_at = ${timestamp}
       WHERE id = ?
     `, [questionId]);
   }
