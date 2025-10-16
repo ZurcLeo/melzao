@@ -106,8 +106,35 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    service: 'Show do Melzão MVP Server'
+    service: 'Show do Melzão MVP Server',
+    database: database.getDatabaseType()
   });
+});
+
+// Setup endpoint - for initial database setup (create admin user)
+app.post('/api/setup/init', async (req, res) => {
+  try {
+    const createAdminUser = require('./scripts/createAdminUser');
+    const result = await createAdminUser();
+
+    res.json({
+      success: true,
+      message: 'Setup concluído com sucesso',
+      admin: {
+        id: result.id,
+        email: result.email,
+        name: result.name,
+        role: result.role,
+        status: result.status
+      }
+    });
+  } catch (error) {
+    console.error('Erro no setup:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 // Status do jogo
