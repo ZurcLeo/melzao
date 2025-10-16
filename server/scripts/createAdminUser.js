@@ -51,16 +51,18 @@ async function createAdminUser() {
     console.log('📝 Criando usuário admin...');
     const adminPasswordHash = await bcrypt.hash('admin123', 12);
 
-    const timestamp = dbType === 'postgres' ? 'NOW()' : 'CURRENT_TIMESTAMP';
+    // Use current date string instead of SQL function
+    const now = new Date().toISOString();
     const result = await Database.run(`
       INSERT INTO users (email, password_hash, name, role, status, approved_at)
-      VALUES (?, ?, ?, ?, ?, ${timestamp})
+      VALUES (?, ?, ?, ?, ?, ?)
     `, [
       'admin@melzao.com',
       adminPasswordHash,
       'Administrador',
       'admin',
-      'active'
+      'active',
+      now
     ]);
 
     console.log('✅ Usuário admin criado com sucesso!');
