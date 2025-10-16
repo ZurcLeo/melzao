@@ -208,21 +208,35 @@ class DatabaseAdapter {
 
     let converted = sql;
 
+    // Replace INSERT OR IGNORE with INSERT ... ON CONFLICT DO NOTHING
+    if (converted.match(/INSERT OR IGNORE/i)) {
+      converted = converted.replace(/INSERT OR IGNORE INTO\s+(\w+)\s*\(/gi, 'INSERT INTO $1 (');
+      // Add ON CONFLICT clause before RETURNING if present, otherwise at the end
+      if (converted.match(/RETURNING/i)) {
+        converted = converted.replace(/\s+RETURNING/i, ' ON CONFLICT DO NOTHING RETURNING');
+      } else {
+        converted = converted.replace(/;?\s*$/, ' ON CONFLICT DO NOTHING;');
+      }
+    }
+
     // Replace AUTOINCREMENT with SERIAL (for CREATE TABLE)
     converted = converted.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY');
 
     // Replace DATETIME with TIMESTAMP
     converted = converted.replace(/DATETIME/gi, 'TIMESTAMP');
 
-    // Replace CURRENT_TIMESTAMP with NOW()
+    // Replace CURRENT_TIMESTAMP with NOW() (both in defaults and standalone usage)
     converted = converted.replace(/DEFAULT CURRENT_TIMESTAMP/gi, 'DEFAULT NOW()');
+    converted = converted.replace(/= CURRENT_TIMESTAMP/gi, '= NOW()');
+    converted = converted.replace(/,\s*CURRENT_TIMESTAMP\s*,/gi, ', NOW(),');
+    converted = converted.replace(/\(\s*CURRENT_TIMESTAMP\s*\)/gi, '(NOW())');
 
     // Replace BOOLEAN 0/1 with TRUE/FALSE
     converted = converted.replace(/BOOLEAN DEFAULT 1/gi, 'BOOLEAN DEFAULT TRUE');
     converted = converted.replace(/BOOLEAN DEFAULT 0/gi, 'BOOLEAN DEFAULT FALSE');
 
-    // Add RETURNING id to INSERT statements for getting lastID
-    if (converted.match(/^\s*INSERT\s+INTO/i) && !converted.match(/RETURNING/i)) {
+    // Add RETURNING id to INSERT statements for getting lastID (if not already present)
+    if (converted.match(/^\s*INSERT\s+INTO/i) && !converted.match(/RETURNING/i) && !converted.match(/ON CONFLICT/i)) {
       converted = converted.replace(/;?\s*$/, ' RETURNING id;');
     }
 

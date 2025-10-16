@@ -13,11 +13,19 @@ class MigrationRunner {
 
   async initialize() {
     // Criar tabela de migrations se não existir
+    const dbType = this.database.getDatabaseType();
+    const pkColumn = dbType === 'postgres'
+      ? 'id SERIAL PRIMARY KEY'
+      : 'id INTEGER PRIMARY KEY AUTOINCREMENT';
+    const timestampDefault = dbType === 'postgres'
+      ? 'TIMESTAMP DEFAULT NOW()'
+      : 'DATETIME DEFAULT CURRENT_TIMESTAMP';
+
     await this.database.run(`
       CREATE TABLE IF NOT EXISTS migrations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${pkColumn},
         name TEXT UNIQUE NOT NULL,
-        applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        applied_at ${timestampDefault}
       )
     `);
 
