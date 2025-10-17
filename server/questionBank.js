@@ -159,7 +159,7 @@ const QUESTION_BANK = {
     {
       id: 'brasil_3_2', level: 3, category: 'brasil',
       question: 'Em que ano foi abolida a escravidão no Brasil?',
-      options: ['1885', '1888', '1889', '1890'],
+      options: ['1885', '1888', '1889', '1890'],  
       correctAnswer: '1888', honeyValue: 15
     },
     {
@@ -542,8 +542,8 @@ const QUESTION_BANK = {
     },
     {
       id: 'brasil_7_2', level: 7, category: 'brasil',
-      question: 'Qual é o nome da primeira universidade do Brasil?',
-      options: ['USP', 'UFRJ', 'UFBA', 'Universidade do Rio de Janeiro'],
+      question: 'Qual é o nome da primeira universidade oficial do Brasil?',
+      options: ['USP', 'UFRJ', 'UFPR', 'Universidade do Rio de Janeiro'],
       correctAnswer: 'Universidade do Rio de Janeiro', honeyValue: 75
     },
     {
