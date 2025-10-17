@@ -586,8 +586,8 @@ class MultiUserGameController {
       participant.currentLevel++;
       participant.totalEarned = question.honeyValue;
 
-      // Check if completed all 10 levels
-      if (participant.currentLevel >= 10) {
+      // Check if completed all 10 levels (currentLevel will be 11 after answering level 10)
+      if (participant.currentLevel > 10) {
         // Winner!
         participant.status = 'winner';
         session.gameStatus = 'waiting';

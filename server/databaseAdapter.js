@@ -258,12 +258,13 @@ class DatabaseAdapter {
     // is_active = 0 -> is_active = FALSE
     // is_default = 1 -> is_default = TRUE
     // is_default = 0 -> is_default = FALSE
-    converted = converted.replace(/\b(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, '$1 = TRUE');
-    converted = converted.replace(/\b(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, '$1 = FALSE');
+    // is_correct = 1 -> is_correct = TRUE
+    converted = converted.replace(/\b(is_active|is_default|is_correct|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, '$1 = TRUE');
+    converted = converted.replace(/\b(is_active|is_default|is_correct|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, '$1 = FALSE');
 
     // Also convert SET clauses for UPDATEs
-    converted = converted.replace(/\bSET\s+(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, 'SET $1 = TRUE');
-    converted = converted.replace(/\bSET\s+(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, 'SET $1 = FALSE');
+    converted = converted.replace(/\bSET\s+(is_active|is_default|is_correct|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, 'SET $1 = TRUE');
+    converted = converted.replace(/\bSET\s+(is_active|is_default|is_correct|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, 'SET $1 = FALSE');
 
     // Convert ? placeholders to $1, $2, $3, etc. for PostgreSQL
     let paramIndex = 1;
