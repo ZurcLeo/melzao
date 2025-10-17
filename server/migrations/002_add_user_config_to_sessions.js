@@ -1,52 +1,68 @@
 /**
- * Migration: Add user_id and config_id to game_sessions table
- * This allows tracking which user created each session and which config was used
+ * Migration: Add foreign key constraints for user_id and config_id in game_sessions
+ * Note: Columns user_id and config_id are already added by migration 001
+ * This migration only adds PostgreSQL foreign key constraints
  */
+
+const Database = require('../databaseAdapter');
 
 module.exports = {
   name: '002_add_user_config_to_sessions',
 
-  async up(Database) {
+  async up() {
     console.log('🔄 Executando migration: 002_add_user_config_to_sessions');
 
     const dbType = Database.getDatabaseType();
 
-    // Add user_id column
-    await Database.run(`
-      ALTER TABLE game_sessions
-      ADD COLUMN user_id INTEGER
-    `);
-
-    // Add config_id column
-    await Database.run(`
-      ALTER TABLE game_sessions
-      ADD COLUMN config_id INTEGER
-    `);
-
-    // Add foreign key constraints if PostgreSQL
+    // Only add foreign key constraints for PostgreSQL
+    // (user_id and config_id columns already exist from migration 001)
     if (dbType === 'postgres') {
-      await Database.run(`
-        ALTER TABLE game_sessions
-        ADD CONSTRAINT fk_game_sessions_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-      `);
+      try {
+        // Check if constraints already exist
+        const constraints = await Database.all(`
+          SELECT constraint_name
+          FROM information_schema.table_constraints
+          WHERE table_name = 'game_sessions'
+          AND constraint_type = 'FOREIGN KEY'
+        `);
 
-      await Database.run(`
-        ALTER TABLE game_sessions
-        ADD CONSTRAINT fk_game_sessions_config
-        FOREIGN KEY (config_id) REFERENCES user_game_configs(id)
-      `);
+        const hasUserFk = constraints.some(c => c.constraint_name === 'fk_game_sessions_user');
+        const hasConfigFk = constraints.some(c => c.constraint_name === 'fk_game_sessions_config');
+
+        if (!hasUserFk) {
+          await Database.run(`
+            ALTER TABLE game_sessions
+            ADD CONSTRAINT fk_game_sessions_user
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          `);
+          console.log('✅ Foreign key constraint fk_game_sessions_user adicionada');
+        }
+
+        if (!hasConfigFk) {
+          await Database.run(`
+            ALTER TABLE game_sessions
+            ADD CONSTRAINT fk_game_sessions_config
+            FOREIGN KEY (config_id) REFERENCES user_game_configs(id)
+          `);
+          console.log('✅ Foreign key constraint fk_game_sessions_config adicionada');
+        }
+      } catch (error) {
+        console.warn('⚠️ Aviso ao adicionar constraints:', error.message);
+        // Don't fail if constraints already exist
+      }
+    } else {
+      console.log('ℹ️ SQLite não requer foreign key constraints adicionais');
     }
 
     console.log('✅ Migration 002_add_user_config_to_sessions concluída');
   },
 
-  async down(Database) {
+  async down() {
     console.log('🔄 Revertendo migration: 002_add_user_config_to_sessions');
 
     const dbType = Database.getDatabaseType();
 
-    // Drop foreign keys first if PostgreSQL
+    // Only drop foreign key constraints (don't drop columns - they're managed by migration 001)
     if (dbType === 'postgres') {
       await Database.run(`
         ALTER TABLE game_sessions
@@ -57,18 +73,9 @@ module.exports = {
         ALTER TABLE game_sessions
         DROP CONSTRAINT IF EXISTS fk_game_sessions_config
       `);
+
+      console.log('✅ Foreign key constraints removidas');
     }
-
-    // Drop columns
-    await Database.run(`
-      ALTER TABLE game_sessions
-      DROP COLUMN IF EXISTS user_id
-    `);
-
-    await Database.run(`
-      ALTER TABLE game_sessions
-      DROP COLUMN IF EXISTS config_id
-    `);
 
     console.log('✅ Migration 002_add_user_config_to_sessions revertida');
   }
