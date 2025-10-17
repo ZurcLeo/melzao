@@ -417,6 +417,22 @@ class MultiUserGameController {
   }
 
   /**
+   * Parse options field - handles both JSON string (SQLite) and JSONB object (PostgreSQL)
+   */
+  parseOptions(options) {
+    if (typeof options === 'string') {
+      try {
+        return JSON.parse(options);
+      } catch (error) {
+        console.error('Erro ao fazer parse de options:', error, 'Value:', options);
+        throw error;
+      }
+    }
+    // Already an object (PostgreSQL JSONB)
+    return options;
+  }
+
+  /**
    * Get available questions from database (fresh data, not cached)
    * This ensures users always see the most recent version of questions
    */
@@ -446,7 +462,7 @@ class MultiUserGameController {
             question_id: q.question_id,
             question_text: q.question_text,
             question: q.question_text,
-            options: JSON.parse(q.options),
+            options: this.parseOptions(q.options),
             correct_answer: q.correct_answer,
             correctAnswer: q.correct_answer,
             level: q.level,
@@ -474,7 +490,7 @@ class MultiUserGameController {
           question_id: q.question_id,
           question_text: q.question_text,
           question: q.question_text,
-          options: JSON.parse(q.options),
+          options: this.parseOptions(q.options),
           correct_answer: q.correct_answer,
           correctAnswer: q.correct_answer,
           level: q.level,
