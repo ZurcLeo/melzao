@@ -3,12 +3,16 @@ const database = require('./database');
 class GameDataService {
 
   // Inicializar nova sessão de jogo
-  async createGameSession() {
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  async createGameSession(sessionData = null) {
+    // If sessionData provided, use it; otherwise generate a new session
+    const sessionId = sessionData?.session_id || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = sessionData?.user_id || null;
+    const configId = sessionData?.config_id || null;
+    const status = sessionData?.status || 'active';
 
     await database.run(
-      'INSERT INTO game_sessions (session_id, started_at, status) VALUES (?, ?, ?)',
-      [sessionId, new Date().toISOString(), 'active']
+      'INSERT INTO game_sessions (session_id, user_id, config_id, started_at, status) VALUES (?, ?, ?, ?, ?)',
+      [sessionId, userId, configId, new Date().toISOString(), status]
     );
 
     console.log(`📊 Nova sessão criada: ${sessionId}`);
