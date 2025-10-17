@@ -66,12 +66,16 @@ class QuestionService {
 
         // Insert without user ID (system questions) - use INSERT OR IGNORE to avoid duplicates
         // The Database Adapter will automatically convert CURRENT_TIMESTAMP to NOW() for PostgreSQL
+        const dbType = Database.getDatabaseType();
+        const isActive = dbType === 'postgres' ? 'TRUE' : '1';
+        const usageCount = '0';
+
         await Database.run(`
           INSERT OR IGNORE INTO questions (
             question_id, category, question_text, options, correct_answer,
             level, honey_value, explanation, is_active, usage_count,
             created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ${isActive}, ${usageCount}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `, [
           question.id,
           questionData.category.trim(),

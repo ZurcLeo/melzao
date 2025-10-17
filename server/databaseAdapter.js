@@ -234,14 +234,24 @@ class DatabaseAdapter {
     converted = converted.replace(/DATETIME/gi, 'TIMESTAMP');
 
     // Replace CURRENT_TIMESTAMP with NOW() (both in defaults and standalone usage)
+    // Must be done BEFORE placeholder conversion to avoid issues
     converted = converted.replace(/DEFAULT CURRENT_TIMESTAMP/gi, 'DEFAULT NOW()');
     converted = converted.replace(/= CURRENT_TIMESTAMP/gi, '= NOW()');
     converted = converted.replace(/,\s*CURRENT_TIMESTAMP\s*,/gi, ', NOW(),');
+    converted = converted.replace(/,\s*CURRENT_TIMESTAMP\s*\)/gi, ', NOW())');
+    converted = converted.replace(/\(\s*CURRENT_TIMESTAMP\s*,/gi, '(NOW(),');
     converted = converted.replace(/\(\s*CURRENT_TIMESTAMP\s*\)/gi, '(NOW())');
+    // Standalone CURRENT_TIMESTAMP (not in any specific context)
+    converted = converted.replace(/\bCURRENT_TIMESTAMP\b/gi, 'NOW()');
 
-    // Replace BOOLEAN 0/1 with TRUE/FALSE
+    // Replace BOOLEAN 0/1 with TRUE/FALSE in column definitions
     converted = converted.replace(/BOOLEAN DEFAULT 1/gi, 'BOOLEAN DEFAULT TRUE');
     converted = converted.replace(/BOOLEAN DEFAULT 0/gi, 'BOOLEAN DEFAULT FALSE');
+
+    // Replace literal 1/0 values being inserted into boolean columns
+    // This is a targeted fix: look for patterns like "..., 1, 0, ..." in INSERT VALUES
+    converted = converted.replace(/,\s*1\s*,\s*0\s*,/g, ', TRUE, 0,');
+    converted = converted.replace(/,\s*0\s*,\s*0\s*,/g, ', FALSE, 0,');
 
     // Convert ? placeholders to $1, $2, $3, etc. for PostgreSQL
     let paramIndex = 1;
