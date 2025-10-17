@@ -253,6 +253,18 @@ class DatabaseAdapter {
     converted = converted.replace(/,\s*1\s*,\s*0\s*,/g, ', TRUE, 0,');
     converted = converted.replace(/,\s*0\s*,\s*0\s*,/g, ', FALSE, 0,');
 
+    // Convert boolean comparisons in WHERE clauses
+    // is_active = 1 -> is_active = TRUE
+    // is_active = 0 -> is_active = FALSE
+    // is_default = 1 -> is_default = TRUE
+    // is_default = 0 -> is_default = FALSE
+    converted = converted.replace(/\b(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, '$1 = TRUE');
+    converted = converted.replace(/\b(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, '$1 = FALSE');
+
+    // Also convert SET clauses for UPDATEs
+    converted = converted.replace(/\bSET\s+(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*1\b/gi, 'SET $1 = TRUE');
+    converted = converted.replace(/\bSET\s+(is_active|is_default|allow_lifelines|auto_advance|custom_questions_only)\s*=\s*0\b/gi, 'SET $1 = FALSE');
+
     // Convert ? placeholders to $1, $2, $3, etc. for PostgreSQL
     let paramIndex = 1;
     converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
