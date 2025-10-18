@@ -45,6 +45,8 @@ class GameController {
     // Salvar participante no banco
     try {
       await gameData.saveParticipant(gameState.sessionId, participant);
+      // Atualizar contagem de participantes na sessão
+      await gameData.updateSessionParticipantCount(gameState.sessionId, gameState.participants.length);
     } catch (error) {
       console.error('Erro ao salvar participante no banco:', error);
     }
@@ -141,7 +143,13 @@ class GameController {
         // Atualizar participante no banco
         try {
           await gameData.updateParticipant(participantId, 'winner', participant.currentLevel, participant.totalEarned);
-          await gameData.finishGameSession(gameState.sessionId, gameState.participants.length);
+          // Verificar se todos os participantes terminaram antes de finalizar sessão
+          const allFinished = gameState.participants.every(p =>
+            p.status === 'winner' || p.status === 'eliminated' || p.status === 'quit'
+          );
+          if (allFinished) {
+            await gameData.finishGameSession(gameState.sessionId);
+          }
         } catch (error) {
           console.error('Erro ao atualizar dados no banco:', error);
         }
@@ -180,7 +188,13 @@ class GameController {
       // Atualizar participante no banco
       try {
         await gameData.updateParticipant(participantId, 'eliminated', participant.currentLevel, finalEarnings);
-        await gameData.finishGameSession(gameState.sessionId, gameState.participants.length);
+        // Verificar se todos os participantes terminaram antes de finalizar sessão
+        const allFinished = gameState.participants.every(p =>
+          p.status === 'winner' || p.status === 'eliminated' || p.status === 'quit'
+        );
+        if (allFinished) {
+          await gameData.finishGameSession(gameState.sessionId);
+        }
       } catch (error) {
         console.error('Erro ao atualizar dados no banco:', error);
       }
@@ -209,7 +223,13 @@ class GameController {
     // Atualizar participante no banco
     try {
       await gameData.updateParticipant(participantId, 'quit', participant.currentLevel, participant.totalEarned);
-      await gameData.finishGameSession(gameState.sessionId, gameState.participants.length);
+      // Verificar se todos os participantes terminaram antes de finalizar sessão
+      const allFinished = gameState.participants.every(p =>
+        p.status === 'winner' || p.status === 'eliminated' || p.status === 'quit'
+      );
+      if (allFinished) {
+        await gameData.finishGameSession(gameState.sessionId);
+      }
     } catch (error) {
       console.error('Erro ao atualizar dados no banco:', error);
     }
@@ -257,7 +277,7 @@ class GameController {
     // Finalizar sessão atual se existir
     if (gameState.sessionId) {
       try {
-        await gameData.finishGameSession(gameState.sessionId, gameState.participants.length);
+        await gameData.finishGameSession(gameState.sessionId);
       } catch (error) {
         console.error('Erro ao finalizar sessão no banco:', error);
       }

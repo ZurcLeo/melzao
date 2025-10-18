@@ -19,11 +19,19 @@ class GameDataService {
     return sessionId;
   }
 
-  // Finalizar sessão de jogo
-  async finishGameSession(sessionId, totalParticipants) {
+  // Atualizar contagem de participantes da sessão
+  async updateSessionParticipantCount(sessionId, count) {
     await database.run(
-      'UPDATE game_sessions SET ended_at = ?, status = ?, total_participants = ? WHERE session_id = ?',
-      [new Date().toISOString(), 'finished', totalParticipants, sessionId]
+      'UPDATE game_sessions SET total_participants = ? WHERE session_id = ?',
+      [count, sessionId]
+    );
+  }
+
+  // Finalizar sessão de jogo
+  async finishGameSession(sessionId) {
+    await database.run(
+      'UPDATE game_sessions SET ended_at = ?, status = ? WHERE session_id = ?',
+      [new Date().toISOString(), 'finished', sessionId]
     );
 
     console.log(`📊 Sessão finalizada: ${sessionId}`);
