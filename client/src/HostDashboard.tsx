@@ -204,32 +204,24 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
   // Listener para resultado da resposta com sons
   useEffect(() => {
     const handleAnswerResult = (result: any) => {
-      if (answerState === 'processing') {
-        // Fase 2: Revealing (mostrar resultado)
-        setLastAnswerResult({
-          correct: result.correct,
-          correctAnswer: result.correctAnswer
-        });
-        setAnswerState('revealing');
+      setLastAnswerResult({
+        correct: result.correct,
+        correctAnswer: result.correctAnswer
+      });
+      setAnswerState('revealing');
+      playSound(result.correct ? 'correct' : 'incorrect');
 
-        // Sons são tocados pelo ShowDoMelzao.tsx para evitar duplicação
-        // A lógica de sons foi movida para lá para melhor controle
-
-        // Se a resposta está correta e há próxima pergunta, resetar mais rápido
-        const delay = result.correct && result.nextQuestion ? 1500 : 2000;
-
-        setTimeout(() => {
-          // Fase 3: Reset para próxima pergunta
-          setAnswerState('idle');
-          setLastAnswerResult(null);
-          setSelectedAnswer('');
-        }, delay);
-      }
+      const delay = result.correct && result.nextQuestion ? 1500 : 2000;
+      setTimeout(() => {
+        setAnswerState('idle');
+        setLastAnswerResult(null);
+        setSelectedAnswer('');
+      }, delay);
     };
 
     socket.on('answer-result', handleAnswerResult);
     return () => socket.off('answer-result', handleAnswerResult);
-  }, [answerState, socket, playSound]);
+  }, [socket, playSound]);
 
   // Detect quando uma nova pergunta foi carregada para forçar reset de estado
   const [lastQuestionId, setLastQuestionId] = useState<number | null>(null);
@@ -239,20 +231,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
     const currentQuestionLevel = gameState?.currentQuestion?.level;
 
     if (currentQuestionId && currentQuestionId !== lastQuestionId) {
-      console.log('🔄 Nova pergunta detectada, resetando estado:', {
+      console.log('🔄 Nova pergunta detectada:', {
         old: lastQuestionId,
         new: currentQuestionId,
         level: currentQuestionLevel,
         question: currentQuestionText
       });
       setLastQuestionId(currentQuestionId);
-      // Reset IMEDIATO do estado para nova pergunta (ignora timeout pendente)
-      setAnswerState('idle');
-      setLastAnswerResult(null);
+      // Só reseta se não estiver no meio de um reveal — o timeout do handleAnswerResult
+      // já cuida do reset quando está em 'revealing'
+      setAnswerState(prev => prev === 'revealing' ? prev : 'idle');
       setSelectedAnswer('');
-
-      // Tocar som de nova pergunta
-      playSound('processing');
     }
   }, [gameState?.currentQuestion?.id, gameState?.currentQuestion?.question, gameState?.currentQuestion?.level, lastQuestionId, playSound]);
 
