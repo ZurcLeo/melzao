@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Trophy, Medal, Star, TrendingUp, Clock, Search, RefreshCw, User } from 'lucide-react';
+import { Trophy, Search, RefreshCw, User } from 'lucide-react';
 import { Card, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 
@@ -74,7 +74,6 @@ const PublicRanking: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedProfile, setSelectedProfile] = useState<PlayerProfile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(false);
 
   const fetchRanking = useCallback(async (p: Period, offset = 0) => {
     setLoading(true);
@@ -96,7 +95,6 @@ const PublicRanking: React.FC = () => {
   }, [period, fetchRanking]);
 
   const fetchProfile = async (handle: string) => {
-    setProfileLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/ranking/${handle}`);
       if (!res.ok) return;
@@ -104,8 +102,6 @@ const PublicRanking: React.FC = () => {
       setSelectedProfile(data);
     } catch (e) {
       console.error(e);
-    } finally {
-      setProfileLoading(false);
     }
   };
 
