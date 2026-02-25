@@ -65,6 +65,45 @@ export interface QuestionStats {
   accuracy_rate: number;
 }
 
+export interface RankingEntry {
+  rank: number;
+  handle: string;
+  display_name: string;
+  total_honey: number;
+  sessions_played: number;
+  best_level: number;
+  win_count: number;
+  accuracy_rate: number;
+  last_seen: string;
+}
+
+export interface PlayerProfile extends RankingEntry {
+  first_seen: string;
+  correct_answers: number;
+  total_answers: number;
+  recent_sessions: Array<{
+    session_id: string;
+    final_status: string;
+    final_level: number;
+    total_earned: number;
+    joined_at: string;
+  }>;
+}
+
+export interface PlayerIdentity {
+  id: number;
+  handle: string;
+  display_name: string;
+  total_honey: number;
+  sessions_played: number;
+  best_level: number;
+  win_count: number;
+  created_by?: number;
+  creator_name?: string;
+  first_seen: string;
+  last_seen: string;
+}
+
 class ApiService {
   private onTokenExpired?: () => void;
 
@@ -133,6 +172,36 @@ class ApiService {
 
   async getServerHealth(): Promise<{ status: string; timestamp: string; service: string }> {
     return this.fetchApi('/health');
+  }
+
+  async getPublicRanking(period: 'all-time' | 'weekly' | 'monthly' = 'all-time', limit = 20, offset = 0): Promise<{ period: string; players: RankingEntry[]; pagination: { total: number; limit: number; offset: number } }> {
+    return this.fetchApi(`/api/ranking?period=${period}&limit=${limit}&offset=${offset}`);
+  }
+
+  async getPlayerProfile(handle: string): Promise<PlayerProfile> {
+    return this.fetchApi(`/api/ranking/${handle.replace('@', '')}`);
+  }
+
+  async getPlayerIdentities(search = '', limit = 50): Promise<{ players: PlayerIdentity[] }> {
+    return this.fetchApi(`/api/ranking/players?search=${encodeURIComponent(search)}&limit=${limit}`);
+  }
+
+  async createPlayerIdentity(handle: string, displayName: string): Promise<{ success: boolean; player: PlayerIdentity }> {
+    return this.fetchApi('/api/ranking/players', {
+      method: 'POST',
+      body: JSON.stringify({ handle, displayName })
+    });
+  }
+
+  async updatePlayerIdentity(id: number, fields: { handle?: string; displayName?: string }): Promise<{ success: boolean; player: PlayerIdentity }> {
+    return this.fetchApi(`/api/ranking/players/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(fields)
+    });
+  }
+
+  async deletePlayerIdentity(id: number): Promise<{ success: boolean }> {
+    return this.fetchApi(`/api/ranking/players/${id}`, { method: 'DELETE' });
   }
 }
 

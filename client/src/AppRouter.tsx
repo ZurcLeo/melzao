@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Header, Container } from './components/layout';
 import HostDashboard from './HostDashboard';
 import ProfilePage from './pages/ProfilePage';
+import PublicRanking from './components/PublicRanking';
 import { ToastContainer } from 'react-toastify';
 
 interface AppRouterProps {
@@ -62,6 +63,16 @@ const AppRouter: React.FC<AppRouterProps> = ({
                   gameState={offlineMode ? null : gameState}
                   offlineMode={offlineMode}
                 />
+              </Container>
+            }
+          />
+
+          {/* Ranking público */}
+          <Route
+            path="/ranking"
+            element={
+              <Container size="full" padding="none" className="pt-20">
+                <PublicRanking />
               </Container>
             }
           />

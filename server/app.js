@@ -87,6 +87,7 @@ const adminRoutes = require('./routes/admin');
 const questionRoutes = require('./routes/questions');
 const configRoutes = require('./routes/configs');
 const gameRoutes = require('./routes/game');
+const rankingRoutes = require('./routes/ranking');
 
 // Make io available to routes via app.locals
 app.locals.io = io;
@@ -97,6 +98,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/configs', configRoutes);
 app.use('/api/game', gameRoutes);
+app.use('/api/ranking', rankingRoutes);
 
 // Import multi-user socket handler
 require('./multiUserGameSocket')(io);

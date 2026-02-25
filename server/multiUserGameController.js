@@ -1,6 +1,7 @@
 const { QuestionBank } = require('./questionBank');
 const gameData = require('./gameData');
 const questionService = require('./services/questionService');
+const rankingService = require('./services/rankingService');
 
 /**
  * Multi-User GameController
@@ -185,9 +186,45 @@ class MultiUserGameController {
       throw new Error('Já existe um participante com este nome');
     }
 
+  async addParticipant(userId, participantName, playerHandle = null) {
+    const session = this.getUserSession(userId);
+
+    if (!session) {
+      throw new Error('Sessão não encontrada. Crie uma sessão primeiro.');
+    }
+
+    if (session.gameStatus === 'active') {
+      throw new Error('Não é possível adicionar participantes durante o jogo');
+    }
+
+    // Check participant limit
+    if (session.participants.length >= session.config.max_participants) {
+      throw new Error(`Limite máximo de ${session.config.max_participants} participantes atingido`);
+    }
+
+    // Check for duplicate names
+    const existingParticipant = session.participants.find(p =>
+      p.name.toLowerCase() === participantName.trim().toLowerCase()
+    );
+
+    if (existingParticipant) {
+      throw new Error('Já existe um participante com este nome');
+    }
+
+    // Resolve player identity if handle provided
+    let playerIdentityId = null;
+    if (playerHandle) {
+      const identity = await rankingService.getByHandle(playerHandle);
+      if (identity) {
+        playerIdentityId = identity.id;
+      }
+    }
+
     const participant = {
       id: `${userId}_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       name: participantName.trim(),
+      playerHandle: playerHandle || null,
+      playerIdentityId,
       currentLevel: 0,
       totalEarned: 0,
       status: 'waiting',
@@ -202,13 +239,17 @@ class MultiUserGameController {
     // Save to database
     try {
       await gameData.saveParticipant(session.sessionId, participant);
-      session.stats.participantsCount = session.participants.length;
 
-      console.log(`👥 Participante adicionado à sessão ${session.sessionId}: ${participantName}`);
+      // Link to player identity in DB if resolved
+      if (playerIdentityId) {
+        await rankingService.linkParticipant(participant.id, playerIdentityId);
+      }
+
+      session.stats.participantsCount = session.participants.length;
+      console.log(`👥 Participante adicionado à sessão ${session.sessionId}: ${participantName}${playerHandle ? ` (@${playerHandle})` : ''}`);
       return participant;
 
     } catch (error) {
-      // Remove from memory if database save fails
       session.participants.pop();
       throw error;
     }
@@ -608,6 +649,14 @@ class MultiUserGameController {
         try {
           await gameData.updateParticipant(participantId, 'winner',
             participant.currentLevel, participant.totalEarned);
+          if (participant.playerIdentityId) {
+            await rankingService.updatePlayerStats(participant.playerIdentityId, {
+              honeyEarned: participant.totalEarned,
+              level: participant.currentLevel - 1,
+              isWinner: true,
+              answers: participant.answers
+            });
+          }
         } catch (error) {
           console.error('Erro ao atualizar participante:', error);
         }
@@ -651,6 +700,14 @@ class MultiUserGameController {
       try {
         await gameData.updateParticipant(participantId, 'eliminated',
           participant.currentLevel, finalEarnings);
+        if (participant.playerIdentityId) {
+          await rankingService.updatePlayerStats(participant.playerIdentityId, {
+            honeyEarned: finalEarnings,
+            level: participant.currentLevel,
+            isWinner: false,
+            answers: participant.answers
+          });
+        }
       } catch (error) {
         console.error('Erro ao atualizar participante:', error);
       }
@@ -701,6 +758,14 @@ class MultiUserGameController {
     try {
       await gameData.updateParticipant(participantId, 'quit',
         participant.currentLevel, participant.totalEarned);
+      if (participant.playerIdentityId) {
+        await rankingService.updatePlayerStats(participant.playerIdentityId, {
+          honeyEarned: participant.totalEarned,
+          level: participant.currentLevel,
+          isWinner: false,
+          answers: participant.answers
+        });
+      }
     } catch (error) {
       console.error('Erro ao atualizar participante:', error);
     }

@@ -186,7 +186,7 @@ module.exports = function(io) {
      */
     socket.on('add-participant', async (data) => {
       try {
-        const { name } = data;
+        const { name, playerHandle = null } = data;
 
         if (!name || name.trim().length === 0) {
           socket.emit('error', {
@@ -212,7 +212,7 @@ module.exports = function(io) {
           session = await multiUserGameController.createUserSession(userId);
         }
 
-        const participant = await multiUserGameController.addParticipant(userId, name.trim());
+        const participant = await multiUserGameController.addParticipant(userId, name.trim(), playerHandle);
 
         socket.emit('participant-added', { participant });
         broadcastToUser(userId, 'participant-added', { participant });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Wifi, WifiOff, Music, Users, Settings, LogOut } from 'lucide-react';
+import { User, Wifi, WifiOff, Music, Users, Settings, LogOut, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
@@ -76,6 +76,17 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Controls */}
           <div className="flex items-center space-x-3">
+            {/* Ranking Link */}
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Trophy size={16} />}
+              onClick={() => navigate('/ranking')}
+              className="hidden sm:flex"
+            >
+              Ranking
+            </Button>
+
             {/* Offline Mode Toggle */}
             <Button
               variant={offlineMode ? 'primary' : 'ghost'}
