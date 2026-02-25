@@ -117,6 +117,12 @@ const QUESTION_BANK = {
       correctAnswer: 'Rio de Janeiro', honeyValue: 10
     },
     {
+      id: 'brasil_2_4', level: 2, category: 'brasil',
+      question: 'Qual o menor estado (em território) do Brasil?',
+      options: ['Sergipe', 'Pará', 'Bahia', 'Mato Grosso do Sul'],
+      correctAnswer: 'Sergipe', honeyValue: 10
+    },
+    {
       id: 'atual_2_3', level: 2, category: 'atual',
       question: 'Qual empresa criou o ChatGPT?',
       options: ['Google', 'Microsoft', 'OpenAI', 'Meta'],

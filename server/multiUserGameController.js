@@ -30,10 +30,20 @@ class MultiUserGameController {
     try {
       const sessionId = this.generateSessionId();
 
+      // Close any stale active sessions for this user in the database
+      // (happens when server restarts and loses in-memory state)
+      const Database = require('./database');
+      const closed = await Database.run(`
+        UPDATE game_sessions SET ended_at = ?, status = 'finished'
+        WHERE user_id = ? AND status = 'active'
+      `, [new Date().toISOString(), userId]);
+      if (closed.changes > 0) {
+        console.log(`🧹 ${closed.changes} sessão(ões) ativa(s) anteriores encerrada(s) para usuário ${userId}`);
+      }
+
       // Get user's configuration
       let config = userConfig;
       if (!config) {
-        const Database = require('./database');
         config = await Database.get(`
           SELECT * FROM user_game_configs
           WHERE user_id = ? AND is_default = 1
