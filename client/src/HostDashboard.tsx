@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Users, BarChart3, Settings, Crown, Timer, Trophy } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Users, BarChart3, Settings, Crown, Timer, Trophy, AtSign, Plus, X } from 'lucide-react';
+import { apiService, PlayerIdentity } from './services/api';
 import HistoryDashboard from './components/HistoryDashboard';
 import AdminPanel from './components/AdminPanel';
 import { Card, CardContent } from './components/ui/Card';
@@ -17,6 +18,13 @@ type AnswerState = 'idle' | 'processing' | 'revealing';
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlineMode = false }) => {
   const [participantName, setParticipantName] = useState('');
+  const [playerHandle, setPlayerHandle] = useState('');
+  const [handleInput, setHandleInput] = useState('');
+  const [handleSuggestions, setHandleSuggestions] = useState<PlayerIdentity[]>([]);
+  const [showHandleDropdown, setShowHandleDropdown] = useState(false);
+  const [handleNotFound, setHandleNotFound] = useState(false);
+  const [isCreatingIdentity, setIsCreatingIdentity] = useState(false);
+  const handleSearchTimer = useRef<NodeJS.Timeout | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
   const [currentView, setCurrentView] = useState<DashboardView>('live');
@@ -90,11 +98,72 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
     };
   }, [socket]);
 
+  // Debounced search for player identities
+  useEffect(() => {
+    if (handleSearchTimer.current) clearTimeout(handleSearchTimer.current);
+    const query = handleInput.trim();
+    if (!query) {
+      setHandleSuggestions([]);
+      setShowHandleDropdown(false);
+      setHandleNotFound(false);
+      return;
+    }
+    handleSearchTimer.current = setTimeout(async () => {
+      try {
+        const result = await apiService.getPlayerIdentities(query, 8);
+        setHandleSuggestions(result.players);
+        setHandleNotFound(result.players.length === 0);
+        setShowHandleDropdown(true);
+      } catch {
+        // handle search is optional
+      }
+    }, 300);
+    return () => { if (handleSearchTimer.current) clearTimeout(handleSearchTimer.current); };
+  }, [handleInput]);
+
+  const selectHandle = (identity: PlayerIdentity) => {
+    setPlayerHandle(identity.handle);
+    setHandleInput(`@${identity.handle}`);
+    setShowHandleDropdown(false);
+    setHandleNotFound(false);
+    if (!participantName.trim()) setParticipantName(identity.display_name);
+  };
+
+  const clearHandle = () => {
+    setPlayerHandle('');
+    setHandleInput('');
+    setHandleSuggestions([]);
+    setShowHandleDropdown(false);
+    setHandleNotFound(false);
+  };
+
+  const createAndLinkIdentity = async () => {
+    const handle = handleInput.replace(/^@/, '').trim().toLowerCase();
+    if (!handle) return;
+    setIsCreatingIdentity(true);
+    try {
+      const displayName = participantName.trim() || handle;
+      const result = await apiService.createPlayerIdentity(handle, displayName);
+      setPlayerHandle(result.player.handle);
+      setHandleInput(`@${result.player.handle}`);
+      setShowHandleDropdown(false);
+      setHandleNotFound(false);
+    } catch (err: any) {
+      console.error('Erro ao criar identidade:', err);
+    } finally {
+      setIsCreatingIdentity(false);
+    }
+  };
+
   const addParticipant = () => {
     if (participantName.trim()) {
-      console.log('🎭 Adicionando participante:', participantName.trim());
-      socket.emit('add-participant', { name: participantName.trim() });
+      console.log('🎭 Adicionando participante:', participantName.trim(), playerHandle ? `@${playerHandle}` : '');
+      socket.emit('add-participant', {
+        name: participantName.trim(),
+        ...(playerHandle ? { playerHandle } : {})
+      });
       setParticipantName('');
+      clearHandle();
     } else {
       console.warn('⚠️ Nome do participante está vazio');
     }
@@ -337,32 +406,95 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={participantName}
-                    onChange={(e) => {
-                      setParticipantName(e.target.value);
-                      console.log('📝 Input alterado:', e.target.value);
-                    }}
-                    placeholder="Digite o nome do participante..."
-                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addParticipant();
-                      }
-                    }}
-                    autoComplete="off"
-                  />
-                  <Button
-                    onClick={addParticipant}
-                    disabled={!participantName.trim()}
-                    variant="primary"
-                    className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Adicionar
-                  </Button>
+                <div className="space-y-3">
+                  {/* Nome + botão */}
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={participantName}
+                      onChange={(e) => setParticipantName(e.target.value)}
+                      placeholder="Nome do participante..."
+                      className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onKeyPress={(e) => { if (e.key === 'Enter') { e.preventDefault(); addParticipant(); } }}
+                      autoComplete="off"
+                    />
+                    <Button
+                      onClick={addParticipant}
+                      disabled={!participantName.trim()}
+                      variant="primary"
+                      className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+
+                  {/* Handle field com autocomplete */}
+                  <div className="relative">
+                    <div className={`flex items-center gap-2 px-4 py-2 bg-white/10 border rounded-xl transition-colors ${
+                      playerHandle ? 'border-green-500/60' : 'border-white/20'
+                    }`}>
+                      <AtSign size={15} className={playerHandle ? 'text-green-400 flex-shrink-0' : 'text-gray-500 flex-shrink-0'} />
+                      <input
+                        type="text"
+                        value={handleInput}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/^@+/, '');
+                          setHandleInput(val);
+                          if (!val) { setPlayerHandle(''); }
+                        }}
+                        placeholder="handle (opcional)"
+                        className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none text-sm min-w-0"
+                        autoComplete="off"
+                        onFocus={() => handleInput.trim() && setShowHandleDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowHandleDropdown(false), 200)}
+                      />
+                      {(handleInput || playerHandle) && (
+                        <button onClick={clearHandle} className="text-gray-500 hover:text-white transition-colors flex-shrink-0">
+                          <X size={15} />
+                        </button>
+                      )}
+                    </div>
+
+                    {showHandleDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-white/20 rounded-xl overflow-hidden z-20 shadow-2xl">
+                        {handleSuggestions.map((p) => (
+                          <button
+                            key={p.id}
+                            onMouseDown={() => selectHandle(p)}
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors text-left"
+                          >
+                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-xs text-white font-bold flex-shrink-0">
+                              {p.display_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-white text-sm font-medium truncate">{p.display_name}</div>
+                              <div className="text-gray-400 text-xs">@{p.handle} · {p.sessions_played} partidas · {p.total_honey} 🍯</div>
+                            </div>
+                          </button>
+                        ))}
+                        {handleNotFound && (
+                          <div className="px-4 py-3">
+                            <p className="text-gray-500 text-xs mb-2">Nenhum jogador encontrado</p>
+                            <button
+                              onMouseDown={createAndLinkIdentity}
+                              disabled={isCreatingIdentity}
+                              className="w-full flex items-center gap-2 px-3 py-2 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 rounded-lg text-blue-300 text-sm transition-colors disabled:opacity-50"
+                            >
+                              <Plus size={14} />
+                              {isCreatingIdentity ? 'Criando...' : `Criar @${handleInput}`}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {playerHandle && (
+                    <div className="flex items-center gap-2 text-xs text-green-400">
+                      <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></div>
+                      Identidade vinculada: <span className="font-semibold">@{playerHandle}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -408,7 +540,12 @@ const HostDashboard: React.FC<HostDashboardProps> = ({ socket, gameState, offlin
                            participant.status === 'quit' ? '⏸️' : '👤'}
                         </div>
                         <div>
-                          <div className="text-white font-semibold text-lg">{participant.name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-semibold text-lg">{participant.name}</span>
+                            {participant.playerHandle && (
+                              <span className="text-xs text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">@{participant.playerHandle}</span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-300 flex items-center gap-3">
                             <span className="flex items-center gap-1">
                               <Trophy size={14} className="text-orange-400" />
