@@ -122,14 +122,6 @@ function App() {
       toast.info(`🎮 Jogo iniciado para ${data.participant.name}!`);
     });
 
-    socket.on('answer-result', (result: any) => {
-      if (result.correct) {
-        toast.success(result.completed ? '🏆 GANHOU O JOGO!' : '✅ Resposta correta!');
-      } else {
-        toast.error(`❌ Resposta errada! Correto: ${result.correctAnswer}`);
-      }
-    });
-
     socket.on('time-up', () => {
       toast.warning('⏰ Tempo esgotado!');
     });
@@ -145,7 +137,6 @@ function App() {
       socket.off('game-state');
       socket.off('participant-added');
       socket.off('game-started');
-      socket.off('answer-result');
       socket.off('time-up');
       socket.off('error');
     };

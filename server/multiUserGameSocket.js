@@ -161,7 +161,6 @@ module.exports = function(io) {
         const success = await multiUserGameController.endUserSession(userId, 'manual');
 
         if (success) {
-          socket.emit('session-ended', { reason: 'manual' });
           broadcastToUser(userId, 'session-ended', { reason: 'manual' });
         } else {
           socket.emit('error', {
@@ -214,7 +213,6 @@ module.exports = function(io) {
 
         const participant = await multiUserGameController.addParticipant(userId, name.trim(), playerHandle);
 
-        socket.emit('participant-added', { participant });
         broadcastToUser(userId, 'participant-added', { participant });
 
         // Send updated game state
@@ -230,7 +228,6 @@ module.exports = function(io) {
           },
           totalParticipants: updatedSession.participants.length
         };
-        socket.emit('game-state', gameState);
         broadcastToUser(userId, 'game-state', gameState);
 
       } catch (error) {
@@ -263,7 +260,6 @@ module.exports = function(io) {
         const gameStart = await multiUserGameController.startGame(userId, participantId);
         console.log(`✅ Jogo iniciado com sucesso:`, gameStart);
 
-        socket.emit('game-started', gameStart);
         broadcastToUser(userId, 'game-started', gameStart);
 
         // Send updated game state
@@ -296,7 +292,6 @@ module.exports = function(io) {
           totalParticipants: gameState.totalParticipants
         });
 
-        socket.emit('game-state', gameState);
         broadcastToUser(userId, 'game-state', gameState);
 
         // Auto-start question timer if configured
@@ -337,7 +332,6 @@ module.exports = function(io) {
           responseTime
         );
 
-        socket.emit('answer-result', result);
         broadcastToUser(userId, 'answer-result', result);
 
         // Send updated game state after answer is processed
@@ -354,7 +348,6 @@ module.exports = function(io) {
             },
             totalParticipants: session.participants.length
           };
-          socket.emit('game-state', gameState);
           broadcastToUser(userId, 'game-state', gameState);
         }
 
@@ -391,7 +384,6 @@ module.exports = function(io) {
 
         const result = await multiUserGameController.quitGame(userId, participantId);
 
-        socket.emit('game-quit', result);
         broadcastToUser(userId, 'game-quit', result);
 
       } catch (error) {
