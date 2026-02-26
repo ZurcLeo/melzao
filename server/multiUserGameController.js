@@ -2,6 +2,7 @@ const { QuestionBank } = require('./questionBank');
 const gameData = require('./gameData');
 const questionService = require('./services/questionService');
 const rankingService = require('./services/rankingService');
+const Database = require('./databaseAdapter');
 
 /**
  * Multi-User GameController
@@ -422,8 +423,17 @@ class MultiUserGameController {
     const randomIndex = Math.floor(Math.random() * availableQuestions.length);
     const selectedQuestion = availableQuestions[randomIndex];
 
-    // Apply honey multiplier
-    const baseHoneyValue = selectedQuestion.honey_value || selectedQuestion.honeyValue || 0;
+    // Honey value comes from level config (single source of truth per level)
+    let baseHoneyValue;
+    try {
+      const levelConfig = await Database.get(
+        'SELECT honey_value FROM level_honey_config WHERE level = ?', [level]
+      );
+      baseHoneyValue = levelConfig?.honey_value ?? selectedQuestion.honey_value ?? selectedQuestion.honeyValue ?? 0;
+    } catch {
+      // Fallback to per-question value if table doesn't exist yet (pre-migration)
+      baseHoneyValue = selectedQuestion.honey_value || selectedQuestion.honeyValue || 0;
+    }
     const adjustedHoneyValue = Math.floor(baseHoneyValue * session.config.honey_multiplier);
 
     // Mark question as used

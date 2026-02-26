@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authService = require('../services/authService');
 const { authenticateToken, requireRole, requireActiveUser } = require('../middleware/auth');
+const Database = require('../databaseAdapter');
 
 // All admin routes require authentication and admin role
 router.use(authenticateToken);
@@ -436,6 +437,69 @@ router.get('/activity', async (req, res) => {
       error: 'Erro ao buscar atividade do sistema',
       code: 'FETCH_ACTIVITY_FAILED'
     });
+  }
+});
+
+/**
+ * @route GET /api/admin/level-honey-config
+ * @desc Get honey values for all 10 levels
+ */
+router.get('/level-honey-config', async (req, res) => {
+  try {
+    const rows = await Database.all(
+      'SELECT level, honey_value FROM level_honey_config ORDER BY level'
+    );
+    res.json({ success: true, levels: rows });
+  } catch (error) {
+    console.error('Erro ao buscar configuração de níveis:', error);
+    res.status(500).json({ error: 'Erro ao buscar configuração de níveis' });
+  }
+});
+
+/**
+ * @route PUT /api/admin/level-honey-config/:level
+ * @desc Update honey value for a specific level (1–10)
+ */
+router.put('/level-honey-config/:level', async (req, res) => {
+  try {
+    const level = parseInt(req.params.level);
+    const honeyValue = parseInt(req.body.honeyValue);
+
+    if (isNaN(level) || level < 1 || level > 10) {
+      return res.status(400).json({ error: 'Nível deve ser entre 1 e 10' });
+    }
+    if (isNaN(honeyValue) || honeyValue < 1) {
+      return res.status(400).json({ error: 'Valor de honey deve ser pelo menos 1' });
+    }
+
+    const dbType = Database.getDatabaseType();
+    if (dbType === 'postgres') {
+      await Database.run(
+        `INSERT INTO level_honey_config (level, honey_value, updated_by, updated_at)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (level) DO UPDATE
+           SET honey_value = EXCLUDED.honey_value,
+               updated_by  = EXCLUDED.updated_by,
+               updated_at  = NOW()`,
+        [level, honeyValue, req.user.id]
+      );
+    } else {
+      await Database.run(
+        `INSERT INTO level_honey_config (level, honey_value, updated_by, updated_at)
+         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(level) DO UPDATE SET
+           honey_value = excluded.honey_value,
+           updated_by  = excluded.updated_by,
+           updated_at  = CURRENT_TIMESTAMP`,
+        [level, honeyValue, req.user.id]
+      );
+    }
+
+    console.log(`🍯 Nível ${level} atualizado para ${honeyValue} honey por user ${req.user.id}`);
+    res.json({ success: true, level, honeyValue });
+  } catch (error) {
+    console.error('Erro ao atualizar nível:', error);
+    res.status(500).json({ error: 'Erro ao atualizar configuração do nível' });
   }
 });
 

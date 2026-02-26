@@ -203,6 +203,17 @@ class ApiService {
   async deletePlayerIdentity(id: number): Promise<{ success: boolean }> {
     return this.fetchApi(`/api/ranking/players/${id}`, { method: 'DELETE' });
   }
+
+  async getLevelHoneyConfig(): Promise<{ success: boolean; levels: Array<{ level: number; honey_value: number }> }> {
+    return this.fetchApi('/api/admin/level-honey-config');
+  }
+
+  async updateLevelHoneyConfig(level: number, honeyValue: number): Promise<{ success: boolean; level: number; honeyValue: number }> {
+    return this.fetchApi(`/api/admin/level-honey-config/${level}`, {
+      method: 'PUT',
+      body: JSON.stringify({ honeyValue })
+    });
+  }
 }
 
 export const apiService = new ApiService();

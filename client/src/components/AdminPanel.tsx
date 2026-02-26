@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, UserX, RotateCcw, BarChart3, Activity, FileText } from 'lucide-react';
+import { Users, CheckCircle, UserX, RotateCcw, BarChart3, Activity, FileText, Layers } from 'lucide-react';
+import { apiService } from '../services/api';
 import { Button } from './ui/Button';
 import { Card, CardContent } from './ui/Card';
 import { Modal, ModalBody } from './ui/Modal';
@@ -30,7 +31,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [stats, setStats] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats' | 'questions'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'users' | 'stats' | 'questions' | 'levels'>('pending');
+  const [levelConfig, setLevelConfig] = useState<Array<{ level: number; honey_value: number }>>([]);
+  const [levelEdits, setLevelEdits] = useState<Record<number, string>>({});
+  const [savingLevel, setSavingLevel] = useState<number | null>(null);
 
   const loadPendingUsers = async () => {
     try {
@@ -99,6 +103,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
     }
   };
 
+  const loadLevelConfig = async () => {
+    try {
+      const data = await apiService.getLevelHoneyConfig();
+      setLevelConfig(data.levels);
+      const edits: Record<number, string> = {};
+      data.levels.forEach(l => { edits[l.level] = String(l.honey_value); });
+      setLevelEdits(edits);
+    } catch (error) {
+      toast.error(`Erro ao carregar configuração de níveis: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  const saveLevelHoney = async (level: number) => {
+    const value = parseInt(levelEdits[level]);
+    if (isNaN(value) || value < 1) {
+      toast.error('Valor inválido');
+      return;
+    }
+    setSavingLevel(level);
+    try {
+      await apiService.updateLevelHoneyConfig(level, value);
+      setLevelConfig(prev => prev.map(l => l.level === level ? { ...l, honey_value: value } : l));
+      toast.success(`Nível ${level} atualizado para ${value} 🍯`);
+    } catch (error) {
+      toast.error(`Erro ao salvar: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setSavingLevel(null);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'pending') {
       loadPendingUsers();
@@ -106,6 +140,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       loadAllUsers();
     } else if (activeTab === 'stats') {
       loadStats();
+    } else if (activeTab === 'levels') {
+      loadLevelConfig();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
@@ -192,6 +228,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
               icon={<FileText size={16} />}
             >
               Questões
+            </Button>
+            <Button
+              variant={activeTab === 'levels' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('levels')}
+              icon={<Layers size={16} />}
+            >
+              Honey por Nível
             </Button>
           </div>
         </CardContent>
@@ -448,6 +492,61 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser, authToken }) => {
       {/* Questions Tab */}
       {activeTab === 'questions' && (
         <QuestionManager authToken={authToken} />
+      )}
+
+      {/* Honey por Nível Tab */}
+      {activeTab === 'levels' && (
+        <Card variant="glass" padding="lg">
+          <CardContent>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+                <Layers className="text-white" size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Honey por Nível</h2>
+                <p className="text-gray-300 text-sm">Valor base de 🍯 concedido ao acertar uma questão de cada nível. Afeta todas as questões daquele nível.</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {levelConfig.length === 0 && (
+                <p className="text-gray-400 text-center py-8">Carregando...</p>
+              )}
+              {levelConfig.map(({ level, honey_value }) => {
+                const isDirty = parseInt(levelEdits[level] ?? '') !== honey_value;
+                return (
+                  <div key={level} className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="w-32 flex-shrink-0">
+                      <div className="text-white font-semibold">Nível {level}</div>
+                      <div className="text-gray-400 text-xs">atual: {honey_value} 🍯</div>
+                    </div>
+                    <input
+                      type="number"
+                      min={1}
+                      value={levelEdits[level] ?? honey_value}
+                      onChange={e => setLevelEdits(prev => ({ ...prev, [level]: e.target.value }))}
+                      className="w-32 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    />
+                    <span className="text-gray-400 text-sm">🍯</span>
+                    <Button
+                      variant={isDirty ? 'primary' : 'ghost'}
+                      size="sm"
+                      disabled={!isDirty || savingLevel === level}
+                      onClick={() => saveLevelHoney(level)}
+                      className={isDirty ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
+                    >
+                      {savingLevel === level ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="text-gray-500 text-xs mt-4">
+              O multiplicador de honey da sessão ainda se aplica sobre esses valores base.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* User Details Modal */}
